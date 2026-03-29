@@ -260,3 +260,6 @@ fabric.properties
 
 __pycache__/
 __pycache__
+
+# Large local docs (keep out of repo)
+aspnet-core-aspnetcore-9.0.pdf
