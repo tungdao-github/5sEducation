@@ -1,26 +1,33 @@
-﻿export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5158";
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+const fallbackApiUrl =
+  process.env.NODE_ENV ===  development
+    ? http://localhost:5158
+    : https://fiveseducation.onrender.com;
+export const API_URL = (rawApiUrl && rawApiUrl.length > 0
+  ? rawApiUrl
+  : fallbackApiUrl
+).replace(/\/+$/, );
 
 export function resolveApiAsset(path?: string | null) {
-  if (!path) return "";
-  if (path.startsWith("http://") || path.startsWith("https://")) {
+ if (!path) return ;
+  if (path.startsWith(http://) || path.startsWith(https://)) {
     return path;
   }
-  return `${API_URL}${path}`;
+  return ${API_URL};
 }
 
 export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(${API_URL}, {
     ...init,
     headers: {
-      "Content-Type": "application/json",
+      Content-Type: application/json,
       ...(init?.headers ?? {}),
     },
-    cache: "no-store",
+    cache: no-store,
   });
 
   if (!res.ok) {
-    throw new Error(`API error ${res.status}`);
+    throw new Error(API error );
   }
 
   return res.json() as Promise<T>;
