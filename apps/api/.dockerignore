@@ -1,0 +1,11 @@
+# api dockerignore
+bin
+obj
+**/bin
+**/obj
+*.user
+*.suo
+*.cache
+*.db
+.vs
+.DS_Store

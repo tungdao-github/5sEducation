@@ -10,12 +10,18 @@ Used Tech Stack
 ### Screenshots
 
 ## Home page
+
 <img src="screenshots/one.png" height="800">
 
 ## Course Details page
+
 <img src="screenshots/two.png" height="800">
 
 ## Enrolled course details
+
 <img src="screenshots/three.png" height="800">
 
 Show your support by 🌟 the project!!
+
+Admin: tungdv14112003@gmail.com
+Instructor: tungdaouploaddrive@gmail.com

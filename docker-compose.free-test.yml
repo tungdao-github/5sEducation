@@ -1,0 +1,35 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      DbProvider: Sqlite
+      ConnectionStrings__DefaultConnection: Data Source=/data/udemyclone-api.db
+      Jwt__Issuer: UdemyClone.Api
+      Jwt__Audience: UdemyClone.Web
+      Jwt__Key: "replace-with-strong-32-plus-char-secret-for-tests"
+      Frontend__BaseUrl: http://localhost:3000
+      Cors__Origins__0: http://localhost:3000
+      Seed__AutoConfirmEmails: true
+      Seed__DefaultPassword: "ChangeMe123!"
+    volumes:
+      - api-data:/data
+    ports:
+      - "5158:8080"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5158
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+
+volumes:
+  api-data:

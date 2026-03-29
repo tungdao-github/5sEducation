@@ -1,0 +1,54 @@
+services:
+  api:
+    image: ${API_IMAGE}
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      DbProvider: Postgres
+      ConnectionStrings__Postgres: ${POSTGRES_URL}
+      Jwt__Issuer: UdemyClone.Api
+      Jwt__Audience: UdemyClone.Web
+      Jwt__Key: ${JWT_KEY}
+      Frontend__BaseUrl: ${SITE_URL}
+      Cors__Origins__0: ${SITE_URL}
+      ForwardedHeaders__Enabled: "true"
+      Seed__AutoConfirmEmails: "false"
+      Seed__DefaultPassword: ${SEED_DEFAULT_PASSWORD}
+      Seed__AdminEmail: ${SEED_ADMIN_EMAIL}
+      Seed__InstructorEmail: ${SEED_INSTRUCTOR_EMAIL}
+      Seed__UserEmail: ${SEED_USER_EMAIL}
+    volumes:
+      - api-dpkeys:/root/.aspnet/DataProtection-Keys
+    expose:
+      - "8080"
+
+  web:
+    image: ${WEB_IMAGE}
+    environment:
+      NEXT_PUBLIC_API_URL: ${API_URL}
+      NEXT_PUBLIC_SITE_URL: ${SITE_URL}
+      NODE_ENV: production
+    depends_on:
+      - api
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - web
+      - api
+
+volumes:
+  api-dpkeys:
+  caddy-data:
+  caddy-config:

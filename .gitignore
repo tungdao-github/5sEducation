@@ -1,4 +1,9 @@
 .idea
+
+# .NET local configuration
+appsettings.Local.json
+appsettings.*.local.json
+*.usersecrets.json
 ### Django ###
 *.log
 *.pot

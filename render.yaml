@@ -1,0 +1,57 @@
+services:
+  - type: web
+    name: udemyclone-api
+    runtime: docker
+    repo: https://github.com/tungdao-github/5sEducation.git
+    dockerfilePath: apps/api/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: DbProvider
+        value: Postgres
+      - key: DATABASE_URL
+        sync: false
+      - key: Jwt__Issuer
+        value: UdemyClone.Api
+      - key: Jwt__Audience
+        value: UdemyClone.Web
+      - key: Jwt__Key
+        generateValue: true
+      - key: Frontend__BaseUrl
+        sync: false
+      - key: Cors__Origins__0
+        sync: false
+      - key: ForwardedHeaders__Enabled
+        value: "true"
+      - key: Seed__AutoConfirmEmails
+        value: "false"
+      - key: Seed__DefaultPassword
+        sync: false
+      - key: Seed__AdminEmail
+        sync: false
+      - key: Seed__InstructorEmail
+        sync: false
+      - key: Seed__UserEmail
+        sync: false
+
+  - type: web
+    name: udemyclone-web
+    runtime: docker
+    repo: https://github.com/tungdao-github/5sEducation.git
+    dockerfilePath: apps/web/Dockerfile
+    dockerContext: .
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
