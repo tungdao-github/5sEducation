@@ -1,8 +1,5 @@
 const rawApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
-const fallbackApiUrl =
-  process.env.NODE_ENV ===  development
-    ? http://localhost:5158
-    : https://fiveseducation.onrender.com;
+const fallbackApiUrl =  https://fiveseducation.onrender.com;
 export const API_URL = (rawApiUrl && rawApiUrl.length > 0
   ? rawApiUrl
   : fallbackApiUrl
