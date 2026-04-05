@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UdemyClone.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+babb50fa97d4aace5f29c80ef0fd933da31712dd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+077f8c934e56439aaa7d4f46fa59582be61ae8ab")]
 [assembly: System.Reflection.AssemblyProductAttribute("UdemyClone.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UdemyClone.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

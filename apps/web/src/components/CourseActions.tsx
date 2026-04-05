@@ -147,7 +147,7 @@ export function CourseActions({
         type="button"
         onClick={addToCart}
         disabled={loading !== null}
-        className="rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-70"
+        className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
       >
         {loading === "cart"
           ? tx("Adding...", "Dang them...")
@@ -157,7 +157,7 @@ export function CourseActions({
         type="button"
         onClick={saveWishlist}
         disabled={loading !== null}
-        className="rounded-full border border-[color:var(--stroke)] px-5 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-[color:var(--brand-soft)] disabled:cursor-not-allowed disabled:opacity-70"
+        className="rounded-lg border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-blue-50 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-70"
       >
         {loading === "wishlist"
           ? tx("Saving...", "Dang luu...")
@@ -167,7 +167,7 @@ export function CourseActions({
         type="button"
         onClick={enrollNow}
         disabled={loading !== null}
-        className="rounded-full border border-[color:var(--stroke)] px-5 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-[color:var(--brand-soft)] disabled:cursor-not-allowed disabled:opacity-70"
+        className="rounded-lg border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-blue-50 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-70"
       >
         {loading === "enroll"
           ? tx("Enrolling...", "Dang dang ky...")

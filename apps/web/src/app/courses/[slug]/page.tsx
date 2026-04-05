@@ -178,10 +178,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   const otherLabel = t("Other lessons", "Bai khac");
   const chapters = buildChapters(course.lessons, chapterLabel, otherLabel);
   const totalDurationLabel = formatDuration(totalMinutes, t);
-  const curriculumSummary = `${chapters.length} ${t("chapters", "chuong")} - ${course.lessons.length} ${t(
+  const curriculumSummary = `${chapters.length} ${t("chapters", "chuong")} · ${course.lessons.length} ${t(
     "lessons",
     "bai hoc"
-  )} - ${totalDurationLabel} ${t("total", "tong")}`;
+  )} · ${totalDurationLabel}`;
   const formattedPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -194,281 +194,190 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   const studentCount = course.studentCount ?? 0;
   const levelLabel = course.level || t("Beginner", "Co ban");
   const languageLabel = course.language || t("English", "Tieng Anh");
-  const metaBadges = [course.category?.title, levelLabel, languageLabel].filter(Boolean) as string[];
-  if (isFlashSale) {
-    metaBadges.push(t("Flash sale", "Giam gia nhanh"));
-  }
   const outcomeItems = splitIntoItems(course.outcome || "");
   const requirementItems = splitIntoItems(course.requirements || "");
-  const lastUpdated = course.updatedAt || course.createdAt;
-  const lastUpdatedLabel = lastUpdated
-    ? new Intl.DateTimeFormat(locale === "vi" ? "vi-VN" : "en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      }).format(new Date(lastUpdated))
-    : null;
-  const navItems = [
-    { id: "overview", label: t("Overview", "Tong quan") },
-    { id: "curriculum", label: t("Curriculum", "Chuong trinh") },
-    { id: "requirements", label: t("Requirements", "Yeu cau") },
-    { id: "about", label: t("About", "Gioi thieu") },
-    { id: "reviews", label: t("Reviews", "Danh gia") },
-  ];
-  if (relatedCourses.length > 0) {
-    navItems.push({ id: "related", label: t("Related", "Lien quan") });
-  }
 
   return (
-    <div className="section-shell py-12 fade-in">
+    <div className="min-h-screen bg-gray-50">
       <CourseViewTracker courseId={course.id} />
-      <div className="mb-10 space-y-4">
-        <Link href="/courses" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-          {t("Courses", "Khoa hoc")}
-        </Link>
-        <h1 className="section-title text-4xl font-semibold text-emerald-950 md:text-5xl">{course.title}</h1>
-        <p className="text-lg text-emerald-800/70">{course.shortDescription}</p>
-        {metaBadges.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
-            {metaBadges.map((item) => (
-              <span key={item} className="badge">
-                {item}
-              </span>
-            ))}
-          </div>
-        )}
-        <div className="flex flex-wrap gap-3 text-sm text-emerald-800/70">
-          <div className="stat-pill">
-            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
-              {t("Rating", "Danh gia")}
-            </span>
-            <span className="text-sm font-semibold text-emerald-950">
-              {averageRating.toFixed(1)} ({reviewCount})
-            </span>
-          </div>
-          <div className="stat-pill">
-            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
-              {t("Students", "Hoc vien")}
-            </span>
-            <span className="text-sm font-semibold text-emerald-950">
-              {studentCount} {t("enrolled", "dang hoc")}
-            </span>
-          </div>
-          <div className="stat-pill">
-            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
-              {t("Duration", "Thoi luong")}
-            </span>
-            <span className="text-sm font-semibold text-emerald-950">{totalDurationLabel}</span>
+
+      <section className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              {course.category?.title && (
+                <div className="inline-block bg-blue-600 px-3 py-1 rounded-full text-sm mb-4">
+                  {course.category.title}
+                </div>
+              )}
+              <h1 className="text-3xl md:text-4xl font-bold mb-4">{course.title}</h1>
+              <p className="text-xl text-gray-300 mb-6">{course.shortDescription}</p>
+
+              <div className="flex flex-wrap items-center gap-6 mb-6">
+                <div className="flex items-center gap-2">
+                  <span className="text-yellow-400">?</span>
+                  <span className="font-semibold">{averageRating.toFixed(1)}</span>
+                  <span className="text-gray-400">({reviewCount} {t("reviews", "danh gia")})</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>{totalDurationLabel}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>{levelLabel}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>{course.lessons.length} {t("lessons", "bai hoc")}</span>
+                </div>
+              </div>
+
+              <p className="text-gray-300">
+                {t("Language", "Ngon ngu")}: <span className="text-white font-semibold">{languageLabel}</span>
+              </p>
+            </div>
+
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-lg overflow-hidden shadow-xl sticky top-20">
+                <img
+                  src={imageUrl}
+                  alt={course.title}
+                  className="w-full aspect-video object-cover"
+                />
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    {originalPrice && (
+                      <span className="text-gray-400 line-through">{new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      }).format(originalPrice)}</span>
+                    )}
+                    <span className="text-3xl font-bold text-blue-600">{formattedPrice}</span>
+                    {isFlashSale && originalPrice && (
+                      <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-sm font-semibold">
+                        {t("Save", "Giam")} {Math.round(((originalPrice - (course.effectivePrice ?? course.price)) / originalPrice) * 100)}%
+                      </span>
+                    )}
+                  </div>
+
+                  <CourseActions courseId={course.id} courseSlug={course.slug} />
+
+                  <Link
+                    href={`/learn/${course.slug}`}
+                    className="block w-full py-3 rounded-lg font-semibold text-center bg-blue-600 text-white hover:bg-blue-700 transition-colors mt-3"
+                  >
+                    {t("Start learning", "Bat dau hoc")}
+                  </Link>
+
+                  <div className="mt-6 space-y-3 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <span>{t("Certificate", "Chung chi")}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span>{t("Lifetime access", "Truy cap tron doi")}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span>{t("Resources", "Tai nguyen")}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <nav className="flex flex-wrap gap-4 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-          {navItems.map((item) => (
-            <a key={item.id} href={`#${item.id}`} className="underline-hover">
-              {item.label}
-            </a>
-          ))}
-        </nav>
-      </div>
+      </section>
 
-      <div className="grid gap-10 lg:grid-cols-[2fr,1fr]">
-        <div className="space-y-8">
-          <section id="overview" className="surface-card p-6">
-            <div className="grid gap-6 lg:grid-cols-[1.25fr,0.75fr]">
-              <div>
-                <h2 className="section-title text-2xl font-semibold text-emerald-950">
-                  {t("What you will learn", "Ban se hoc duoc")}
-                </h2>
-                <p className="mt-3 text-sm text-emerald-800/70">
-                  {course.outcome || t("Build practical skills.", "Xay dung ky nang thuc hanh.")}
-                </p>
-                {outcomeItems.length > 0 && (
-                  <ul className="mt-4 grid gap-3 md:grid-cols-2">
-                    {outcomeItems.map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-sm text-emerald-900">
-                        <span className="mt-1 h-2 w-2 rounded-full bg-emerald-600/80" />
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">{t("What you will learn", "Ban se hoc duoc")}</h2>
+                {outcomeItems.length > 0 ? (
+                  <ul className="grid md:grid-cols-2 gap-3">
+                    {outcomeItems.map((outcome) => (
+                      <li key={outcome} className="flex items-start gap-2">
+                        <span className="text-green-600">•</span>
+                        <span className="text-gray-700">{outcome}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-700">{course.outcome || t("Build practical skills.", "Xay dung ky nang thuc hanh.")}</p>
+                )}
+              </div>
+
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">{t("Curriculum", "Chuong trinh")}</h2>
+                  <div className="text-sm text-gray-600">{curriculumSummary}</div>
+                </div>
+
+                <div className="space-y-3">
+                  {chapters.map((chapter, index) => (
+                    <details key={chapter.key} className="border border-gray-200 rounded-lg overflow-hidden" open={index < 2}>
+                      <summary className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors cursor-pointer">
+                        <div className="text-left">
+                          <div className="font-semibold text-gray-900">{chapter.title}</div>
+                          <div className="text-sm text-gray-600">
+                            {chapter.lessons.length} {t("lessons", "bai hoc")} · {formatDuration(chapter.totalMinutes, t)}
+                          </div>
+                        </div>
+                      </summary>
+                      <div className="px-4 pb-4 bg-gray-50">
+                        <div className="space-y-2 pt-2">
+                          {chapter.lessons.map((lesson) => (
+                            <div key={lesson.id} className="flex items-center justify-between text-sm text-gray-600 py-2">
+                              <span>{lesson.title}</span>
+                              <span>{lesson.durationMinutes} {t("mins", "phut")}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </details>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">{t("Requirements", "Yeu cau")}</h2>
+                {requirementItems.length > 0 ? (
+                  <ul className="space-y-2 text-gray-700">
+                    {requirementItems.map((item) => (
+                      <li key={item} className="flex items-start gap-2">
+                        <span className="text-green-600">•</span>
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
+                ) : (
+                  <p className="text-gray-700">{course.requirements || t("No prerequisites.", "Khong yeu cau kien thuc truoc.")}</p>
                 )}
               </div>
-              <div className="surface-muted p-4">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                  {t("Course at a glance", "Tong quan khoa hoc")}
-                </h3>
-                <dl className="mt-4 space-y-3 text-sm">
-                  <div className="flex items-center justify-between">
-                    <dt className="text-emerald-800/70">{t("Chapters", "Chuong")}</dt>
-                    <dd className="font-semibold text-emerald-950">{chapters.length}</dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt className="text-emerald-800/70">{t("Lessons", "Bai hoc")}</dt>
-                    <dd className="font-semibold text-emerald-950">{course.lessons.length}</dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt className="text-emerald-800/70">{t("Level", "Trinh do")}</dt>
-                    <dd className="font-semibold text-emerald-950">{levelLabel}</dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt className="text-emerald-800/70">{t("Language", "Ngon ngu")}</dt>
-                    <dd className="font-semibold text-emerald-950">{languageLabel}</dd>
-                  </div>
-                  {lastUpdatedLabel && (
-                    <div className="flex items-center justify-between">
-                      <dt className="text-emerald-800/70">{t("Last updated", "Cap nhat")}</dt>
-                      <dd className="font-semibold text-emerald-950">{lastUpdatedLabel}</dd>
-                    </div>
-                  )}
-                </dl>
-              </div>
-            </div>
-          </section>
 
-          <section id="curriculum" className="surface-card p-6">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="section-title text-2xl font-semibold text-emerald-950">
-                {t("Course curriculum", "Noi dung khoa hoc")}
-              </h2>
-              <span className="text-sm text-emerald-800/70">
-                {curriculumSummary}
-              </span>
-            </div>
-            <div className="mt-4 space-y-4">
-              {chapters.map((chapter, index) => (
-                <details
-                  key={chapter.key}
-                  className="group surface-muted p-4"
-                  open={index < 2}
-                >
-                  <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2">
-                    <span className="text-sm font-semibold text-emerald-950">{chapter.title}</span>
-                    <span className="text-xs text-emerald-800/70">
-                      {chapter.lessons.length} {t("lessons", "bai hoc")} - {formatDuration(chapter.totalMinutes, t)}
-                    </span>
-                  </summary>
-                  <ul className="mt-3 space-y-2">
-                    {chapter.lessons.map((lesson) => (
-                      <li key={lesson.id} className="flex items-center justify-between rounded-2xl bg-white/90 p-3">
-                        <span className="text-sm font-medium text-emerald-950">{lesson.title}</span>
-                        <span className="text-xs text-emerald-800/70">
-                          {lesson.durationMinutes} {t("mins", "phut")}
-                        </span>
-                      </li>
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">{t("About this course", "Mo ta")}</h2>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">{course.description}</p>
+              </div>
+
+              <section id="reviews">
+                <CourseReviews courseId={course.id} courseSlug={course.slug} />
+              </section>
+
+              {relatedCourses.length > 0 && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">{t("Related courses", "Khoa hoc lien quan")}</h2>
+                  <div className="grid gap-5 md:grid-cols-2">
+                    {relatedCourses.map((item) => (
+                      <CourseCard key={item.id} course={item} locale={locale} />
                     ))}
-                  </ul>
-                </details>
-              ))}
-            </div>
-          </section>
-
-          <section id="requirements" className="surface-card p-6">
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
-              {t("Requirements", "Yeu cau")}
-            </h2>
-            {requirementItems.length > 0 ? (
-              <ul className="mt-4 space-y-3 text-sm text-emerald-900">
-                {requirementItems.map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-emerald-600/80" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-3 text-sm text-emerald-800/70">
-                {course.requirements || t("No prerequisites.", "Khong yeu cau kien thuc truoc.")}
-              </p>
-            )}
-          </section>
-
-          <section id="about" className="surface-card p-6">
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
-              {t("About this course", "Gioi thieu khoa hoc")}
-            </h2>
-            <p className="mt-3 whitespace-pre-line text-sm text-emerald-800/70">{course.description}</p>
-          </section>
-
-          {relatedCourses.length > 0 && (
-            <section id="related" className="surface-card p-6">
-              <div className="flex items-center justify-between">
-                <h2 className="section-title text-2xl font-semibold text-emerald-950">
-                  {t("Related courses", "Khoa hoc lien quan")}
-                </h2>
-              </div>
-              <div className="mt-4 grid gap-5 md:grid-cols-2">
-                {relatedCourses.map((item) => (
-                  <CourseCard key={item.id} course={item} locale={locale} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          <section id="reviews">
-            <CourseReviews courseId={course.id} courseSlug={course.slug} />
-          </section>
-        </div>
-
-        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          <div className="surface-card p-6 shadow-sm">
-            <img src={imageUrl} alt={course.title} className="h-48 w-full rounded-2xl object-cover" />
-            <div className="mt-5 flex items-baseline justify-between">
-              <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-semibold text-emerald-950">{formattedPrice}</span>
-                {isFlashSale && originalPrice ? (
-                  <span className="text-sm font-semibold text-emerald-700/60 line-through">
-                    {new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }).format(originalPrice)}
-                  </span>
-                ) : null}
-              </div>
-              <span className="text-xs text-emerald-800/70">{t("One-time payment", "Thanh toan mot lan")}</span>
-            </div>
-            {isFlashSale && course.flashSaleEndsAt ? (
-              <p className="mt-2 text-xs font-semibold text-amber-600">
-                {t("Flash sale ends:", "Giam gia ket thuc:")}{" "}
-                {new Date(course.flashSaleEndsAt).toLocaleString()}
-              </p>
-            ) : null}
-            <CourseActions courseId={course.id} courseSlug={course.slug} />
-            <Link
-              href={`/learn/${course.slug}`}
-              className="mt-3 inline-flex w-full justify-center rounded-full border border-[color:var(--stroke)] px-4 py-2 text-xs font-semibold text-emerald-900"
-            >
-              {t("Start learning", "Bat dau hoc")}
-            </Link>
-            <div className="mt-6 space-y-2 text-xs text-emerald-800/70">
-              <p>{t("Includes:", "Bao gom:")}</p>
-              <ul className="space-y-1">
-                <li>{t("Lifetime access", "Truy cap tron doi")}</li>
-                <li>{t("Downloadable resources", "Tai nguyen co the tai ve")}</li>
-                <li>{t("Certificate of completion", "Chung chi hoan thanh")}</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="surface-card p-6">
-            <h3 className="text-lg font-semibold text-emerald-950">
-              {t("Need help deciding?", "Can tu van them?")}
-            </h3>
-            <p className="mt-2 text-sm text-emerald-800/70">
-              {t(
-                "Talk to a mentor and build a personalized learning plan.",
-                "Trao doi voi mentor va len lo trinh hoc tap ca nhan."
+                  </div>
+                </div>
               )}
-            </p>
-            <Link
-              href="/register"
-              className="mt-4 inline-flex rounded-full border border-[color:var(--stroke)] px-4 py-2 text-xs font-semibold text-emerald-900"
-            >
-              {t("Book a consult", "Dat lich tu van")}
-            </Link>
+            </div>
+
+            <div className="lg:col-span-1"></div>
           </div>
-        </aside>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
-
-

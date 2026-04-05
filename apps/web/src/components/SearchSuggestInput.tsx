@@ -195,7 +195,7 @@ export function SearchSuggestInput({
               }
             }}
             className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-full border px-2 py-1 text-[11px] font-semibold ${
-              listening ? "border-[color:var(--brand)] bg-[color:var(--brand-soft)] text-emerald-900" : "border-[color:var(--stroke)] text-emerald-700"
+              listening ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-600"
             }`}
             aria-label={tx("Start voice search", "Bat dau tim kiem bang giong noi")}
           >
@@ -211,17 +211,17 @@ export function SearchSuggestInput({
       {open && (
         <div className="absolute left-0 right-0 top-full z-40 mt-2 rounded-2xl border border-[color:var(--stroke)] bg-white p-2 shadow-lg">
           {loading && (
-            <div className="px-3 py-2 text-xs text-emerald-700/70">
+            <div className="px-3 py-2 text-xs text-gray-500">
               {tx("Searching...", "Dang tim...")}
             </div>
           )}
           {!loading && items.length === 0 && (
-            <div className="px-3 py-2 text-xs text-emerald-700/70">
+            <div className="px-3 py-2 text-xs text-gray-500">
               {tx("No matches yet.", "Chua co goi y.")}
             </div>
           )}
           {grouped.paths.length > 0 && (
-            <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-600">
+            <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-600">
               {tx("Paths", "Lo trinh")}
             </div>
           )}
@@ -230,14 +230,14 @@ export function SearchSuggestInput({
               key={`path-${item.slug}`}
               type="button"
               onClick={() => handleSelect(item)}
-              className="flex w-full flex-col gap-1 rounded-xl px-3 py-2 text-left text-xs font-semibold text-emerald-900 hover:bg-[color:var(--brand-soft)]"
+              className="flex w-full flex-col gap-1 rounded-xl px-3 py-2 text-left text-xs font-semibold text-gray-900 hover:bg-blue-50"
             >
               <span>{item.title}</span>
-              {item.subtitle && <span className="text-[11px] text-emerald-700/70">{item.subtitle}</span>}
+              {item.subtitle && <span className="text-[11px] text-gray-500">{item.subtitle}</span>}
             </button>
           ))}
           {grouped.courses.length > 0 && (
-            <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-600">
+            <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-600">
               {tx("Courses", "Khoa hoc")}
             </div>
           )}
@@ -246,10 +246,10 @@ export function SearchSuggestInput({
               key={`course-${item.slug}`}
               type="button"
               onClick={() => handleSelect(item)}
-              className="flex w-full flex-col gap-1 rounded-xl px-3 py-2 text-left text-xs font-semibold text-emerald-900 hover:bg-[color:var(--brand-soft)]"
+              className="flex w-full flex-col gap-1 rounded-xl px-3 py-2 text-left text-xs font-semibold text-gray-900 hover:bg-blue-50"
             >
               <span>{item.title}</span>
-              {item.subtitle && <span className="text-[11px] text-emerald-700/70">{item.subtitle}</span>}
+              {item.subtitle && <span className="text-[11px] text-gray-500">{item.subtitle}</span>}
             </button>
           ))}
         </div>

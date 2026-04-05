@@ -179,290 +179,256 @@ export default async function CoursesPage({
   baseParams.set("pageSize", resolvedPageSize.toString());
 
   return (
-    <div className="section-shell space-y-10 py-12 fade-in">
-      <div className="space-y-3">
-        <Link href="/" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-          {t("Home", "Trang chu")}
-        </Link>
-        <h1 className="section-title text-4xl font-semibold text-emerald-950">
-          {t("All courses", "Tat ca khoa hoc")}
-        </h1>
-        <p className="text-sm text-emerald-800/70">
-          {t(
-            "Find a path that matches your goals, experience, and schedule.",
-            "Tim lo trinh phu hop voi muc tieu, kinh nghiem va thoi gian cua ban."
-          )}
-        </p>
-        <div className="flex flex-wrap gap-3 text-sm text-emerald-800/70">
-          <div className="stat-pill">
-            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
-              {t("Results", "Ket qua")}
-            </span>
-            <span className="text-sm font-semibold text-emerald-950">{totalCourses}</span>
-          </div>
-          <div className="stat-pill">
-            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
-              {t("Showing", "Hien thi")}
-            </span>
-            <span className="text-sm font-semibold text-emerald-950">
-              {startIndex}-{endIndex}
-            </span>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white border-b border-gray-200 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <form
+            action="/courses"
+            method="get"
+            className="flex gap-3"
+          >
+            <div className="flex-1 relative flex bg-white border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+              <svg viewBox="0 0 24 24" className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
+              </svg>
+              <SearchSuggestInput
+                name="q"
+                defaultValue={search}
+                placeholder={t("Search courses", "Tim khoa hoc")}
+                inputClassName="flex-1 pl-11 pr-4 py-3 focus:outline-none text-gray-900 bg-transparent"
+              />
+            </div>
+            <button
+              type="submit"
+              className="hidden sm:inline-flex items-center gap-2 px-4 rounded-xl border bg-blue-600 text-white border-blue-600 text-sm font-medium hover:bg-blue-700"
+            >
+              {t("Search", "Tim")}
+            </button>
+          </form>
         </div>
       </div>
 
-      <div className="surface-card space-y-6 p-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              {t("Filters", "Bo loc")}
-            </p>
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
-              {t("Find the right course", "Tim khoa hoc phu hop")}
-            </h2>
-            <p className="text-sm text-emerald-800/70">
-              {t("Narrow by price, level, and topic to move faster.", "Loc theo gia, cap do, va chu de de tim nhanh hon.")}
-            </p>
-          </div>
-          <div className="stat-pill">
-            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
-              {t("Page size", "So khoa hoc")}
-            </span>
-            <span className="text-sm font-semibold text-emerald-950">{resolvedPageSize}</span>
-          </div>
-        </div>
-        <form action="/courses" method="get" className="flex flex-col gap-3">
-          {category && <input type="hidden" name="category" value={category} />}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              {t("Search", "Tim kiem")}
-            </label>
-            <SearchSuggestInput
-              name="q"
-              defaultValue={search}
-              placeholder={t("Search courses", "Tim khoa hoc")}
-              className="flex-1"
-              inputClassName="flex-1 rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm text-emerald-950 focus:outline-none"
-              enableVoice
-            />
-          </div>
-          <div className="grid gap-3 md:grid-cols-4">
-            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              <span>{t("Min price", "Gia tu")}</span>
-              <input
-                name="minPrice"
-                type="number"
-                step="0.01"
-                min="0"
-                defaultValue={minPrice}
-                placeholder={t("Min price", "Gia tu")}
-                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
-              />
-            </label>
-            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              <span>{t("Max price", "Gia den")}</span>
-              <input
-                name="maxPrice"
-                type="number"
-                step="0.01"
-                min="0"
-                defaultValue={maxPrice}
-                placeholder={t("Max price", "Gia den")}
-                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
-              />
-            </label>
-            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              <span>{t("Level", "Cap do")}</span>
-              <select
-                name="level"
-                defaultValue={level}
-                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
-              >
-                <option value="">{t("All levels", "Tat ca cap do")}</option>
-                <option value="Beginner">{t("Beginner", "Co ban")}</option>
-                <option value="Intermediate">{t("Intermediate", "Trung cap")}</option>
-                <option value="Advanced">{t("Advanced", "Nang cao")}</option>
-              </select>
-            </label>
-            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              <span>{t("Language", "Ngon ngu")}</span>
-              <select
-                name="language"
-                defaultValue={language}
-                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
-              >
-                <option value="">{t("All languages", "Tat ca ngon ngu")}</option>
-                <option value="English">{t("English", "Tieng Anh")}</option>
-                <option value="Vietnamese">{t("Vietnamese", "Tieng Viet")}</option>
-              </select>
-            </label>
-          </div>
-          <div className="grid gap-3 md:grid-cols-4">
-            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              <span>{t("Rating", "Danh gia")}</span>
-              <select
-                name="minRating"
-                defaultValue={minRating}
-                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
-              >
-                <option value="">{t("Any rating", "Moi danh gia")}</option>
-                <option value="3">3+</option>
-                <option value="3.5">3.5+</option>
-                <option value="4">4+</option>
-                <option value="4.5">4.5+</option>
-              </select>
-            </label>
-            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              <span>{t("Sort", "Sap xep")}</span>
-              <select
-                name="sort"
-                defaultValue={sort}
-                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
-              >
-                <option value="">{t("Newest", "Moi nhat")}</option>
-                <option value="popular">{t("Most popular", "Pho bien")}</option>
-                <option value="rating">{t("Top rated", "Danh gia cao")}</option>
-                <option value="price_asc">{t("Price low to high", "Gia tang dan")}</option>
-                <option value="price_desc">{t("Price high to low", "Gia giam dan")}</option>
-              </select>
-            </label>
-            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              <span>{t("Page size", "So khoa hoc")}</span>
-              <select
-                name="pageSize"
-                defaultValue={resolvedPageSize.toString()}
-                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
-              >
-                <option value="12">12 / {t("page", "trang")}</option>
-                <option value="24">24 / {t("page", "trang")}</option>
-                <option value="36">36 / {t("page", "trang")}</option>
-                <option value="48">48 / {t("page", "trang")}</option>
-                <option value="60">60 / {t("page", "trang")}</option>
-              </select>
-            </label>
-            <button
-              type="submit"
-              className="rounded-full bg-emerald-700 px-6 py-2 text-sm font-semibold text-white"
-            >
-              {t("Apply filters", "Ap dung bo loc")}
-            </button>
-          </div>
-        </form>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-8">
+          <aside className="hidden lg:block w-72 flex-shrink-0">
+            <form action="/courses" method="get" className="bg-white rounded-xl border border-gray-200 p-5 sticky top-24 space-y-5">
+              {search && <input type="hidden" name="q" value={search} />}
+              <input type="hidden" name="pageSize" value={resolvedPageSize.toString()} />
 
-        <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-            {t("Categories", "Danh muc")}
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href={`/courses${baseParams.toString() ? `?${baseParams}` : ""}`}
-              className={`rounded-full border px-4 py-1 text-xs font-semibold ${
-                category ? "border-[color:var(--stroke)] text-emerald-800" : "border-[color:var(--brand)] bg-emerald-700 text-white"
-              }`}
-            >
-              {t("All", "Tat ca")}
-            </Link>
-            {categories.map((item) => (
-              <Link
-                key={item.id}
-                href={`/courses?${(() => {
-                  const params = new URLSearchParams(baseParams);
-                  params.set("category", item.slug);
-                  return params.toString();
-                })()}`}
-                className={`rounded-full border px-4 py-1 text-xs font-semibold ${
-                  category === item.slug
-                    ? "border-[color:var(--brand)] bg-emerald-700 text-white"
-                    : "border-[color:var(--stroke)] text-emerald-800"
-                }`}
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">{t("Category", "Danh muc")}</h4>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="category" value="" defaultChecked={!category} className="text-blue-600" />
+                    <span className="text-sm text-gray-600">{t("All", "Tat ca")}</span>
+                  </label>
+                  {categories.map((cat) => (
+                    <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="category"
+                        value={cat.slug}
+                        defaultChecked={category === cat.slug}
+                        className="text-blue-600"
+                      />
+                      <span className="text-sm text-gray-600">{cat.title}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">{t("Level", "Trinh do")}</h4>
+                <select
+                  name="level"
+                  defaultValue={level}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  <option value="">{t("All levels", "Tat ca cap do")}</option>
+                  <option value="Beginner">{t("Beginner", "Co ban")}</option>
+                  <option value="Intermediate">{t("Intermediate", "Trung cap")}</option>
+                  <option value="Advanced">{t("Advanced", "Nang cao")}</option>
+                </select>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">{t("Language", "Ngon ngu")}</h4>
+                <select
+                  name="language"
+                  defaultValue={language}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  <option value="">{t("All languages", "Tat ca")}</option>
+                  <option value="English">{t("English", "Tieng Anh")}</option>
+                  <option value="Vietnamese">{t("Vietnamese", "Tieng Viet")}</option>
+                </select>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">{t("Price", "Gia")}</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    name="minPrice"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    defaultValue={minPrice}
+                    placeholder={t("Min", "Tu")}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none"
+                  />
+                  <input
+                    name="maxPrice"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    defaultValue={maxPrice}
+                    placeholder={t("Max", "Den")}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">{t("Min rating", "Danh gia")}</h4>
+                <select
+                  name="minRating"
+                  defaultValue={minRating}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  <option value="">{t("Any rating", "Tat ca")}</option>
+                  <option value="3">3+</option>
+                  <option value="3.5">3.5+</option>
+                  <option value="4">4+</option>
+                  <option value="4.5">4.5+</option>
+                </select>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">{t("Sort", "Sap xep")}</h4>
+                <select
+                  name="sort"
+                  defaultValue={sort}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  <option value="">{t("Newest", "Moi nhat")}</option>
+                  <option value="popular">{t("Most popular", "Pho bien")}</option>
+                  <option value="rating">{t("Top rated", "Danh gia cao")}</option>
+                  <option value="price_asc">{t("Price low to high", "Gia tang dan")}</option>
+                  <option value="price_desc">{t("Price high to low", "Gia giam dan")}</option>
+                </select>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">{t("Page size", "So khoa hoc")}</h4>
+                <select
+                  name="pageSize"
+                  defaultValue={resolvedPageSize.toString()}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  <option value="12">12</option>
+                  <option value="24">24</option>
+                  <option value="36">36</option>
+                  <option value="48">48</option>
+                  <option value="60">60</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
               >
-                {item.title}
-              </Link>
-            ))}
-            {(search || category || level || language || minPrice || maxPrice || minRating || sort) && (
-              <Link
-                href="/courses"
-                className="rounded-full border border-[color:var(--stroke)] px-4 py-1 text-xs font-semibold text-emerald-900"
-              >
-                {t("Reset filters", "Xoa bo loc")}
-              </Link>
+                {t("Apply filters", "Ap dung")}
+              </button>
+
+              {(search || category || level || language || minPrice || maxPrice || minRating || sort) && (
+                <Link
+                  href="/courses"
+                  className="block text-center text-sm text-blue-600 hover:underline"
+                >
+                  {t("Reset filters", "Xoa bo loc")}
+                </Link>
+              )}
+            </form>
+          </aside>
+
+          <div className="flex-1 min-w-0 space-y-6">
+            <div className="flex items-center justify-between">
+              <p className="text-gray-600 text-sm">
+                {search && <span className="font-medium">"{search}" · </span>}
+                {t("Found", "Tim thay")} <span className="font-semibold text-gray-900">{totalCourses}</span> {t("courses", "khoa hoc")}
+              </p>
+              <div className="text-xs text-gray-500">
+                {t("Showing", "Hien thi")} {startIndex}-{endIndex}
+              </div>
+            </div>
+
+            {activeFilters.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {activeFilters.map((item) => (
+                  <span key={item} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-medium">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {courses.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+                <p className="text-gray-500">{t("No courses found.", "Khong tim thay khoa hoc.")}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {courses.map((course) => (
+                  <CourseCard key={course.id} course={course} locale={locale} />
+                ))}
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-gray-600">
+                <span>
+                  {t("Page", "Trang")} {currentPage} / {totalPages}
+                </span>
+                <div className="flex items-center gap-2">
+                  {prevPage ? (
+                    <Link
+                      href={`/courses?${(() => {
+                        const params = new URLSearchParams(baseParams);
+                        params.set("page", prevPage.toString());
+                        return params.toString();
+                      })()}`}
+                      className="rounded-lg border border-gray-200 px-4 py-1 text-xs font-semibold text-gray-700"
+                    >
+                      {t("Previous", "Truoc")}
+                    </Link>
+                  ) : (
+                    <span className="rounded-lg border border-gray-200 px-4 py-1 text-xs font-semibold text-gray-300">
+                      {t("Previous", "Truoc")}
+                    </span>
+                  )}
+                  {nextPage ? (
+                    <Link
+                      href={`/courses?${(() => {
+                        const params = new URLSearchParams(baseParams);
+                        params.set("page", nextPage.toString());
+                        return params.toString();
+                      })()}`}
+                      className="rounded-lg border border-gray-200 px-4 py-1 text-xs font-semibold text-gray-700"
+                    >
+                      {t("Next", "Tiep")}
+                    </Link>
+                  ) : (
+                    <span className="rounded-lg border border-gray-200 px-4 py-1 text-xs font-semibold text-gray-300">
+                      {t("Next", "Tiep")}
+                    </span>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </div>
-
-        {activeFilters.length > 0 && (
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              {t("Active filters", "Bo loc dang dung")}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {activeFilters.map((item) => (
-                <span key={item} className="badge">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
-
-      {courses.length === 0 ? (
-        <div className="surface-card p-10 text-center text-sm text-emerald-800/70">
-          {t("No courses found. Try changing your filters.", "Khong tim thay khoa hoc. Hay thu doi bo loc.")}
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 stagger">
-            {courses.map((course) => (
-              <CourseCard key={course.id} course={course} locale={locale} />
-            ))}
-          </div>
-          {totalPages > 1 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-emerald-800/70">
-              <span>
-                {t("Page", "Trang")} {currentPage} / {totalPages} - {t("Showing", "Hien thi")} {startIndex}-{endIndex}{" "}
-                {t("of", "tren")} {totalCourses} {t("courses", "khoa hoc")}
-              </span>
-              <div className="flex items-center gap-2">
-                {prevPage ? (
-                  <Link
-                    href={`/courses?${(() => {
-                      const params = new URLSearchParams(baseParams);
-                      params.set("page", prevPage.toString());
-                      return params.toString();
-                    })()}`}
-                    className="rounded-full border border-[color:var(--stroke)] px-4 py-1 text-xs font-semibold text-emerald-900"
-                  >
-                    {t("Previous", "Truoc")}
-                  </Link>
-                ) : (
-                  <span className="rounded-full border border-[color:var(--stroke)] px-4 py-1 text-xs font-semibold text-emerald-400">
-                    {t("Previous", "Truoc")}
-                  </span>
-                )}
-                {nextPage ? (
-                  <Link
-                    href={`/courses?${(() => {
-                      const params = new URLSearchParams(baseParams);
-                      params.set("page", nextPage.toString());
-                      return params.toString();
-                    })()}`}
-                    className="rounded-full border border-[color:var(--stroke)] px-4 py-1 text-xs font-semibold text-emerald-900"
-                  >
-                    {t("Next", "Tiep")}
-                  </Link>
-                ) : (
-                  <span className="rounded-full border border-[color:var(--stroke)] px-4 py-1 text-xs font-semibold text-emerald-400">
-                    {t("Next", "Tiep")}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
-
-

@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { resolveApiAsset } from "@/lib/api";
 import { pickLocaleText, type AppLocale } from "@/lib/i18n";
 import { CompareToggle } from "@/components/CompareToggle";
@@ -42,62 +42,72 @@ export function CourseCard({ course, locale = "en" }: { course: CourseSummary; l
   const rating = course.averageRating ?? 0;
   const reviewCount = course.reviewCount ?? 0;
   const roundedRating = Math.round(rating);
-  const stars = Array.from({ length: 5 }, (_, index) => (index < roundedRating ? "★" : "☆")).join("");
+  const stars = Array.from({ length: 5 }, (_, index) => (index < roundedRating ? "?" : "?")).join("");
   const effectivePrice = course.effectivePrice ?? course.price;
   const originalPrice = course.originalPrice;
-  const isFlashSale = Boolean(course.isFlashSaleActive && originalPrice);
+  const discount = originalPrice ? Math.round(((originalPrice - effectivePrice) / originalPrice) * 100) : 0;
 
   return (
-    <article className="surface-card flex h-full flex-col gap-4 p-4">
-      <div className="relative overflow-hidden rounded-2xl">
+    <article className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-gray-200 flex flex-col">
+      <div className="relative overflow-hidden aspect-video flex-shrink-0">
         <img
           src={imageUrl}
           alt={course.title}
-          className="h-44 w-full object-cover"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
           decoding="async"
         />
-        <span className="badge absolute left-3 top-3 bg-white/90">
-          {course.level || "Beginner"}
-        </span>
-        {isFlashSale && (
-          <span className="absolute right-3 top-3 rounded-full bg-amber-400 px-3 py-1 text-[11px] font-semibold text-emerald-950">
-            {pickLocaleText(locale, "Flash sale", "Giam gia nhanh")}
-          </span>
+        {discount > 0 && (
+          <div className="absolute top-3 left-3 bg-red-500 text-white px-2.5 py-0.5 rounded-full text-xs font-bold">
+            -{discount}%
+          </div>
         )}
+        <span className="absolute top-3 right-3">
+          <CompareToggle courseId={course.id} />
+        </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3">
+      <div className="p-4 flex flex-col flex-1">
         {course.category?.title && (
-          <p className="section-eyebrow">
+          <div className="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-1.5">
             {course.category.title}
-          </p>
+          </div>
         )}
-        <Link href={`/courses/${course.slug}`} className="text-lg font-semibold text-emerald-950">
+
+        <Link
+          href={`/courses/${course.slug}`}
+          className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors flex-1"
+        >
           {course.title}
         </Link>
-        <p className="text-sm text-emerald-800/70">{course.shortDescription}</p>
-        <div className="flex items-center justify-between text-xs text-emerald-800/70">
-          <span>{course.language || pickLocaleText(locale, "English", "Tieng Anh")}</span>
-          <span className="flex items-center gap-2 text-sm font-semibold text-emerald-950">
-            {formatPrice(effectivePrice, locale)}
-            {isFlashSale && originalPrice ? (
-              <span className="text-xs font-semibold text-emerald-700/60 line-through">
+
+        <p className="text-xs text-gray-500 mb-3 line-clamp-2">{course.shortDescription}</p>
+
+        <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+          <div className="flex items-center gap-1">
+            <span className="text-yellow-500">{stars}</span>
+            <span className="font-semibold text-gray-800">{rating.toFixed(1)}</span>
+            <span>({reviewCount})</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span>{course.level || pickLocaleText(locale, "Beginner", "Co ban")}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold text-blue-600">
+              {formatPrice(effectivePrice, locale)}
+            </span>
+            {originalPrice ? (
+              <span className="text-xs text-gray-400 line-through">
                 {formatPrice(originalPrice, locale)}
               </span>
             ) : null}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-emerald-800/70">
-          <span className="text-amber-500">{stars}</span>
-          <span>{rating.toFixed(1)}</span>
-          <span>({reviewCount})</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-emerald-700/70">
+          </div>
+          <span className="text-xs text-gray-500">
             {course.studentCount} {pickLocaleText(locale, "students", "hoc vien")}
           </span>
-          <CompareToggle courseId={course.id} />
         </div>
       </div>
     </article>

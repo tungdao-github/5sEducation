@@ -42,8 +42,10 @@ export function CompareToggle({ courseId }: { courseId: number }) {
     <button
       type="button"
       onClick={toggle}
-      className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${
-        active ? "border-[color:var(--brand)] bg-emerald-700 text-white" : "border-[color:var(--stroke)] text-emerald-900"
+      className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
+        active
+          ? "border-blue-600 bg-blue-600 text-white"
+          : "border-gray-200 bg-white/90 text-gray-600 hover:text-blue-600"
       }`}
     >
       {active ? tx("Added", "Da them") : tx("Compare", "So sanh")}

@@ -74,135 +74,116 @@ export default function WishlistPage() {
     () => items.reduce((sum, item) => sum + item.price, 0),
     [items]
   );
-  const itemCount = items.length;
 
-  return (
-    <div className="section-shell space-y-8 py-12 fade-in">
-      <div className="space-y-2">
-        <Link href="/courses" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-          {tx("Courses", "Khoa hoc")}
-        </Link>
-        <h1 className="section-title text-4xl font-semibold text-emerald-950">
-          {tx("Wishlist", "Danh sach yeu thich")}
-        </h1>
-        <p className="text-sm text-emerald-800/70">
-          {tx("Save courses to revisit later.", "Luu khoa hoc de xem lai sau.")}
-        </p>
-        <div className="flex flex-wrap gap-3 text-sm text-emerald-800/70">
-          <div className="stat-pill">
-            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
-              {tx("Saved", "Da luu")}
-            </span>
-            <span className="text-sm font-semibold text-emerald-950">{itemCount}</span>
-          </div>
-          <div className="stat-pill">
-            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
-              {tx("Value", "Gia tri")}
-            </span>
-            <span className="text-sm font-semibold text-emerald-950">${totalValue.toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
-
-      {needsAuth ? (
-        <div className="surface-card p-10 text-center">
-          <p className="text-sm text-emerald-800/70">
-            {tx("Please sign in to view your wishlist.", "Vui long dang nhap de xem danh sach yeu thich.")}
-          </p>
+  if (needsAuth) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md px-4">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{tx("Sign in required", "Can dang nhap")}</h2>
+          <p className="text-gray-500 mb-6">{tx("Please sign in to view your wishlist.", "Vui long dang nhap de xem danh sach yeu thich.")}</p>
           <Link
             href="/login?next=/wishlist"
-            className="mt-4 inline-flex rounded-full bg-emerald-700 px-6 py-2 text-sm font-semibold text-white"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
           >
             {tx("Sign in", "Dang nhap")}
           </Link>
         </div>
-      ) : items.length === 0 ? (
-        <div className="surface-card p-10 text-center text-sm text-emerald-800/70">
-          {tx("Your wishlist is empty.", "Danh sach yeu thich dang trong.")}
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md px-4">
+          <div className="size-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-red-500 text-2xl">?</span>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{tx("No saved courses", "Chua co khoa hoc yeu thich")}</h2>
+          <p className="text-gray-500 mb-6">{tx("Save courses to revisit later.", "Hay them khoa hoc de xem lai sau.")}</p>
+          <Link
+            href="/courses"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          >
+            {tx("Explore courses", "Kham pha khoa hoc")}
+          </Link>
         </div>
-      ) : (
-        <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-          <div className="space-y-4">
-            <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                  {tx("Saved courses", "Khoa hoc da luu")}
-                </p>
-                <p className="text-sm text-emerald-800/70">
-                  {tx("Pick what to learn next or move to cart.", "Chon khoa hoc tiep theo hoac dua vao gio hang.")}
-                </p>
-              </div>
-              <span className="text-sm font-semibold text-emerald-950">
-                {itemCount} {tx("items", "khoa hoc")}
-              </span>
-            </div>
-            {items.map((item) => (
-              <div key={item.id} className="surface-card flex flex-col gap-4 p-4 md:flex-row">
-                <img
-                  src={resolveApiAsset(item.thumbnailUrl) || "/images/learning.jpg"}
-                  alt={item.courseTitle}
-                  className="h-28 w-full rounded-2xl object-cover md:h-24 md:w-40"
-                />
-                <div className="flex flex-1 flex-col justify-between gap-2">
-                  <div>
-                    <Link href={`/courses/${item.courseSlug}`} className="text-lg font-semibold text-emerald-950">
-                      {item.courseTitle}
-                    </Link>
-                    <div className="mt-2 flex flex-wrap gap-2 text-xs text-emerald-800/70">
-                      {item.level && <span className="badge">{item.level}</span>}
-                      {item.language && <span className="badge">{item.language}</span>}
-                    </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-3 mb-8">
+          <span className="size-6 text-red-500">?</span>
+          <h1 className="text-3xl font-bold text-gray-900">{tx("Wishlist", "Khoa hoc yeu thich")}</h1>
+          <span className="bg-gray-200 text-gray-700 px-2.5 py-0.5 rounded-full text-sm font-medium">
+            {items.length}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {items.map((course) => (
+            <div
+              key={course.id}
+              className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+            >
+              <div className="flex gap-4 p-4">
+                <Link href={`/courses/${course.courseSlug}`} className="flex-shrink-0">
+                  <img
+                    src={resolveApiAsset(course.thumbnailUrl) || "/images/learning.jpg"}
+                    alt={course.courseTitle}
+                    className="w-28 h-20 object-cover rounded-lg"
+                  />
+                </Link>
+                <div className="flex-1 min-w-0">
+                  <Link href={`/courses/${course.courseSlug}`}>
+                    <h3 className="font-semibold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 text-sm">
+                      {course.courseTitle}
+                    </h3>
+                  </Link>
+                  <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                    {course.level && <span className="bg-gray-100 px-2 py-1 rounded-full">{course.level}</span>}
+                    {course.language && <span className="bg-gray-100 px-2 py-1 rounded-full">{course.language}</span>}
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="font-bold text-blue-600">${course.price.toFixed(2)}</span>
+                  </div>
+                  <div className="flex gap-2 mt-3">
                     <button
-                      type="button"
-                      onClick={() => handleAddToCart(item.courseId)}
-                      className="rounded-full bg-emerald-700 px-4 py-2 text-xs font-semibold text-white"
+                      onClick={() => handleAddToCart(course.courseId)}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700"
+                      disabled={loadingId === course.courseId}
                     >
-                      {loadingId === item.courseId
-                        ? tx("Adding...", "Dang them...")
-                        : tx("Add to cart", "Them vao gio")}
+                      {loadingId === course.courseId ? tx("Adding...", "Dang them...") : tx("Add to cart", "Them vao gio")}
                     </button>
                     <button
-                      type="button"
-                      onClick={() => handleRemove(item.courseId)}
-                      className="rounded-full border border-[color:var(--stroke)] px-3 py-2 text-xs font-semibold text-emerald-900"
+                      onClick={() => handleRemove(course.courseId)}
+                      className="p-1.5 text-gray-400 hover:text-red-500 border border-gray-200 rounded-lg transition-colors"
                     >
-                      {tx("Remove", "Xoa")}
+                      ?
                     </button>
                   </div>
                 </div>
-                <div className="text-sm font-semibold text-emerald-950">${item.price.toFixed(2)}</div>
               </div>
-            ))}
-          </div>
-
-          <div className="surface-card h-fit space-y-4 p-6">
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                {tx("Wishlist value", "Tong gia tri")}
-              </p>
-              <p className="text-3xl font-semibold text-emerald-950">${totalValue.toFixed(2)}</p>
-              <p className="text-xs text-emerald-800/70">
-                {tx("Includes", "Bao gom")} {itemCount} {tx("items", "khoa hoc")}
-              </p>
             </div>
-            <Link
-              href="/cart"
-              className="mt-6 inline-flex w-full justify-center rounded-full bg-emerald-700 px-6 py-3 text-sm font-semibold text-white"
-            >
-              {tx("Go to cart", "Den gio hang")}
-            </Link>
-            <Link
-              href="/courses"
-              className="inline-flex w-full justify-center rounded-full border border-[color:var(--stroke)] px-6 py-2 text-xs font-semibold text-emerald-900"
-            >
-              {tx("Continue browsing", "Tiep tuc xem khoa hoc")}
-            </Link>
-          </div>
+          ))}
         </div>
-      )}
+
+        <div className="mt-8 bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-500">{tx("Total value", "Tong gia tri")}</p>
+            <p className="text-2xl font-bold text-gray-900">${totalValue.toFixed(2)}</p>
+          </div>
+          <Link
+            href="/cart"
+            className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+          >
+            {tx("Go to cart", "Den gio hang")}
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
-

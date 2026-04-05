@@ -7,7 +7,6 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { GoogleOneTap } from "@/components/GoogleOneTap";
 import { SupportChatWidget } from "@/components/SupportChatWidget";
-import { SideNav } from "@/components/SideNav";
 import { getServerLocale } from "@/lib/server-locale";
 
 const bodyFont = Manrope({
@@ -63,13 +62,8 @@ export default async function RootLayout({
         <Providers>
           <GoogleOneTap />
           <SiteHeader />
-          <div className="flex flex-1">
-            <SideNav />
-            <div className="flex min-w-0 flex-1 flex-col">
-              <main className="flex-1">{children}</main>
-              <SiteFooter />
-            </div>
-          </div>
+          <main className="flex-1">{children}</main>
+          <SiteFooter />
           <SupportChatWidget />
         </Providers>
       </body>

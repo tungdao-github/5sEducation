@@ -3,8 +3,6 @@ import { API_URL } from "@/lib/api";
 import { CourseCard, CourseSummary } from "@/components/CourseCard";
 import { getServerLocale } from "@/lib/server-locale";
 import { pickLocaleText } from "@/lib/i18n";
-import { LearningPathCard, LearningPathSummary } from "@/components/LearningPathCard";
-import { HomeBlocks, HomePageBlock } from "@/components/HomeBlocks";
 import { SearchSuggestInput } from "@/components/SearchSuggestInput";
 
 interface Category {
@@ -33,285 +31,146 @@ async function getCategories(): Promise<Category[]> {
   }
 }
 
-async function getLearningPaths(): Promise<LearningPathSummary[]> {
-  try {
-    const res = await fetch(`${API_URL}/api/learning-paths`, { cache: "no-store" });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
-    return [];
-  }
-}
-
-async function getHomeBlocks(locale: string): Promise<HomePageBlock[]> {
-  try {
-    const res = await fetch(`${API_URL}/api/homepage/blocks?locale=${locale}`, { cache: "no-store" });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
-    return [];
-  }
-}
-
 export default async function HomePage() {
   const locale = await getServerLocale();
   const t = (en: string, vi: string) => pickLocaleText(locale, en, vi);
 
-  const [courses, categories, learningPaths, blocks] = await Promise.all([
-    getCourses(),
-    getCategories(),
-    getLearningPaths(),
-    getHomeBlocks(locale),
-  ]);
-
+  const [courses, categories] = await Promise.all([getCourses(), getCategories()]);
   const topCourses = courses.slice(0, 6);
-  const featuredCategories = categories.slice(0, 6);
-  const featuredPaths = learningPaths.slice(0, 4);
-  const hasHeroBlock = blocks.some((block) => block.type === "hero");
-  const hasCtaBlock = blocks.some((block) => block.type === "cta");
-  const hasFeatureBlock = blocks.some((block) => block.type === "feature");
-  const valueProps = [
-    {
-      title: t("Mentor-led studio sprints", "Sprint thuc chien co mentor"),
-      description: t(
-        "Weekly feedback cycles with senior mentors so you ship real portfolio work.",
-        "Review hang tuan voi mentor senior de ban hoan thanh case study that."
-      ),
-    },
-    {
-      title: t("Job-ready skill tracks", "Lo trinh ky nang san sang di lam"),
-      description: t(
-        "Structured paths for product, data, and engineering roles with clear milestones.",
-        "Lo trinh co cau truc cho product, data, va engineering voi moc tien do ro rang."
-      ),
-    },
-    {
-      title: t("Cohort learning community", "Cong dong hoc theo cohort"),
-      description: t(
-        "Small cohorts keep you accountable, supported, and moving fast with peers.",
-        "Cohort nho giup ban co dong luc va tien nhanh cung dong doi."
-      ),
-    },
-  ];
 
   return (
-    <div className="space-y-16 pb-16">
-      {blocks.length > 0 && <HomeBlocks blocks={blocks} locale={locale} />}
-      {!hasHeroBlock && (
-        <section className="hero-grid fade-in">
-          <div className="section-shell grid gap-10 py-16 lg:grid-cols-[1.2fr,0.8fr]">
-            <div className="space-y-6">
-              <span className="badge">{t("New season", "Mua hoc moi")}</span>
-              <h1 className="section-title text-4xl font-semibold text-emerald-950 md:text-5xl">
-                {t("Build skills that turn into real work.", "Xay dung ky nang de lam viec thuc te.")}
-              </h1>
-              <p className="text-lg text-emerald-800/70">
-                {t(
-                  "5S Education blends structured learning paths, live feedback, and projects that mirror real client work.",
-                  "5S Education ket hop lo trinh hoc co cau truc, phan hoi truc tiep, va du an mo phong cong viec thuc te."
-                )}
-              </p>
+    <div className="min-h-screen bg-gray-50">
+      <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              {t("Learn UX/UI from top experts", "Kham pha khoa hoc UX/UI hang dau")}
+            </h1>
+            <p className="text-xl text-blue-100 mb-8">
+              {t(
+                "Upgrade your skills with practical, mentor-led courses.",
+                "Nang cao ky nang voi khoa hoc thuc chien va mentor huong dan."
+              )}
+            </p>
+
+            <div className="relative max-w-2xl mx-auto">
               <form
                 action="/courses"
                 method="get"
-                className="flex flex-col gap-3 rounded-3xl bg-white/80 p-4 shadow-sm ring-1 ring-[color:var(--stroke)] sm:flex-row"
+                className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-lg"
               >
+                <svg viewBox="0 0 24 24" className="h-5 w-5 stroke-gray-400" fill="none" strokeWidth="2">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
+                </svg>
                 <SearchSuggestInput
                   name="q"
-                  placeholder={t("Search courses, tools, or roles", "Tim khoa hoc, cong cu, hoac vai tro")}
+                  placeholder={t("Search courses, instructors...", "Tim khoa hoc, giang vien...")}
+                  inputClassName="w-full bg-transparent text-gray-900 placeholder-gray-500 focus:outline-none"
                   className="flex-1"
-                  inputClassName="w-full bg-transparent text-sm text-emerald-950 placeholder:text-emerald-700/60 focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="rounded-full bg-emerald-700 px-6 py-2 text-sm font-semibold text-white"
+                  className="hidden sm:inline-flex bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
                 >
-                  {t("Explore", "Kham pha")}
+                  {t("Search", "Tim kiem")}
                 </button>
               </form>
-              <div className="flex flex-wrap gap-4 text-sm text-emerald-800/70">
-                <div className="stat-pill">
-                  <p className="text-lg font-semibold text-emerald-950">{courses.length}</p>
-                  <p>{t("Curated courses", "Khoa hoc chon loc")}</p>
-                </div>
-                <div className="stat-pill">
-                  <p className="text-lg font-semibold text-emerald-950">120+</p>
-                  <p>{t("Mentor hours", "Gio mentor")}</p>
-                </div>
-                <div className="stat-pill">
-                  <p className="text-lg font-semibold text-emerald-950">95%</p>
-                  <p>{t("Completion rate", "Ty le hoan thanh")}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="surface-card flex flex-col gap-6 p-6">
-              <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                  {t("Featured", "Noi bat")}
-                </p>
-                <h2 className="text-2xl font-semibold text-emerald-950">
-                  {t("Weekly studio brief", "Ban tin studio hang tuan")}
-                </h2>
-                <p className="text-sm text-emerald-800/70">
-                  {t(
-                    "Join a short sprint guided by real product teams. Ship a portfolio-ready case study in 7 days.",
-                    "Tham gia sprint ngan duoc huong dan boi doi ngu san pham thuc te. Hoan thanh case study trong 7 ngay."
-                  )}
-                </p>
-              </div>
-              <div className="surface-muted p-4">
-                <p className="text-sm font-semibold text-emerald-900">
-                  {t("Next cohort starts", "Khai giang dot tiep theo")}
-                </p>
-                <p className="text-3xl font-semibold text-emerald-950">Apr 12</p>
-                <p className="text-xs text-emerald-800/70">
-                  {t("Limited seats - Live review", "Cho ngoi gioi han - Review truc tiep")}
-                </p>
-              </div>
-              <Link
-                href="/courses"
-                className="rounded-full bg-emerald-700 px-5 py-3 text-center text-sm font-semibold text-white"
-              >
-                {t("View the curriculum", "Xem lo trinh hoc")}
-              </Link>
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {!hasFeatureBlock && (
-        <section className="section-shell space-y-6">
-          <div>
-            <span className="section-eyebrow">{t("Why 5S", "Vi sao 5S")}</span>
-            <h2 className="section-title mt-3 text-3xl font-semibold text-emerald-950">
-              {t("A learning studio built for outcomes", "Studio hoc tap tap trung vao ket qua")}
-            </h2>
+      <section className="bg-white py-12 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-blue-600 mb-2">{courses.length}+</div>
+              <div className="text-gray-600">{t("Courses", "Khoa hoc")}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-blue-600 mb-2">50K+</div>
+              <div className="text-gray-600">{t("Learners", "Hoc vien")}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-blue-600 mb-2">100+</div>
+              <div className="text-gray-600">{t("Instructors", "Giang vien")}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-blue-600 mb-2">4.8?</div>
+              <div className="text-gray-600">{t("Avg rating", "Danh gia TB")}</div>
+            </div>
           </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {valueProps.map((item) => (
-              <div key={item.title} className="surface-card space-y-3 p-6">
-                <h3 className="text-lg font-semibold text-emerald-950">{item.title}</h3>
-                <p className="text-sm text-emerald-800/70">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      <section className="section-shell space-y-6">
-        <div>
-          <h2 className="section-title text-3xl font-semibold text-emerald-950">
-            {t("Popular categories", "Danh muc pho bien")}
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 6h16" strokeLinecap="round" />
+                <path d="M6 12h12" strokeLinecap="round" />
+                <path d="M8 18h8" strokeLinecap="round" />
+              </svg>
+              <h2 className="text-xl font-semibold text-gray-900">{t("Categories", "Danh muc")}</h2>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {categories.length === 0 ? (
+                <span className="text-sm text-gray-500">{t("No categories yet.", "Chua co danh muc.")}</span>
+              ) : (
+                categories.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/courses?category=${category.slug}`}
+                    className="px-4 py-2 rounded-full bg-white text-gray-700 hover:bg-gray-100 border border-gray-300 text-sm font-medium"
+                  >
+                    {category.title}
+                  </Link>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-gray-600">
+              {t("Found", "Tim thay")} <span className="font-semibold text-gray-900">{topCourses.length}</span> {t("courses", "khoa hoc")}
+            </p>
+          </div>
+
+          {topCourses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {topCourses.map((course) => (
+                <CourseCard key={course.id} course={course} locale={locale} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">{t("No courses found.", "Chua co khoa hoc.")}</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="bg-blue-600 text-white py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            {t("Start your learning journey today", "Bat dau hanh trinh hoc tap ngay hom nay")}
           </h2>
-          <p className="text-sm text-emerald-800/70">
-            {t("Explore structured learning paths.", "Kham pha cac lo trinh hoc co cau truc.")}
+          <p className="text-xl text-blue-100 mb-8">
+            {t(
+              "Join thousands of learners upgrading their careers.",
+              "Tham gia cong dong hoc vien dang nang cap su nghiep."
+            )}
           </p>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger">
-          {featuredCategories.length === 0 && (
-            <div className="surface-card p-6 text-sm text-emerald-800/70">
-              {t(
-                "Categories will appear once you add them in the admin panel.",
-                "Danh muc se hien thi sau khi ban them trong trang admin."
-              )}
-            </div>
-          )}
-          {featuredCategories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/courses?category=${category.slug}`}
-              className="surface-card p-6 transition hover:-translate-y-1"
-            >
-              <p className="text-sm font-semibold text-emerald-950">{category.title}</p>
-              <p className="text-xs text-emerald-800/70">
-                {t("Curated path - Updated weekly", "Lo trinh chon loc - Cap nhat hang tuan")}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="section-shell space-y-6">
-        <div className="flex items-end justify-between">
-          <div>
-            <h2 className="section-title text-3xl font-semibold text-emerald-950">
-              {t("Top courses", "Khoa hoc hang dau")}
-            </h2>
-            <p className="text-sm text-emerald-800/70">
-              {t(
-                "Hand-picked learning paths with mentor support.",
-                "Lo trinh hoc duoc chon loc kem mentor ho tro."
-              )}
-            </p>
-          </div>
-          <Link href="/courses" className="text-sm font-semibold text-emerald-800 underline-hover">
-            {t("Browse all", "Xem tat ca")}
+          <Link
+            href="/courses"
+            className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+          >
+            {t("Explore courses", "Kham pha ngay")}
           </Link>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 stagger">
-          {topCourses.map((course) => (
-            <CourseCard key={course.id} course={course} locale={locale} />
-          ))}
-        </div>
       </section>
-
-      <section className="section-shell space-y-6">
-        <div className="flex items-end justify-between">
-          <div>
-            <h2 className="section-title text-3xl font-semibold text-emerald-950">
-              {t("Learning paths", "Lo trinh hoc tap")}
-            </h2>
-            <p className="text-sm text-emerald-800/70">
-              {t("Structured journeys to reach your goal.", "Lo trinh co cau truc de dat muc tieu.")}
-            </p>
-          </div>
-          <Link href="/paths" className="text-sm font-semibold text-emerald-800 underline-hover">
-            {t("Browse all", "Xem tat ca")}
-          </Link>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 stagger">
-          {featuredPaths.length === 0 && (
-            <div className="surface-card p-6 text-sm text-emerald-800/70">
-              {t("Paths will appear once admin adds them.", "Lo trinh se hien sau khi admin them.")}
-            </div>
-          )}
-          {featuredPaths.map((path) => (
-            <LearningPathCard key={path.id} path={path} locale={locale} />
-          ))}
-        </div>
-      </section>
-
-      {!hasCtaBlock && (
-        <section className="section-shell">
-          <div className="surface-card grid gap-6 p-10 lg:grid-cols-[1.2fr,0.8fr]">
-            <div className="space-y-4">
-              <h2 className="section-title text-3xl font-semibold text-emerald-950">
-                {t("Build a learning journey for your team", "Xay dung hanh trinh hoc tap cho doi ngu")}
-              </h2>
-              <p className="text-sm text-emerald-800/70">
-                {t(
-                  "Create cohort-based programs, assign mentors, and track outcomes across every role.",
-                  "Tao chuong trinh theo cohort, phan mentor, va theo doi ket qua cho tung vai tro."
-                )}
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <span className="badge">{t("Team dashboards", "Dashboard doi ngu")}</span>
-                <span className="badge">{t("Skills matrix", "Ma tran ky nang")}</span>
-                <span className="badge">{t("Certification", "Chung chi")}</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-center">
-              <Link
-                href="/register"
-                className="rounded-full bg-emerald-700 px-6 py-3 text-sm font-semibold text-white"
-              >
-                {t("Start free trial", "Bat dau dung thu mien phi")}
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
     </div>
   );
 }

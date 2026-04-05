@@ -1,4 +1,4 @@
-ï»¿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -358,12 +358,12 @@ export default function AccountPage() {
     return (
       <div className="section-shell py-16 fade-in">
         <div className="surface-card p-10 text-center">
-          <p className="text-sm text-emerald-800/70">
+          <p className="text-sm text-gray-600">
             {tx("Please sign in to manage your account.", "Vui long dang nhap de quan ly tai khoan.")}
           </p>
           <Link
             href="/login?next=/account"
-            className="mt-4 inline-flex rounded-full bg-emerald-700 px-6 py-2 text-sm font-semibold text-white"
+            className="mt-4 inline-flex rounded-full bg-blue-600 px-6 py-2 text-sm font-semibold text-white"
           >
             {tx("Sign in", "Dang nhap")}
           </Link>
@@ -375,16 +375,16 @@ export default function AccountPage() {
   return (
     <div className="section-shell space-y-10 py-12 fade-in">
       <div className="space-y-2">
-        <Link href="/" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+        <Link href="/" className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
           {tx("Home", "Trang chu")}
         </Link>
-        <h1 className="section-title text-4xl font-semibold text-emerald-950">
+        <h1 className="section-title text-4xl font-semibold text-gray-900">
           {tx("Account settings", "Cai dat tai khoan")}
         </h1>
-        <p className="text-sm text-emerald-800/70">
+        <p className="text-sm text-gray-600">
           {tx("Update your profile and password.", "Cap nhat ho so va mat khau cua ban.")}
         </p>
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-emerald-900">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-gray-900">
           <span className="rounded-full border border-[color:var(--stroke)] px-3 py-1">
             {tx("Tier", "Hang")}: {loyaltyTier}
           </span>
@@ -396,11 +396,11 @@ export default function AccountPage() {
 
       <section className="surface-card space-y-6 p-8">
         <div>
-          <h2 className="section-title text-2xl font-semibold text-emerald-950">
+          <h2 className="section-title text-2xl font-semibold text-gray-900">
             {tx("Profile", "Ho so")}
           </h2>
           {profile?.email && (
-            <p className="text-xs text-emerald-800/70">
+            <p className="text-xs text-gray-600">
               {tx("Signed in as", "Dang dang nhap")}: {profile.email}
             </p>
           )}
@@ -408,7 +408,7 @@ export default function AccountPage() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
               {tx("First name", "Ten")}
             </label>
             <input
@@ -418,7 +418,7 @@ export default function AccountPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
               {tx("Last name", "Ho")}
             </label>
             <input
@@ -430,7 +430,7 @@ export default function AccountPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+          <label className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
             {tx("Avatar URL", "Link avatar")}
           </label>
           <input
@@ -444,7 +444,7 @@ export default function AccountPage() {
           type="button"
           onClick={handleSaveProfile}
           disabled={savingProfile}
-          className="rounded-full bg-emerald-700 px-6 py-3 text-sm font-semibold text-white"
+          className="rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white"
         >
           {savingProfile ? tx("Saving...", "Dang luu...") : tx("Save profile", "Luu ho so")}
         </button>
@@ -452,14 +452,14 @@ export default function AccountPage() {
 
       <section className="surface-card space-y-6 p-8">
         <div>
-          <h2 className="section-title text-2xl font-semibold text-emerald-950">
+          <h2 className="section-title text-2xl font-semibold text-gray-900">
             {tx("Change password", "Doi mat khau")}
           </h2>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
               {tx("Current password", "Mat khau hien tai")}
             </label>
             <input
@@ -470,7 +470,7 @@ export default function AccountPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
               {tx("New password", "Mat khau moi")}
             </label>
             <input
@@ -486,7 +486,7 @@ export default function AccountPage() {
           type="button"
           onClick={handleChangePassword}
           disabled={savingPassword}
-          className="rounded-full border border-[color:var(--stroke)] px-6 py-3 text-sm font-semibold text-emerald-900"
+          className="rounded-full border border-[color:var(--stroke)] px-6 py-3 text-sm font-semibold text-gray-900"
         >
           {savingPassword ? tx("Updating...", "Dang doi...") : tx("Update password", "Cap nhat mat khau")}
         </button>
@@ -494,10 +494,10 @@ export default function AccountPage() {
 
       <section className="surface-card space-y-6 p-8">
         <div>
-          <h2 className="section-title text-2xl font-semibold text-emerald-950">
+          <h2 className="section-title text-2xl font-semibold text-gray-900">
             {tx("Shipping addresses", "Dia chi giao hang")}
           </h2>
-          <p className="text-sm text-emerald-800/70">
+          <p className="text-sm text-gray-600">
             {tx("Manage multiple delivery addresses.", "Quan ly nhieu dia chi giao hang.")}
           </p>
         </div>
@@ -511,7 +511,7 @@ export default function AccountPage() {
                 placeholder={tx("Label (Home/Office)", "Nhan (Nha/Cong ty)")}
                 className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm"
               />
-              <label className="flex items-center gap-2 text-xs font-semibold text-emerald-900">
+              <label className="flex items-center gap-2 text-xs font-semibold text-gray-900">
                 <input
                   type="checkbox"
                   checked={addressForm.isDefault}
@@ -579,7 +579,7 @@ export default function AccountPage() {
                 type="button"
                 onClick={handleSaveAddress}
                 disabled={savingAddress}
-                className="rounded-full bg-emerald-700 px-6 py-2 text-sm font-semibold text-white"
+                className="rounded-full bg-blue-600 px-6 py-2 text-sm font-semibold text-white"
               >
                 {savingAddress
                   ? tx("Saving...", "Dang luu...")
@@ -591,7 +591,7 @@ export default function AccountPage() {
                 <button
                   type="button"
                   onClick={resetAddressForm}
-                  className="rounded-full border border-[color:var(--stroke)] px-6 py-2 text-sm font-semibold text-emerald-900"
+                  className="rounded-full border border-[color:var(--stroke)] px-6 py-2 text-sm font-semibold text-gray-900"
                 >
                   {tx("Cancel", "Huy")}
                 </button>
@@ -603,30 +603,30 @@ export default function AccountPage() {
             {addresses.map((address) => (
               <div key={address.id} className="surface-muted space-y-2 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-emerald-950">
+                  <p className="text-sm font-semibold text-gray-900">
                     {address.label || tx("Address", "Dia chi")}
                   </p>
                   {address.isDefault && (
-                    <span className="rounded-full bg-[color:var(--brand-soft)] px-3 py-1 text-[11px] font-semibold text-emerald-900">
+                    <span className="rounded-full bg-[color:var(--brand-soft)] px-3 py-1 text-[11px] font-semibold text-gray-900">
                       {tx("Default", "Mac dinh")}
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-emerald-800/70">
-                  {address.recipientName} Ã‚- {address.phone}
+                <p className="text-xs text-gray-600">
+                  {address.recipientName} Â- {address.phone}
                 </p>
-                <p className="text-sm text-emerald-900">
+                <p className="text-sm text-gray-900">
                   {address.line1}
                   {address.line2 ? `, ${address.line2}` : ""}
                 </p>
-                <p className="text-xs text-emerald-800/70">
-                  {address.city} {address.state} {address.postalCode} Ã‚- {address.country}
+                <p className="text-xs text-gray-600">
+                  {address.city} {address.state} {address.postalCode} Â- {address.country}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => handleEditAddress(address)}
-                    className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Edit", "Sua")}
                   </button>
@@ -634,7 +634,7 @@ export default function AccountPage() {
                     <button
                       type="button"
                       onClick={() => handleSetDefault(address)}
-                      className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-xs font-semibold text-emerald-900"
+                      className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-xs font-semibold text-gray-900"
                     >
                       {tx("Set default", "Dat mac dinh")}
                     </button>
@@ -642,7 +642,7 @@ export default function AccountPage() {
                   <button
                     type="button"
                     onClick={() => handleDeleteAddress(address.id)}
-                    className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Delete", "Xoa")}
                   </button>
@@ -650,7 +650,7 @@ export default function AccountPage() {
               </div>
             ))}
             {addresses.length === 0 && (
-              <p className="text-sm text-emerald-800/70">
+              <p className="text-sm text-gray-600">
                 {tx("No addresses yet.", "Chua co dia chi nao.")}
               </p>
             )}
@@ -660,5 +660,6 @@ export default function AccountPage() {
     </div>
   );
 }
+
 
 

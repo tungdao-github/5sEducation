@@ -1,4 +1,4 @@
-ï»¿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
@@ -2030,12 +2030,12 @@ export default function AdminPage() {
     return (
       <div className="mx-auto w-full max-w-4xl px-6 py-16 fade-in">
         <div className="glass-card rounded-3xl p-10 text-center">
-          <p className="text-sm text-emerald-800/70">
+          <p className="text-sm text-gray-600">
             {tx("Admin access only.", "Chi danh cho quan tri vien.")}
           </p>
           <Link
             href="/login?next=/admin"
-            className="mt-4 inline-flex rounded-full bg-emerald-700 px-6 py-2 text-sm font-semibold text-white"
+            className="mt-4 inline-flex rounded-full bg-blue-600 px-6 py-2 text-sm font-semibold text-white"
           >
             {tx("Sign in", "Dang nhap")}
           </Link>
@@ -2047,13 +2047,13 @@ export default function AdminPage() {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-10 px-6 py-12 fade-in">
       <div className="space-y-2">
-        <Link href="/" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+        <Link href="/" className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
           {tx("Home", "Trang chu")}
         </Link>
-        <h1 className="section-title text-4xl font-semibold text-emerald-950">
+        <h1 className="section-title text-4xl font-semibold text-gray-900">
           {tx("Admin console", "Bang quan tri")}
         </h1>
-        <p className="text-sm text-emerald-800/70">
+        <p className="text-sm text-gray-600">
           {tx("Manage categories and user access.", "Quan ly danh muc va quyen truy cap nguoi dung.")}
         </p>
       </div>
@@ -2061,55 +2061,55 @@ export default function AdminPage() {
       {stats && (
         <section className="glass-card space-y-6 rounded-3xl p-8">
           <div>
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
+            <h2 className="section-title text-2xl font-semibold text-gray-900">
               {tx("Overview", "Tong quan")}
             </h2>
-            <p className="text-sm text-emerald-800/70">
+            <p className="text-sm text-gray-600">
               {tx("Key system metrics.", "Chi so tong quan he thong.")}
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-emerald-100 bg-white/70 p-4">
-              <p className="text-xs font-semibold text-emerald-700">{tx("Users", "Nguoi dung")}</p>
-              <p className="text-2xl font-semibold text-emerald-950">{stats.totalUsers}</p>
+            <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+              <p className="text-xs font-semibold text-blue-600">{tx("Users", "Nguoi dung")}</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.totalUsers}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-100 bg-white/70 p-4">
-              <p className="text-xs font-semibold text-emerald-700">{tx("Courses", "Khoa hoc")}</p>
-              <p className="text-2xl font-semibold text-emerald-950">
+            <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+              <p className="text-xs font-semibold text-blue-600">{tx("Courses", "Khoa hoc")}</p>
+              <p className="text-2xl font-semibold text-gray-900">
                 {stats.publishedCourses}/{stats.totalCourses}
               </p>
             </div>
-            <div className="rounded-2xl border border-emerald-100 bg-white/70 p-4">
-              <p className="text-xs font-semibold text-emerald-700">{tx("Enrollments", "Ghi danh")}</p>
-              <p className="text-2xl font-semibold text-emerald-950">{stats.totalEnrollments}</p>
+            <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+              <p className="text-xs font-semibold text-blue-600">{tx("Enrollments", "Ghi danh")}</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.totalEnrollments}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-100 bg-white/70 p-4">
-              <p className="text-xs font-semibold text-emerald-700">{tx("Lessons", "Bai hoc")}</p>
-              <p className="text-2xl font-semibold text-emerald-950">{stats.totalLessons}</p>
+            <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+              <p className="text-xs font-semibold text-blue-600">{tx("Lessons", "Bai hoc")}</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.totalLessons}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-100 bg-white/70 p-4">
-              <p className="text-xs font-semibold text-emerald-700">{tx("Revenue", "Doanh thu")}</p>
-              <p className="text-2xl font-semibold text-emerald-950">
+            <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+              <p className="text-xs font-semibold text-blue-600">{tx("Revenue", "Doanh thu")}</p>
+              <p className="text-2xl font-semibold text-gray-900">
                 ${stats.totalRevenue.toFixed(2)}
               </p>
             </div>
-            <div className="rounded-2xl border border-emerald-100 bg-white/70 p-4">
-              <p className="text-xs font-semibold text-emerald-700">{tx("Avg rating", "Danh gia TB")}</p>
-              <p className="text-2xl font-semibold text-emerald-950">{stats.averageRating.toFixed(1)}</p>
+            <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+              <p className="text-xs font-semibold text-blue-600">{tx("Avg rating", "Danh gia TB")}</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.averageRating.toFixed(1)}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-100 bg-white/70 p-4">
-              <p className="text-xs font-semibold text-emerald-700">{tx("Active 30d", "Hoat dong 30 ngay")}</p>
-              <p className="text-2xl font-semibold text-emerald-950">{stats.activeStudents30d}</p>
+            <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+              <p className="text-xs font-semibold text-blue-600">{tx("Active 30d", "Hoat dong 30 ngay")}</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.activeStudents30d}</p>
             </div>
-            <div className="rounded-2xl border border-emerald-100 bg-white/70 p-4">
-              <p className="text-xs font-semibold text-emerald-700">{tx("Open support", "Ho tro dang mo")}</p>
-              <p className="text-2xl font-semibold text-emerald-950">{stats.openSupportTickets}</p>
+            <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+              <p className="text-xs font-semibold text-blue-600">{tx("Open support", "Ho tro dang mo")}</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.openSupportTickets}</p>
             </div>
           </div>
 
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
               {tx("Enrollments last 7 days", "Ghi danh 7 ngay")}
             </p>
             <div className="flex items-end gap-3">
@@ -2119,11 +2119,11 @@ export default function AdminPage() {
                   <div key={item.date} className="flex flex-col items-center gap-2">
                     <div className="flex h-20 items-end">
                       <div
-                        className="w-3 rounded-full bg-emerald-600"
+                        className="w-3 rounded-full bg-blue-600"
                         style={{ height: `${Math.round((item.count / max) * 100)}%` }}
                       />
                     </div>
-                    <span className="text-[10px] text-emerald-800/70">{item.date.slice(5)}</span>
+                    <span className="text-[10px] text-gray-600">{item.date.slice(5)}</span>
                   </div>
                 ));
               })()}
@@ -2132,7 +2132,7 @@ export default function AdminPage() {
 
           <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
             <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
                 {tx("Revenue last 30 days", "Doanh thu 30 ngay")}
               </p>
               <div className="flex items-end gap-1">
@@ -2143,11 +2143,11 @@ export default function AdminPage() {
                     <div key={item.date} className="flex flex-col items-center gap-2">
                       <div className="flex h-24 items-end">
                         <div
-                          className="w-2 rounded-full bg-emerald-700"
+                          className="w-2 rounded-full bg-blue-600"
                           style={{ height: `${Math.round((item.value / max) * 100)}%` }}
                         />
                       </div>
-                      <span className="text-[10px] text-emerald-800/70">{item.date.slice(5)}</span>
+                      <span className="text-[10px] text-gray-600">{item.date.slice(5)}</span>
                     </div>
                   ));
                 })()}
@@ -2156,20 +2156,20 @@ export default function AdminPage() {
 
             <div className="space-y-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
                   {tx("Orders by status", "Don hang theo trang thai")}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {(stats.ordersByStatus ?? []).map((item) => (
                     <span
                       key={item.status}
-                      className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                      className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                     >
                       {item.status}: {item.count}
                     </span>
                   ))}
                   {(stats.ordersByStatus ?? []).length === 0 && (
-                    <span className="text-xs text-emerald-800/70">
+                    <span className="text-xs text-gray-600">
                       {tx("No orders yet.", "Chua co don hang.")}
                     </span>
                   )}
@@ -2177,20 +2177,20 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">
                   {tx("Top courses by revenue", "Khoa hoc doanh thu cao")}
                 </p>
                 <div className="mt-3 space-y-2">
                   {(stats.topCoursesByRevenue ?? []).map((course) => (
-                    <div key={course.courseId} className="flex items-center justify-between text-xs text-emerald-900">
+                    <div key={course.courseId} className="flex items-center justify-between text-xs text-gray-900">
                       <span className="font-semibold">{course.courseTitle}</span>
-                      <span className="text-emerald-800/70">
-                        {course.orders} {tx("orders", "don")} Â· ${course.revenue.toFixed(2)}
+                      <span className="text-gray-600">
+                        {course.orders} {tx("orders", "don")} · ${course.revenue.toFixed(2)}
                       </span>
                     </div>
                   ))}
                   {(stats.topCoursesByRevenue ?? []).length === 0 && (
-                    <span className="text-xs text-emerald-800/70">
+                    <span className="text-xs text-gray-600">
                       {tx("No revenue data yet.", "Chua co du lieu doanh thu.")}
                     </span>
                   )}
@@ -2232,10 +2232,10 @@ export default function AdminPage() {
       <section className="glass-card space-y-6 rounded-3xl p-8">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
+            <h2 className="section-title text-2xl font-semibold text-gray-900">
               {tx("System settings", "Cau hinh he thong")}
             </h2>
-            <p className="text-sm text-emerald-800/70">
+            <p className="text-sm text-gray-600">
               {tx("Control branding, footer, and contact details.", "Chinh sua logo, footer va lien he.")}
             </p>
           </div>
@@ -2243,7 +2243,7 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={handleClearCache}
-              className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+              className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900"
             >
               {tx("Clear cache", "Xoa cache")}
             </button>
@@ -2251,7 +2251,7 @@ export default function AdminPage() {
               type="button"
               onClick={handleSaveSettings}
               disabled={savingSettings}
-              className="rounded-full bg-emerald-700 px-5 py-2 text-xs font-semibold text-white"
+              className="rounded-full bg-blue-600 px-5 py-2 text-xs font-semibold text-white"
             >
               {savingSettings ? tx("Saving...", "Dang luu...") : tx("Save settings", "Luu cau hinh")}
             </button>
@@ -2261,7 +2261,7 @@ export default function AdminPage() {
         <div className="grid gap-4 lg:grid-cols-2">
           {settingsFields.map((field) => (
             <div key={field.key} className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+              <label className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600">
                 {field.label}
               </label>
               <input
@@ -2270,7 +2270,7 @@ export default function AdminPage() {
                   setSettingsValues((prev) => ({ ...prev, [field.key]: e.currentTarget.value }))
                 }
                 placeholder={field.key}
-                className="w-full rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
             </div>
           ))}
@@ -2280,10 +2280,10 @@ export default function AdminPage() {
       <section className="surface-card space-y-6 rounded-3xl p-8">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
+            <h2 className="section-title text-2xl font-semibold text-gray-900">
               {tx("Courses", "Khoa hoc")}
             </h2>
-            <p className="text-sm text-emerald-800/70">
+            <p className="text-sm text-gray-600">
               {tx("Manage the product catalog.", "Quan ly khoa hoc trong catalog.")}
             </p>
           </div>
@@ -2292,16 +2292,16 @@ export default function AdminPage() {
               value={courseFilter}
               onChange={(e) => setCourseFilter(e.currentTarget.value)}
               placeholder={tx("Search courses", "Tim khoa hoc")}
-              className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-xs"
+              className="rounded-full border border-gray-200 bg-white px-4 py-2 text-xs"
             />
             <button
               type="button"
               onClick={handleExportCourses}
-              className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+              className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900"
             >
               {tx("Export CSV", "Xuat CSV")}
             </button>
-            <label className="cursor-pointer rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900">
+            <label className="cursor-pointer rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900">
               {importingCourses ? tx("Importing...", "Dang nhap...") : tx("Import CSV", "Nhap CSV")}
               <input
                 type="file"
@@ -2355,7 +2355,7 @@ export default function AdminPage() {
                   ],
                 ])
               }
-              className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+              className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900"
             >
               {tx("Template", "Mau CSV")}
             </button>
@@ -2368,12 +2368,12 @@ export default function AdminPage() {
               value={courseForm.title}
               onChange={(e) => setCourseForm((prev) => ({ ...prev, title: e.currentTarget.value }))}
               placeholder={tx("Title", "Tieu de")}
-              className="w-full rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             />
             <select
               value={courseForm.categoryId}
               onChange={(e) => setCourseForm((prev) => ({ ...prev, categoryId: e.currentTarget.value }))}
-              className="w-full rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             >
               <option value="">{tx("No category", "Chua chon danh muc")}</option>
               {categories.map((category) => (
@@ -2386,27 +2386,27 @@ export default function AdminPage() {
               value={courseForm.shortDescription}
               onChange={(e) => setCourseForm((prev) => ({ ...prev, shortDescription: e.currentTarget.value }))}
               placeholder={tx("Short description", "Mo ta ngan")}
-              className="w-full rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             />
             <textarea
               value={courseForm.description}
               onChange={(e) => setCourseForm((prev) => ({ ...prev, description: e.currentTarget.value }))}
               placeholder={tx("Full description", "Mo ta day du")}
-              className="w-full rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm"
               rows={4}
             />
             <textarea
               value={courseForm.outcome}
               onChange={(e) => setCourseForm((prev) => ({ ...prev, outcome: e.currentTarget.value }))}
               placeholder={tx("Learning outcome", "Ket qua khoa hoc")}
-              className="w-full rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm"
               rows={2}
             />
             <textarea
               value={courseForm.requirements}
               onChange={(e) => setCourseForm((prev) => ({ ...prev, requirements: e.currentTarget.value }))}
               placeholder={tx("Requirements", "Yeu cau")}
-              className="w-full rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm"
               rows={2}
             />
             <div className="grid gap-3 sm:grid-cols-2">
@@ -2414,13 +2414,13 @@ export default function AdminPage() {
                 value={courseForm.language}
                 onChange={(e) => setCourseForm((prev) => ({ ...prev, language: e.currentTarget.value }))}
                 placeholder={tx("Language", "Ngon ngu")}
-                className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
               <input
                 value={courseForm.level}
                 onChange={(e) => setCourseForm((prev) => ({ ...prev, level: e.currentTarget.value }))}
                 placeholder={tx("Level", "Cap do")}
-                className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -2429,13 +2429,13 @@ export default function AdminPage() {
                 value={courseForm.price}
                 onChange={(e) => setCourseForm((prev) => ({ ...prev, price: Number(e.currentTarget.value) }))}
                 placeholder={tx("Price", "Gia")}
-                className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
               <input
                 value={courseForm.flashSalePrice}
                 onChange={(e) => setCourseForm((prev) => ({ ...prev, flashSalePrice: e.currentTarget.value }))}
                 placeholder={tx("Flash sale price", "Gia khuyen mai")}
-                className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -2443,22 +2443,22 @@ export default function AdminPage() {
                 type="datetime-local"
                 value={courseForm.flashSaleStartsAt}
                 onChange={(e) => setCourseForm((prev) => ({ ...prev, flashSaleStartsAt: e.currentTarget.value }))}
-                className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
               <input
                 type="datetime-local"
                 value={courseForm.flashSaleEndsAt}
                 onChange={(e) => setCourseForm((prev) => ({ ...prev, flashSaleEndsAt: e.currentTarget.value }))}
-                className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
             </div>
             <input
               value={courseForm.previewVideoUrl}
               onChange={(e) => setCourseForm((prev) => ({ ...prev, previewVideoUrl: e.currentTarget.value }))}
               placeholder={tx("Preview video URL", "Link video preview")}
-              className="w-full rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             />
-            <label className="flex items-center gap-2 text-xs font-semibold text-emerald-900">
+            <label className="flex items-center gap-2 text-xs font-semibold text-gray-900">
               <input
                 type="checkbox"
                 checked={courseForm.isPublished}
@@ -2467,7 +2467,7 @@ export default function AdminPage() {
               {tx("Published", "Xuat ban")}
             </label>
             <div className="flex flex-wrap items-center gap-2">
-              <label className="cursor-pointer rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900">
+              <label className="cursor-pointer rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900">
                 {courseThumbnail ? courseThumbnail.name : tx("Upload thumbnail", "Tai thumbnail")}
                 <input
                   type="file"
@@ -2479,7 +2479,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={handleSaveCourse}
-                className="rounded-full bg-emerald-700 px-5 py-2 text-xs font-semibold text-white"
+                className="rounded-full bg-blue-600 px-5 py-2 text-xs font-semibold text-white"
               >
                 {editingCourseId ? tx("Save changes", "Luu thay doi") : tx("Add course", "Them khoa hoc")}
               </button>
@@ -2487,7 +2487,7 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={resetCourseForm}
-                  className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+                  className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900"
                 >
                   {tx("Cancel", "Huy")}
                 </button>
@@ -2499,14 +2499,14 @@ export default function AdminPage() {
             {filteredCourses.map((course) => (
               <div key={course.id} className="flex flex-col gap-3 rounded-2xl bg-white/70 p-4">
                 <div>
-                  <p className="text-sm font-semibold text-emerald-950">{course.title}</p>
-                  <p className="text-xs text-emerald-800/70">
-                    {course.category?.title ?? tx("No category", "Chua co danh muc")} Â· {course.level} Â·{" "}
+                  <p className="text-sm font-semibold text-gray-900">{course.title}</p>
+                  <p className="text-xs text-gray-600">
+                    {course.category?.title ?? tx("No category", "Chua co danh muc")} · {course.level} ·{" "}
                     {course.language}
                   </p>
-                  <p className="text-xs text-emerald-800/70">Slug: {course.slug}</p>
+                  <p className="text-xs text-gray-600">Slug: {course.slug}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-emerald-800/70">
+                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-gray-600">
                   <span>${course.price.toFixed(2)}</span>
                   <span>{course.isPublished ? tx("Published", "Xuat ban") : tx("Draft", "Ban nhap")}</span>
                   <span>{new Date(course.updatedAt).toLocaleDateString()}</span>
@@ -2515,14 +2515,14 @@ export default function AdminPage() {
                   <button
                     type="button"
                     onClick={() => handleEditCourse(course.id)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Edit", "Sua")}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDeleteCourse(course.id)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Delete", "Xoa")}
                   </button>
@@ -2530,7 +2530,7 @@ export default function AdminPage() {
               </div>
             ))}
             {filteredCourses.length === 0 && (
-              <p className="text-sm text-emerald-800/70">{tx("No courses yet.", "Chua co khoa hoc.")}</p>
+              <p className="text-sm text-gray-600">{tx("No courses yet.", "Chua co khoa hoc.")}</p>
             )}
           </div>
         </div>
@@ -2539,10 +2539,10 @@ export default function AdminPage() {
       <section className="glass-card space-y-6 rounded-3xl p-8">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
+            <h2 className="section-title text-2xl font-semibold text-gray-900">
               {tx("Orders", "Don hang")}
             </h2>
-            <p className="text-sm text-emerald-800/70">
+            <p className="text-sm text-gray-600">
               {tx("Track payments and fulfillment status.", "Theo doi thanh toan va trang thai xu ly.")}
             </p>
           </div>
@@ -2550,7 +2550,7 @@ export default function AdminPage() {
             <select
               value={orderFilter}
               onChange={(e) => setOrderFilter(e.currentTarget?.value ?? "")}
-              className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-xs font-semibold text-emerald-900"
+              className="rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-900"
             >
               <option value="">{tx("All statuses", "Tat ca trang thai")}</option>
               {orderStatusOptions.map((status) => (
@@ -2562,7 +2562,7 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={handleExportOrders}
-              className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+              className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900"
             >
               {tx("Export CSV", "Xuat CSV")}
             </button>
@@ -2580,12 +2580,12 @@ export default function AdminPage() {
             <div key={order.id} className="flex flex-col gap-3 rounded-2xl bg-white/70 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-emerald-950">
-                    #{order.id} Â· {order.userName}
+                  <p className="text-sm font-semibold text-gray-900">
+                    #{order.id} · {order.userName}
                   </p>
-                  <p className="text-xs text-emerald-800/70">{order.userEmail}</p>
+                  <p className="text-xs text-gray-600">{order.userEmail}</p>
                 </div>
-                <div className="text-xs font-semibold text-emerald-800/70">
+                <div className="text-xs font-semibold text-gray-600">
                   {formatCurrency(order.total, order.currency || "USD")}
                 </div>
               </div>
@@ -2598,12 +2598,12 @@ export default function AdminPage() {
                   }}
                   list="order-status-options"
                   placeholder={tx("Status", "Trang thai")}
-                  className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-xs"
+                  className="rounded-full border border-gray-200 bg-white px-4 py-2 text-xs"
                 />
                 <button
                   type="button"
                   onClick={() => handleUpdateOrderStatus(order.id)}
-                  className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+                  className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900"
                 >
                   {tx("Update status", "Cap nhat trang thai")}
                 </button>
@@ -2612,19 +2612,19 @@ export default function AdminPage() {
                   onClick={() =>
                     setOrderExpanded((prev) => ({ ...prev, [order.id]: !prev[order.id] }))
                   }
-                  className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+                  className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900"
                 >
                   {orderExpanded[order.id] ? tx("Hide items", "An muc") : tx("View items", "Xem muc")}
                 </button>
-                <span className="text-[11px] text-emerald-800/70">
+                <span className="text-[11px] text-gray-600">
                   {tx("Updated", "Cap nhat")}: {new Date(order.updatedAt).toLocaleString()}
                 </span>
               </div>
 
               {orderExpanded[order.id] && (
-                <div className="space-y-2 rounded-2xl border border-emerald-100 bg-white/70 p-3">
+                <div className="space-y-2 rounded-2xl border border-gray-200 bg-white/70 p-3">
                   {order.items.map((item) => (
-                    <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-900">
+                    <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-900">
                       <span>{item.courseTitle}</span>
                       <span>
                         {item.quantity} x {formatCurrency(item.unitPrice, order.currency || "USD")}
@@ -2636,7 +2636,7 @@ export default function AdminPage() {
             </div>
           ))}
           {orders.length === 0 && (
-            <p className="text-sm text-emerald-800/70">{tx("No orders yet.", "Chua co don hang.")}</p>
+            <p className="text-sm text-gray-600">{tx("No orders yet.", "Chua co don hang.")}</p>
           )}
         </div>
       </section>
@@ -2644,10 +2644,10 @@ export default function AdminPage() {
       <section className="glass-card space-y-6 rounded-3xl p-8">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
+            <h2 className="section-title text-2xl font-semibold text-gray-900">
               {tx("Categories", "Danh muc")}
             </h2>
-            <p className="text-sm text-emerald-800/70">
+            <p className="text-sm text-gray-600">
               {tx("Keep the catalog organized.", "Sap xep catalog gon gang.")}
             </p>
           </div>
@@ -2656,27 +2656,27 @@ export default function AdminPage() {
               value={newCategory}
               onChange={(e) => setNewCategory(e.currentTarget?.value ?? "")}
               placeholder={tx("New category", "Danh muc moi")}
-              className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+              className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             />
             <button
               type="button"
               onClick={handleCreateCategory}
-              className="rounded-full bg-emerald-700 px-5 py-2 text-sm font-semibold text-white"
+              className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white"
             >
               {tx("Add category", "Them danh muc")}
             </button>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs text-emerald-700">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-blue-600">
           <button
             type="button"
             onClick={handleExportCategories}
-            className="rounded-full border border-emerald-200 px-4 py-2 font-semibold text-emerald-900"
+            className="rounded-full border border-gray-200 px-4 py-2 font-semibold text-gray-900"
           >
             {tx("Export CSV", "Xuat CSV")}
           </button>
-          <label className="cursor-pointer rounded-full border border-emerald-200 px-4 py-2 font-semibold text-emerald-900">
+          <label className="cursor-pointer rounded-full border border-gray-200 px-4 py-2 font-semibold text-gray-900">
             {tx("Import CSV", "Nhap CSV")}
             <input
               type="file"
@@ -2694,7 +2694,7 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={() => downloadCsvFile("categories-template.csv", [["title"], ["Design"], ["Marketing"]])}
-            className="rounded-full border border-emerald-200 px-4 py-2 font-semibold text-emerald-900"
+            className="rounded-full border border-gray-200 px-4 py-2 font-semibold text-gray-900"
           >
             {tx("Template", "Mau CSV")}
           </button>
@@ -2704,28 +2704,28 @@ export default function AdminPage() {
           {categories.map((category) => (
             <div key={category.id} className="flex flex-col gap-3 rounded-2xl bg-white/70 p-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-sm font-semibold text-emerald-950">
+                <p className="text-sm font-semibold text-gray-900">
                   {editingId === category.id ? (
                     <input
                       value={editingTitle}
                       onChange={(e) => setEditingTitle(e.currentTarget?.value ?? "")}
-                      className="rounded-full border border-emerald-100 bg-white px-3 py-1 text-sm"
+                      className="rounded-full border border-gray-200 bg-white px-3 py-1 text-sm"
                     />
                   ) : (
                     category.title
                   )}
                 </p>
-                <p className="text-xs text-emerald-800/70">Slug: {category.slug}</p>
+                <p className="text-xs text-gray-600">Slug: {category.slug}</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-emerald-800/70">
+                <span className="text-xs font-semibold text-gray-600">
                   {category.courseCount} {tx("courses", "khoa hoc")}
                 </span>
                 {editingId === category.id ? (
                   <button
                     type="button"
                     onClick={() => handleUpdateCategory(category.id)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Save", "Luu")}
                   </button>
@@ -2736,7 +2736,7 @@ export default function AdminPage() {
                       setEditingId(category.id);
                       setEditingTitle(category.title);
                     }}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Edit", "Sua")}
                   </button>
@@ -2744,7 +2744,7 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => handleDeleteCategory(category.id)}
-                  className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                  className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                 >
                   {tx("Delete", "Xoa")}
                 </button>
@@ -2752,7 +2752,7 @@ export default function AdminPage() {
             </div>
           ))}
           {categories.length === 0 && (
-            <p className="text-sm text-emerald-800/70">
+            <p className="text-sm text-gray-600">
               {tx("No categories yet.", "Chua co danh muc.")}
             </p>
           )}
@@ -2762,27 +2762,27 @@ export default function AdminPage() {
       <section className="glass-card space-y-6 rounded-3xl p-8">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
+            <h2 className="section-title text-2xl font-semibold text-gray-900">
               {tx("Learning paths", "Lo trinh hoc tap")}
             </h2>
-            <p className="text-sm text-emerald-800/70">
+            <p className="text-sm text-gray-600">
               {tx("Create structured roadmaps.", "Tao lo trinh hoc co cau truc.")}
             </p>
           </div>
-          <div className="flex flex-wrap gap-3 text-xs text-emerald-700">
+          <div className="flex flex-wrap gap-3 text-xs text-blue-600">
             {tx("Manage sections & courses in each path.", "Quan ly bai hoc va khoa hoc trong tung lo trinh.")}
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs text-emerald-700">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-blue-600">
           <button
             type="button"
             onClick={handleExportPaths}
-            className="rounded-full border border-emerald-200 px-4 py-2 font-semibold text-emerald-900"
+            className="rounded-full border border-gray-200 px-4 py-2 font-semibold text-gray-900"
           >
             {tx("Export CSV", "Xuat CSV")}
           </button>
-          <label className="cursor-pointer rounded-full border border-emerald-200 px-4 py-2 font-semibold text-emerald-900">
+          <label className="cursor-pointer rounded-full border border-gray-200 px-4 py-2 font-semibold text-gray-900">
             {tx("Import CSV", "Nhap CSV")}
             <input
               type="file"
@@ -2808,7 +2808,7 @@ export default function AdminPage() {
                 setPathForm((prev) => ({ ...prev, title: value }));
               }}
               placeholder={tx("Path title", "Ten lo trinh")}
-              className="w-full rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             />
             <textarea
               value={pathForm.description}
@@ -2817,7 +2817,7 @@ export default function AdminPage() {
                 setPathForm((prev) => ({ ...prev, description: value }));
               }}
               placeholder={tx("Short description", "Mo ta ngan")}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm"
               rows={3}
             />
             <div className="grid gap-3 sm:grid-cols-2">
@@ -2828,7 +2828,7 @@ export default function AdminPage() {
                   setPathForm((prev) => ({ ...prev, level: value }));
                 }}
                 placeholder={tx("Level", "Cap do")}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
               <input
                 type="number"
@@ -2838,7 +2838,7 @@ export default function AdminPage() {
                   setPathForm((prev) => ({ ...prev, estimatedHours: Number(value) }));
                 }}
                 placeholder={tx("Hours", "So gio")}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
             </div>
             <input
@@ -2848,9 +2848,9 @@ export default function AdminPage() {
                 setPathForm((prev) => ({ ...prev, thumbnailUrl: value }));
               }}
               placeholder={tx("Thumbnail URL", "Link anh")}
-              className="w-full rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             />
-            <label className="flex items-center gap-2 text-xs font-semibold text-emerald-900">
+            <label className="flex items-center gap-2 text-xs font-semibold text-gray-900">
               <input
                 type="checkbox"
                 checked={pathForm.isPublished}
@@ -2865,7 +2865,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={handleSavePath}
-                className="rounded-full bg-emerald-700 px-5 py-2 text-sm font-semibold text-white"
+                className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white"
               >
                 {editingPathId ? tx("Save changes", "Luu thay doi") : tx("Add path", "Them lo trinh")}
               </button>
@@ -2873,7 +2873,7 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={resetPathForm}
-                  className="rounded-full border border-emerald-200 px-5 py-2 text-sm font-semibold text-emerald-900"
+                  className="rounded-full border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-900"
                 >
                   {tx("Cancel", "Huy")}
                 </button>
@@ -2885,13 +2885,13 @@ export default function AdminPage() {
             {learningPaths.map((path) => (
               <div
                 key={path.id}
-                className="flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-4"
+                className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white/70 p-4"
               >
                 <div>
-                  <p className="text-sm font-semibold text-emerald-950">{path.title}</p>
-                  <p className="text-xs text-emerald-800/70">Slug: {path.slug}</p>
+                  <p className="text-sm font-semibold text-gray-900">{path.title}</p>
+                  <p className="text-xs text-gray-600">Slug: {path.slug}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-emerald-800/70">
+                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-gray-600">
                   <span>{path.courseCount} {tx("courses", "khoa hoc")}</span>
                   <span>{path.level}</span>
                   <span>{path.isPublished ? tx("Published", "Xuat ban") : tx("Draft", "Ban nhap")}</span>
@@ -2899,21 +2899,21 @@ export default function AdminPage() {
                 <div className="flex flex-wrap gap-2">
                   <Link
                     href={`/admin/paths/${path.id}`}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Manage", "Quan ly")}
                   </Link>
                   <button
                     type="button"
                     onClick={() => handleEditPath(path)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Edit", "Sua")}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDeletePath(path.id)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Delete", "Xoa")}
                   </button>
@@ -2921,7 +2921,7 @@ export default function AdminPage() {
               </div>
             ))}
             {learningPaths.length === 0 && (
-              <p className="text-sm text-emerald-800/70">
+              <p className="text-sm text-gray-600">
                 {tx("No learning paths yet.", "Chua co lo trinh hoc tap.")}
               </p>
             )}
@@ -2931,10 +2931,10 @@ export default function AdminPage() {
 
       <section className="glass-card space-y-6 rounded-3xl p-8">
         <div>
-          <h2 className="section-title text-2xl font-semibold text-emerald-950">
+          <h2 className="section-title text-2xl font-semibold text-gray-900">
             {tx("Homepage blocks", "Block trang chu")}
           </h2>
-          <p className="text-sm text-emerald-800/70">
+          <p className="text-sm text-gray-600">
             {tx("Control banners and highlight sections.", "Quan ly banner va cac khoi noi bat.")}
           </p>
         </div>
@@ -2949,7 +2949,7 @@ export default function AdminPage() {
                   setBlockForm((prev) => ({ ...prev, key: value }));
                 }}
                 placeholder={tx("Key", "Ma block")}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
               <input
                 value={blockForm.type}
@@ -2958,7 +2958,7 @@ export default function AdminPage() {
                   setBlockForm((prev) => ({ ...prev, type: value }));
                 }}
                 placeholder={tx("Type (hero/cta/feature)", "Loai block")}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
             </div>
             <input
@@ -2968,7 +2968,7 @@ export default function AdminPage() {
                 setBlockForm((prev) => ({ ...prev, title: value }));
               }}
               placeholder={tx("Title", "Tieu de")}
-              className="w-full rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             />
             <textarea
               value={blockForm.subtitle}
@@ -2977,7 +2977,7 @@ export default function AdminPage() {
                 setBlockForm((prev) => ({ ...prev, subtitle: value }));
               }}
               placeholder={tx("Subtitle", "Mo ta")}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm"
               rows={3}
             />
             <div className="grid gap-3 sm:grid-cols-2">
@@ -2988,7 +2988,7 @@ export default function AdminPage() {
                   setBlockForm((prev) => ({ ...prev, ctaText: value }));
                 }}
                 placeholder={tx("CTA text", "Nut CTA")}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
               <input
                 value={blockForm.ctaUrl}
@@ -2997,7 +2997,7 @@ export default function AdminPage() {
                   setBlockForm((prev) => ({ ...prev, ctaUrl: value }));
                 }}
                 placeholder={tx("CTA URL", "Link CTA")}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
             </div>
             <input
@@ -3007,7 +3007,7 @@ export default function AdminPage() {
                 setBlockForm((prev) => ({ ...prev, imageUrl: value }));
               }}
               placeholder={tx("Image URL", "Link anh")}
-              className="w-full rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             />
             <textarea
               value={blockForm.itemsJson}
@@ -3016,7 +3016,7 @@ export default function AdminPage() {
                 setBlockForm((prev) => ({ ...prev, itemsJson: value }));
               }}
               placeholder={tx("Items JSON (optional)", "Items JSON (tuy chon)")}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-xs"
+              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-xs"
               rows={3}
             />
             <div className="grid gap-3 sm:grid-cols-2">
@@ -3027,7 +3027,7 @@ export default function AdminPage() {
                   setBlockForm((prev) => ({ ...prev, locale: value }));
                 }}
                 placeholder={tx("Locale (en/vi)", "Ngon ngu (en/vi)")}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
               <input
                 type="number"
@@ -3037,10 +3037,10 @@ export default function AdminPage() {
                   setBlockForm((prev) => ({ ...prev, sortOrder: Number(value) }));
                 }}
                 placeholder={tx("Sort order", "Thu tu")}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
             </div>
-            <label className="flex items-center gap-2 text-xs font-semibold text-emerald-900">
+            <label className="flex items-center gap-2 text-xs font-semibold text-gray-900">
               <input
                 type="checkbox"
                 checked={blockForm.isPublished}
@@ -3055,7 +3055,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={handleSaveBlock}
-                className="rounded-full bg-emerald-700 px-5 py-2 text-sm font-semibold text-white"
+                className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white"
               >
                 {editingBlockId ? tx("Save changes", "Luu thay doi") : tx("Add block", "Them block")}
               </button>
@@ -3063,7 +3063,7 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={resetBlockForm}
-                  className="rounded-full border border-emerald-200 px-5 py-2 text-sm font-semibold text-emerald-900"
+                  className="rounded-full border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-900"
                 >
                   {tx("Cancel", "Huy")}
                 </button>
@@ -3076,7 +3076,7 @@ export default function AdminPage() {
               <select
                 value={blockTypeFilter}
                 onChange={(e) => setBlockTypeFilter(e.currentTarget.value)}
-                className="rounded-full border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-900"
+                className="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900"
               >
                 <option value="">{tx("All block types", "Tat ca loai block")}</option>
                 {blockTypeOptions.map((type) => (
@@ -3085,13 +3085,13 @@ export default function AdminPage() {
                   </option>
                 ))}
               </select>
-              <span className="text-[11px] text-emerald-800/70">
+              <span className="text-[11px] text-gray-600">
                 {canReorderBlocks
                   ? tx("Drag & drop to reorder.", "Keo tha de sap xep.")
                   : tx("Turn off filter to reorder.", "Tat bo loc de sap xep.")}
               </span>
               {isReorderingBlocks && (
-                <span className="text-[11px] text-emerald-800/70">
+                <span className="text-[11px] text-gray-600">
                   {tx("Saving order...", "Dang luu thu tu...")}
                 </span>
               )}
@@ -3123,17 +3123,17 @@ export default function AdminPage() {
                   setDraggingBlockId(null);
                   setDragOverBlockId(null);
                 }}
-                className={`flex flex-col gap-2 rounded-2xl border border-emerald-100 bg-white/70 p-4 transition ${
+                className={`flex flex-col gap-2 rounded-2xl border border-gray-200 bg-white/70 p-4 transition ${
                   canReorderBlocks ? "cursor-move" : "cursor-default"
                 } ${dragOverBlockId === block.id ? "ring-2 ring-emerald-400" : ""} ${
                   draggingBlockId === block.id ? "opacity-70" : ""
                 }`}
               >
                 <div>
-                  <p className="text-sm font-semibold text-emerald-950">
+                  <p className="text-sm font-semibold text-gray-900">
                     {block.type} - {block.title || block.key || "Block"}
                   </p>
-                  <p className="text-xs text-emerald-800/70">
+                  <p className="text-xs text-gray-600">
                     {block.locale ? `Locale: ${block.locale}` : tx("Global", "Toan cuc")} -{" "}
                     {tx("Order", "Thu tu")}: {block.sortOrder} -{" "}
                     {block.isPublished ? tx("Published", "Xuat ban") : tx("Draft", "Ban nhap")}
@@ -3143,14 +3143,14 @@ export default function AdminPage() {
                   <button
                     type="button"
                     onClick={() => handleEditBlock(block)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Edit", "Sua")}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDeleteBlock(block.id)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Delete", "Xoa")}
                   </button>
@@ -3158,7 +3158,7 @@ export default function AdminPage() {
               </div>
             ))}
             {visibleBlocks.length === 0 && (
-              <p className="text-sm text-emerald-800/70">{tx("No blocks yet.", "Chua co block.")}</p>
+              <p className="text-sm text-gray-600">{tx("No blocks yet.", "Chua co block.")}</p>
             )}
           </div>
         </div>
@@ -3166,10 +3166,10 @@ export default function AdminPage() {
 
       <section className="glass-card space-y-6 rounded-3xl p-8">
         <div>
-          <h2 className="section-title text-2xl font-semibold text-emerald-950">
+          <h2 className="section-title text-2xl font-semibold text-gray-900">
             {tx("Blog posts", "Bai viet")}
           </h2>
-          <p className="text-sm text-emerald-800/70">
+          <p className="text-sm text-gray-600">
             {tx("Publish news and learning updates.", "Dang tin tuc va noi dung huong dan.")}
           </p>
         </div>
@@ -3183,7 +3183,7 @@ export default function AdminPage() {
                 setBlogForm((prev) => ({ ...prev, title: value }));
               }}
               placeholder={tx("Title", "Tieu de")}
-              className="w-full rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             />
             <input
               value={blogForm.slug}
@@ -3192,7 +3192,7 @@ export default function AdminPage() {
                 setBlogForm((prev) => ({ ...prev, slug: value }));
               }}
               placeholder={tx("Slug (optional)", "Slug (tuy chon)")}
-              className="w-full rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             />
             <textarea
               value={blogForm.summary}
@@ -3201,7 +3201,7 @@ export default function AdminPage() {
                 setBlogForm((prev) => ({ ...prev, summary: value }));
               }}
               placeholder={tx("Summary", "Tom tat")}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm"
               rows={3}
             />
             <textarea
@@ -3211,7 +3211,7 @@ export default function AdminPage() {
                 setBlogForm((prev) => ({ ...prev, content: value }));
               }}
               placeholder={tx("Content", "Noi dung")}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm"
               rows={6}
             />
             <input
@@ -3221,7 +3221,7 @@ export default function AdminPage() {
                 setBlogForm((prev) => ({ ...prev, coverImageUrl: value }));
               }}
               placeholder={tx("Cover image URL", "Link anh cover")}
-              className="w-full rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <input
@@ -3231,7 +3231,7 @@ export default function AdminPage() {
                   setBlogForm((prev) => ({ ...prev, authorName: value }));
                 }}
                 placeholder={tx("Author name", "Ten tac gia")}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
               <input
                 value={blogForm.tags}
@@ -3240,7 +3240,7 @@ export default function AdminPage() {
                   setBlogForm((prev) => ({ ...prev, tags: value }));
                 }}
                 placeholder={tx("Tags (comma separated)", "Tags (ngan cach boi dau phay)")}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -3251,7 +3251,7 @@ export default function AdminPage() {
                   setBlogForm((prev) => ({ ...prev, locale: value }));
                 }}
                 placeholder={tx("Locale (en/vi)", "Ngon ngu (en/vi)")}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
               <input
                 type="datetime-local"
@@ -3260,7 +3260,7 @@ export default function AdminPage() {
                   const value = e.currentTarget?.value ?? "";
                   setBlogForm((prev) => ({ ...prev, publishedAt: value }));
                 }}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
               />
             </div>
             <input
@@ -3270,7 +3270,7 @@ export default function AdminPage() {
                 setBlogForm((prev) => ({ ...prev, seoTitle: value }));
               }}
               placeholder={tx("SEO title", "SEO title")}
-              className="w-full rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-gray-200 bg-white px-4 py-2 text-sm"
             />
             <textarea
               value={blogForm.seoDescription}
@@ -3279,10 +3279,10 @@ export default function AdminPage() {
                 setBlogForm((prev) => ({ ...prev, seoDescription: value }));
               }}
               placeholder={tx("SEO description", "SEO description")}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm"
               rows={3}
             />
-            <label className="flex items-center gap-2 text-xs font-semibold text-emerald-900">
+            <label className="flex items-center gap-2 text-xs font-semibold text-gray-900">
               <input
                 type="checkbox"
                 checked={blogForm.isPublished}
@@ -3297,7 +3297,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={handleSaveBlog}
-                className="rounded-full bg-emerald-700 px-5 py-2 text-sm font-semibold text-white"
+                className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white"
               >
                 {editingBlogId ? tx("Save changes", "Luu thay doi") : tx("Add post", "Them bai viet")}
               </button>
@@ -3305,7 +3305,7 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={resetBlogForm}
-                  className="rounded-full border border-emerald-200 px-5 py-2 text-sm font-semibold text-emerald-900"
+                  className="rounded-full border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-900"
                 >
                   {tx("Cancel", "Huy")}
                 </button>
@@ -3317,13 +3317,13 @@ export default function AdminPage() {
             {blogPosts.map((post) => (
               <div
                 key={post.id}
-                className="flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-4"
+                className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white/70 p-4"
               >
                 <div>
-                  <p className="text-sm font-semibold text-emerald-950">{post.title}</p>
-                  <p className="text-xs text-emerald-800/70">Slug: {post.slug}</p>
+                  <p className="text-sm font-semibold text-gray-900">{post.title}</p>
+                  <p className="text-xs text-gray-600">Slug: {post.slug}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-emerald-800/70">
+                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-gray-600">
                   <span>{post.locale}</span>
                   <span>{post.isPublished ? tx("Published", "Xuat ban") : tx("Draft", "Ban nhap")}</span>
                   {post.publishedAt && <span>{new Date(post.publishedAt).toLocaleDateString()}</span>}
@@ -3332,14 +3332,14 @@ export default function AdminPage() {
                   <button
                     type="button"
                     onClick={() => handleEditBlog(post.id)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Edit", "Sua")}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDeleteBlog(post.id)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                   >
                     {tx("Delete", "Xoa")}
                   </button>
@@ -3347,7 +3347,7 @@ export default function AdminPage() {
               </div>
             ))}
             {blogPosts.length === 0 && (
-              <p className="text-sm text-emerald-800/70">{tx("No posts yet.", "Chua co bai viet.")}</p>
+              <p className="text-sm text-gray-600">{tx("No posts yet.", "Chua co bai viet.")}</p>
             )}
           </div>
         </div>
@@ -3356,10 +3356,10 @@ export default function AdminPage() {
       <section className="glass-card space-y-6 rounded-3xl p-8">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
+            <h2 className="section-title text-2xl font-semibold text-gray-900">
               {tx("Reviews & feedback", "Danh gia & phan hoi")}
             </h2>
-            <p className="text-sm text-emerald-800/70">
+            <p className="text-sm text-gray-600">
               {tx("Moderate learner feedback.", "Quan ly phan hoi cua hoc vien.")}
             </p>
           </div>
@@ -3368,12 +3368,12 @@ export default function AdminPage() {
               value={reviewQuery}
               onChange={(e) => setReviewQuery(e.currentTarget.value)}
               placeholder={tx("Search comments", "Tim binh luan")}
-              className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-xs"
+              className="rounded-full border border-gray-200 bg-white px-4 py-2 text-xs"
             />
             <select
               value={reviewCourseFilter}
               onChange={(e) => setReviewCourseFilter(e.currentTarget.value)}
-              className="rounded-full border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-900"
+              className="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900"
             >
               <option value="">{tx("All courses", "Tat ca khoa hoc")}</option>
               {adminCourses.map((course) => (
@@ -3385,7 +3385,7 @@ export default function AdminPage() {
             <select
               value={reviewTake}
               onChange={(e) => setReviewTake(Number(e.currentTarget.value))}
-              className="rounded-full border border-emerald-200 bg-white px-3 py-2 text-xs"
+              className="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs"
             >
               <option value={60}>60</option>
               <option value={120}>120</option>
@@ -3399,22 +3399,22 @@ export default function AdminPage() {
             <div key={review.id} className="flex flex-col gap-3 rounded-2xl bg-white/70 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm font-semibold text-emerald-950">{review.courseTitle}</p>
-                  <p className="text-xs text-emerald-800/70">
-                    {review.userName} Â· {review.userEmail}
+                  <p className="text-sm font-semibold text-gray-900">{review.courseTitle}</p>
+                  <p className="text-xs text-gray-600">
+                    {review.userName} · {review.userEmail}
                   </p>
                 </div>
-                <div className="text-xs font-semibold text-emerald-800/70">
-                  {review.rating} â˜…
+                <div className="text-xs font-semibold text-gray-600">
+                  {review.rating} ?
                 </div>
               </div>
-              <p className="text-sm text-emerald-900/80">{review.comment}</p>
-              <div className="flex flex-wrap items-center gap-2 text-[11px] text-emerald-800/70">
+              <p className="text-sm text-gray-900/80">{review.comment}</p>
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-600">
                 <span>{new Date(review.createdAt).toLocaleString()}</span>
                 <button
                   type="button"
                   onClick={() => handleDeleteReview(review.id)}
-                  className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                  className="rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-900"
                 >
                   {tx("Delete", "Xoa")}
                 </button>
@@ -3422,7 +3422,7 @@ export default function AdminPage() {
             </div>
           ))}
           {reviews.length === 0 && (
-            <p className="text-sm text-emerald-800/70">{tx("No reviews yet.", "Chua co danh gia.")}</p>
+            <p className="text-sm text-gray-600">{tx("No reviews yet.", "Chua co danh gia.")}</p>
           )}
         </div>
       </section>
@@ -3430,10 +3430,10 @@ export default function AdminPage() {
       <section className="glass-card space-y-6 rounded-3xl p-8">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
+            <h2 className="section-title text-2xl font-semibold text-gray-900">
               {tx("Users", "Nguoi dung")}
             </h2>
-            <p className="text-sm text-emerald-800/70">
+            <p className="text-sm text-gray-600">
               {tx("Audit who has access.", "Kiem tra ai co quyen truy cap.")}
             </p>
           </div>
@@ -3441,7 +3441,7 @@ export default function AdminPage() {
             <select
               value={userRoleFilter}
               onChange={(e) => setUserRoleFilter(e.currentTarget.value)}
-              className="rounded-full border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-900"
+              className="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900"
             >
               <option value="">{tx("All roles", "Tat ca vai tro")}</option>
               {(roleOptions.length > 0 ? roleOptions : ["User", "Instructor", "Admin"]).map((role) => (
@@ -3457,19 +3457,19 @@ export default function AdminPage() {
           {sortedUsers.map((user) => (
             <div key={user.id} className="flex flex-col gap-3 rounded-2xl bg-white/70 p-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-sm font-semibold text-emerald-950">{user.email}</p>
-                <p className="text-xs text-emerald-800/70">
+                <p className="text-sm font-semibold text-gray-900">{user.email}</p>
+                <p className="text-xs text-gray-600">
                   {user.firstName} {user.lastName}
                 </p>
-                <p className="text-[11px] text-emerald-800/70">
-                  {tx("Loyalty", "Diem tich luy")}: {user.loyaltyPoints ?? 0} Â· {user.loyaltyTier ?? "Bronze"}
+                <p className="text-[11px] text-gray-600">
+                  {tx("Loyalty", "Diem tich luy")}: {user.loyaltyPoints ?? 0} · {user.loyaltyTier ?? "Bronze"}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <select
                   value={pickPrimaryRole(user.roles ?? [])}
                   onChange={(e) => handleUpdateUserRole(user.id, e.currentTarget.value)}
-                  className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-[11px] font-semibold text-emerald-900"
+                  className="rounded-full border border-gray-200 bg-white px-3 py-1 text-[11px] font-semibold text-gray-900"
                 >
                   {(roleOptions.length > 0 ? roleOptions : ["User", "Instructor", "Admin"]).map((role) => (
                     <option key={role} value={role}>
@@ -3479,7 +3479,7 @@ export default function AdminPage() {
                 </select>
                 <span
                   className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
-                    user.isAdmin ? "bg-emerald-100 text-emerald-900" : "bg-slate-100 text-slate-700"
+                    user.isAdmin ? "bg-blue-100 text-gray-900" : "bg-slate-100 text-slate-700"
                   }`}
                 >
                   {user.isAdmin ? tx("Admin", "Admin") : tx("User", "Nguoi dung")}
@@ -3488,7 +3488,7 @@ export default function AdminPage() {
             </div>
           ))}
           {sortedUsers.length === 0 && (
-            <p className="text-sm text-emerald-800/70">{tx("No users found.", "Khong tim thay nguoi dung.")}</p>
+            <p className="text-sm text-gray-600">{tx("No users found.", "Khong tim thay nguoi dung.")}</p>
           )}
         </div>
       </section>
@@ -3496,10 +3496,10 @@ export default function AdminPage() {
       <section className="glass-card space-y-6 rounded-3xl p-8">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
+            <h2 className="section-title text-2xl font-semibold text-gray-900">
               {tx("Admin activity log", "Nhat ky quan tri")}
             </h2>
-            <p className="text-sm text-emerald-800/70">
+            <p className="text-sm text-gray-600">
               {tx("Track who changed what in the admin area.", "Theo doi ai da thao tac trong khu vuc quan tri.")}
             </p>
           </div>
@@ -3508,12 +3508,12 @@ export default function AdminPage() {
               value={auditQuery}
               onChange={(e) => setAuditQuery(e.currentTarget.value)}
               placeholder={tx("Search by email or action", "Tim theo email/hanh dong")}
-              className="rounded-full border border-emerald-200 bg-white px-4 py-2 text-xs"
+              className="rounded-full border border-gray-200 bg-white px-4 py-2 text-xs"
             />
             <select
               value={auditTake}
               onChange={(e) => setAuditTake(Number(e.currentTarget.value))}
-              className="rounded-full border border-emerald-200 bg-white px-3 py-2 text-xs"
+              className="rounded-full border border-gray-200 bg-white px-3 py-2 text-xs"
             >
               <option value={40}>40</option>
               <option value={80}>80</option>
@@ -3523,7 +3523,7 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={handleExportAuditLogs}
-              className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+              className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900"
             >
               {tx("Export CSV", "Xuat CSV")}
             </button>
@@ -3537,7 +3537,7 @@ export default function AdminPage() {
                 }
                 loadAuditLogs(token);
               }}
-              className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+              className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900"
             >
               {tx("Refresh", "Lam moi")}
             </button>
@@ -3546,53 +3546,53 @@ export default function AdminPage() {
 
         <div className="space-y-3">
           {auditLogs.map((log) => (
-            <div key={log.id} className="flex flex-col gap-2 rounded-2xl bg-white/70 p-4 text-xs text-emerald-900">
+            <div key={log.id} className="flex flex-col gap-2 rounded-2xl bg-white/70 p-4 text-xs text-gray-900">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-semibold">{log.userEmail}</span>
-                <span className="text-emerald-800/70">{new Date(log.createdAt).toLocaleString()}</span>
+                <span className="text-gray-600">{new Date(log.createdAt).toLocaleString()}</span>
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-[11px] text-emerald-800/70">
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-gray-600">
                 <span>{log.action}</span>
                 <span>{log.method}</span>
                 <span>{log.path}</span>
                 <span>{log.ipAddress}</span>
               </div>
-              {log.detail && <p className="text-[11px] text-emerald-800/80">{log.detail}</p>}
+              {log.detail && <p className="text-[11px] text-gray-600">{log.detail}</p>}
             </div>
           ))}
           {auditLogs.length === 0 && (
-            <p className="text-sm text-emerald-800/70">{tx("No logs yet.", "Chua co log.")}</p>
+            <p className="text-sm text-gray-600">{tx("No logs yet.", "Chua co log.")}</p>
           )}
         </div>
       </section>
 
       <section className="glass-card space-y-6 rounded-3xl p-8">
         <div>
-          <h2 className="section-title text-2xl font-semibold text-emerald-950">
+          <h2 className="section-title text-2xl font-semibold text-gray-900">
             {tx("Support inbox", "Ho tro khach hang")}
           </h2>
-          <p className="text-sm text-emerald-800/70">
+          <p className="text-sm text-gray-600">
             {tx("Review and respond to support messages.", "Xem va xu ly tin nhan ho tro.")}
           </p>
         </div>
 
         <div className="space-y-4">
           {supportMessages.map((item) => (
-            <div key={item.id} className="rounded-2xl border border-emerald-100 bg-white/70 p-4 space-y-3">
+            <div key={item.id} className="rounded-2xl border border-gray-200 bg-white/70 p-4 space-y-3">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-emerald-950">
+                  <p className="text-sm font-semibold text-gray-900">
                     {item.name} - {item.email}
                   </p>
-                  <p className="text-[11px] text-emerald-700/70">
+                  <p className="text-[11px] text-gray-500">
                     {new Date(item.createdAt).toLocaleString()}
                   </p>
                 </div>
-                <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-semibold text-emerald-900">
+                <span className="rounded-full bg-blue-100 px-3 py-1 text-[11px] font-semibold text-gray-900">
                   {item.status}
                 </span>
               </div>
-              <p className="text-sm text-emerald-900">{item.message}</p>
+              <p className="text-sm text-gray-900">{item.message}</p>
               <div className="grid gap-3 md:grid-cols-2">
                 <input
                   value={supportStatus[item.id] ?? item.status}
@@ -3602,7 +3602,7 @@ export default function AdminPage() {
                     setSupportStatus((prev) => ({ ...prev, [item.id]: value }));
                   }}
                   placeholder={tx("Status (open/resolved)", "Trang thai")}
-                  className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-xs"
+                  className="rounded-full border border-gray-200 bg-white px-4 py-2 text-xs"
                 />
                 <input
                   value={supportNotes[item.id] ?? item.adminNote ?? ""}
@@ -3612,14 +3612,14 @@ export default function AdminPage() {
                     setSupportNotes((prev) => ({ ...prev, [item.id]: value }));
                   }}
                   placeholder={tx("Admin note", "Ghi chu quan tri")}
-                  className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-xs"
+                  className="rounded-full border border-gray-200 bg-white px-4 py-2 text-xs"
                 />
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => handleUpdateSupport(item.id)}
-                  className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+                  className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900"
                 >
                   {tx("Update", "Cap nhat")}
                 </button>
@@ -3633,16 +3633,16 @@ export default function AdminPage() {
                     }
                     loadSupportReplies(token, item.id);
                   }}
-                  className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+                  className="rounded-full border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-900"
                 >
                   {tx("View thread", "Xem hoi thoai")}
                 </button>
               </div>
 
               {supportReplies[item.id]?.length ? (
-                <div className="space-y-2 rounded-2xl border border-emerald-100 bg-white/60 p-3">
+                <div className="space-y-2 rounded-2xl border border-gray-200 bg-white/60 p-3">
                   {supportReplies[item.id].map((reply) => (
-                    <div key={reply.id} className="text-xs text-emerald-900">
+                    <div key={reply.id} className="text-xs text-gray-900">
                       <span className="font-semibold">
                         {reply.authorRole === "admin" ? tx("Admin", "Admin") : reply.authorName}:
                       </span>{" "}
@@ -3660,12 +3660,12 @@ export default function AdminPage() {
                     setSupportReplyDraft((prev) => ({ ...prev, [item.id]: value }));
                   }}
                   placeholder={tx("Reply to customer", "Tra loi khach hang")}
-                  className="flex-1 rounded-full border border-emerald-100 bg-white px-4 py-2 text-xs"
+                  className="flex-1 rounded-full border border-gray-200 bg-white px-4 py-2 text-xs"
                 />
                 <button
                   type="button"
                   onClick={() => handleReplySupport(item.id)}
-                  className="rounded-full bg-emerald-700 px-4 py-2 text-xs font-semibold text-white"
+                  className="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white"
                 >
                   {tx("Send reply", "Gui tra loi")}
                 </button>
@@ -3673,11 +3673,12 @@ export default function AdminPage() {
             </div>
           ))}
           {supportMessages.length === 0 && (
-            <p className="text-sm text-emerald-800/70">{tx("No messages yet.", "Chua co tin nhan.")}</p>
+            <p className="text-sm text-gray-600">{tx("No messages yet.", "Chua co tin nhan.")}</p>
           )}
         </div>
       </section>
     </div>
   );
 }
+
 
