@@ -36,6 +36,24 @@ npm run dev
 4. He thong co One Tap (goi y dang nhap Google) giong Coursera.
 5. Neu ban muon tao khoa hoc, tai khoan can role `Instructor` (hoac `Admin`).
 
+### Cau hinh dang nhap Google (bat buoc neu muon dung)
+
+1. Frontend: mo `apps/web/.env` va them:
+
+```
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
+```
+
+2. Backend: mo `apps/api/appsettings.Development.json` va them:
+
+```
+"GoogleAuth": {
+  "ClientId": "YOUR_GOOGLE_CLIENT_ID"
+}
+```
+
+3. Khoi dong lai ca API va Frontend.
+
 ## 3) Luong cho hoc vien
 
 1. Vao danh sach khoa hoc, chon khoa hoc muon hoc.

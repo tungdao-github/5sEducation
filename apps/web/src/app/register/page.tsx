@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,9 +20,14 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [confirmLink, setConfirmLink] = useState("");
+  const [agreed, setAgreed] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!agreed) {
+      setError(tx("Please accept the terms to continue.", "Vui long dong y dieu khoan de tiep tuc."));
+      return;
+    }
     setLoading(true);
     setError("");
     setSuccessMessage("");
@@ -80,8 +85,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-16 fade-in">
-      <div className="glass-card mx-auto max-w-md rounded-3xl p-8">
+    <div className="section-shell py-16 fade-in">
+      <div className="surface-card mx-auto max-w-md p-8">
         <h1 className="section-title text-3xl font-semibold text-emerald-950">
           {tx("Create an account", "Tao tai khoan")}
         </h1>
@@ -89,14 +94,14 @@ export default function RegisterPage() {
           {tx("Start your learning journey in minutes.", "Bat dau hanh trinh hoc tap chi trong vai phut.")}
         </p>
 
-        <div className="mt-4 rounded-2xl border border-emerald-100 bg-white/70 p-4">
+        <div className="surface-muted mt-4 p-4">
           <GoogleSignInButton nextPath={nextPath} mode="signup" />
         </div>
 
         <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-emerald-700/70">
-          <span className="h-px flex-1 bg-emerald-100" />
+          <span className="h-px flex-1 bg-[color:var(--stroke)]" />
           <span>{tx("Or sign up with email", "Hoac dang ky bang email")}</span>
-          <span className="h-px flex-1 bg-emerald-100" />
+          <span className="h-px flex-1 bg-[color:var(--stroke)]" />
         </div>
 
         {error && (
@@ -104,7 +109,7 @@ export default function RegisterPage() {
         )}
 
         {successMessage && (
-          <div className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <div className="mt-4 surface-muted px-4 py-3 text-sm text-emerald-800">
             <p>{successMessage}</p>
             {confirmLink && (
               <a
@@ -133,7 +138,7 @@ export default function RegisterPage() {
               required
               value={name}
               onChange={(e) => setName(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-emerald-950 focus:outline-none"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm text-emerald-950 focus:outline-none"
             />
           </div>
 
@@ -147,7 +152,7 @@ export default function RegisterPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-emerald-950 focus:outline-none"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm text-emerald-950 focus:outline-none"
             />
           </div>
 
@@ -164,13 +169,29 @@ export default function RegisterPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-emerald-950 focus:outline-none"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm text-emerald-950 focus:outline-none"
             />
           </div>
 
+          <label className="flex items-start gap-3 text-xs text-emerald-800/70">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.currentTarget.checked)}
+              className="mt-1"
+            />
+            <span>
+              {tx("I agree to the", "Toi dong y voi")}{" "}
+              <Link href="/policy" className="font-semibold text-emerald-900 underline-hover">
+                {tx("Terms & Privacy Policy", "Dieu khoan & Bao mat")}
+              </Link>
+              .
+            </span>
+          </label>
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !agreed}
             className="w-full rounded-full bg-emerald-700 px-6 py-3 text-sm font-semibold text-white"
           >
             {loading ? tx("Creating...", "Dang tao...") : tx("Create account", "Tao tai khoan")}
@@ -187,3 +208,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

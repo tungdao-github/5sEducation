@@ -97,9 +97,11 @@ export default async function BlogDetailPage({
   const locale = await getServerLocale();
   const t = (en: string, vi: string) => pickLocaleText(locale, en, vi);
   const dateLocale = locale === "vi" ? "vi-VN" : "en-US";
+  const wordCount = post.content?.trim().split(/\s+/).filter(Boolean).length ?? 0;
+  const readMinutes = Math.max(1, Math.round(wordCount / 200));
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-10 px-6 py-12 fade-in">
+    <div className="section-shell space-y-10 py-12 fade-in">
       <div className="space-y-3">
         <Link href="/blog" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
           {t("Back to blog", "Quay lai blog")}
@@ -115,38 +117,98 @@ export default async function BlogDetailPage({
               day: "numeric",
             })}
           </span>
-          {post.tags?.length ? (
-            <>
-              <span>-</span>
-              <span>{post.tags.join(", ")}</span>
-            </>
-          ) : null}
+          <span>-</span>
+          <span>{t("Read", "Doc")}: {readMinutes} {t("min", "phut")}</span>
         </div>
         <p className="text-sm text-emerald-800/70">{post.summary}</p>
       </div>
 
-      {post.coverImageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={resolveApiAsset(post.coverImageUrl)}
-          alt={post.title}
-          className="h-72 w-full rounded-3xl object-cover"
-        />
-      ) : null}
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <article className="space-y-6">
+          {post.coverImageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={resolveApiAsset(post.coverImageUrl)}
+              alt={post.title}
+              className="h-72 w-full rounded-3xl object-cover"
+            />
+          ) : null}
 
-      <div className="glass-card space-y-4 rounded-3xl p-8 text-sm text-emerald-900">
-        <div className="whitespace-pre-line leading-relaxed">{post.content}</div>
-      </div>
+          <div className="surface-card space-y-4 p-8 text-sm text-emerald-900">
+            <div className="whitespace-pre-line leading-relaxed">{post.content}</div>
+          </div>
+        </article>
 
-      <div className="flex flex-wrap gap-2">
-        {post.tags?.map((item) => (
-          <span
-            key={item}
-            className="rounded-full border border-emerald-100 bg-white px-3 py-1 text-[11px] font-semibold text-emerald-800"
-          >
-            {item}
-          </span>
-        ))}
+        <aside className="space-y-4 lg:sticky lg:top-24">
+          <div className="surface-card space-y-3 p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              {t("Article details", "Thong tin bai viet")}
+            </p>
+            <div className="space-y-2 text-sm text-emerald-900">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
+                  {t("Author", "Tac gia")}
+                </p>
+                <p className="font-semibold">{post.authorName || "5S Education"}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
+                  {t("Published", "Xuat ban")}
+                </p>
+                <p>
+                  {new Date(post.publishedAt ?? post.createdAt).toLocaleDateString(dateLocale, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
+                  {t("Reading time", "Thoi gian doc")}
+                </p>
+                <p>{readMinutes} {t("minutes", "phut")}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="surface-card space-y-3 p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              {t("Topics", "Chu de")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {(post.tags ?? []).length === 0 && (
+                <span className="text-xs text-emerald-700/70">{t("No tags yet.", "Chua co tag.")}</span>
+              )}
+              {post.tags?.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-[color:var(--stroke)] bg-white px-3 py-1 text-[11px] font-semibold text-emerald-800"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="surface-card space-y-3 p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              {t("Keep learning", "Tiep tuc hoc")}
+            </p>
+            <p className="text-sm text-emerald-800/70">
+              {t(
+                "Explore curated courses to apply these ideas in practice.",
+                "Kham pha khoa hoc de ap dung cac y tuong nay vao thuc te."
+              )}
+            </p>
+            <Link
+              href="/courses"
+              className="inline-flex rounded-full bg-emerald-700 px-5 py-2 text-sm font-semibold text-white"
+            >
+              {t("Browse courses", "Xem khoa hoc")}
+            </Link>
+          </div>
+        </aside>
       </div>
     </div>
   );

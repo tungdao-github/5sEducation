@@ -56,8 +56,8 @@ export default function ConfirmEmailPage() {
   }, [searchParams, tx]);
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-6 py-20 fade-in">
-      <div className="glass-card rounded-3xl p-10 text-center">
+    <div className="section-shell py-20 fade-in">
+      <div className="surface-card rounded-3xl p-10 text-center">
         <h1 className="section-title text-3xl font-semibold text-emerald-950">
           {tx("Confirm email", "Xac thuc email")}
         </h1>

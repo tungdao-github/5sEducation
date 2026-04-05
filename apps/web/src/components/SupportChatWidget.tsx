@@ -77,7 +77,7 @@ export function SupportChatWidget() {
   return (
     <div className="fixed bottom-6 right-6 z-[60]">
       {open && (
-        <div className="mb-3 w-80 rounded-3xl border border-emerald-100 bg-white p-4 shadow-xl">
+        <div className="mb-3 w-80 surface-card rounded-3xl p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm font-semibold text-emerald-950">
@@ -90,7 +90,7 @@ export function SupportChatWidget() {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-full border border-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-800"
+              className="rounded-full border border-[color:var(--stroke)] px-2 py-1 text-[10px] font-semibold text-emerald-800"
             >
               {tx("Close", "Dong")}
             </button>
@@ -101,20 +101,20 @@ export function SupportChatWidget() {
               value={name}
               onChange={(e) => setName(e.currentTarget.value)}
               placeholder={tx("Your name", "Ten cua ban")}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-3 py-2 text-xs"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-3 py-2 text-xs"
             />
             <input
               value={email}
               onChange={(e) => setEmail(e.currentTarget.value)}
               placeholder={tx("Email", "Email")}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-3 py-2 text-xs"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-3 py-2 text-xs"
             />
             <textarea
               value={message}
               onChange={(e) => setMessage(e.currentTarget.value)}
               placeholder={tx("How can we help?", "Ban can ho tro gi?")}
               rows={4}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-3 py-2 text-xs"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-3 py-2 text-xs"
             />
           </div>
 
@@ -143,3 +143,4 @@ export function SupportChatWidget() {
     </div>
   );
 }
+

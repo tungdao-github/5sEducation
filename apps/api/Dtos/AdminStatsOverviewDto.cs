@@ -14,4 +14,7 @@ public class AdminStatsOverviewDto
     public decimal TotalRevenue { get; set; }
     public double AverageRating { get; set; }
     public List<DailyCountDto> EnrollmentsLast7Days { get; set; } = new();
+    public List<DailyValueDto> RevenueLast30Days { get; set; } = new();
+    public List<StatusCountDto> OrdersByStatus { get; set; } = new();
+    public List<TopCourseRevenueDto> TopCoursesByRevenue { get; set; } = new();
 }

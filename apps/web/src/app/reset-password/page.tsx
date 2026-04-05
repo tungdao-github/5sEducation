@@ -64,8 +64,8 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-6 py-16 fade-in">
-      <div className="glass-card mx-auto max-w-md rounded-3xl p-8">
+    <div className="section-shell py-16 fade-in">
+      <div className="surface-card mx-auto max-w-md p-8">
         <h1 className="section-title text-3xl font-semibold text-emerald-950">
           {tx("Set a new password", "Tao mat khau moi")}
         </h1>
@@ -82,7 +82,7 @@ export default function ResetPasswordPage() {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-emerald-950"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm text-emerald-950"
             />
           </div>
           <div className="space-y-2">
@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-emerald-950"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm text-emerald-950"
             />
           </div>
 
@@ -107,7 +107,7 @@ export default function ResetPasswordPage() {
         </form>
 
         {message && (
-          <div className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <div className="mt-4 surface-muted px-4 py-3 text-sm text-emerald-800">
             {message}
           </div>
         )}
@@ -121,3 +121,4 @@ export default function ResetPasswordPage() {
     </div>
   );
 }
+

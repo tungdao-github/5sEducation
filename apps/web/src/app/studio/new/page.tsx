@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -109,7 +109,7 @@ export default function NewCoursePage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-8 px-6 py-12 fade-in">
+    <div className="section-shell space-y-8 py-12 fade-in">
       <div className="space-y-2">
         <Link href="/studio" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
           Studio
@@ -122,7 +122,7 @@ export default function NewCoursePage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="glass-card space-y-6 rounded-3xl p-8">
+      <form onSubmit={handleSubmit} className="surface-card space-y-6 rounded-3xl p-8">
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
             {tx("Title", "Tieu de")}
@@ -131,7 +131,7 @@ export default function NewCoursePage() {
             value={title}
             onChange={(e) => setTitle(e.currentTarget.value)}
             required
-            className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+            className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
           />
         </div>
 
@@ -143,7 +143,7 @@ export default function NewCoursePage() {
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             >
               <option value="">{tx("Select category", "Chon danh muc")}</option>
               {categories.map((category) => (
@@ -161,7 +161,7 @@ export default function NewCoursePage() {
               value={level}
               onChange={(e) => setLevel(e.currentTarget.value)}
               required
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function NewCoursePage() {
             value={shortDescription}
             onChange={(e) => setShortDescription(e.currentTarget.value)}
             required
-            className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+            className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
           />
         </div>
 
@@ -187,7 +187,7 @@ export default function NewCoursePage() {
             onChange={(e) => setDescription(e.currentTarget.value)}
             required
             rows={4}
-            className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+            className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
           />
         </div>
 
@@ -200,7 +200,7 @@ export default function NewCoursePage() {
               value={outcome}
               onChange={(e) => setOutcome(e.currentTarget.value)}
               required
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -211,7 +211,7 @@ export default function NewCoursePage() {
               value={requirements}
               onChange={(e) => setRequirements(e.currentTarget.value)}
               required
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
         </div>
@@ -225,7 +225,7 @@ export default function NewCoursePage() {
               value={language}
               onChange={(e) => setLanguage(e.currentTarget.value)}
               required
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -239,7 +239,7 @@ export default function NewCoursePage() {
               value={price}
               onChange={(e) => setPrice(e.currentTarget.value)}
               required
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -252,7 +252,7 @@ export default function NewCoursePage() {
               step="0.01"
               value={flashSalePrice}
               onChange={(e) => setFlashSalePrice(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -262,7 +262,7 @@ export default function NewCoursePage() {
             <input
               value={previewVideoUrl}
               onChange={(e) => setPreviewVideoUrl(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
         </div>
@@ -276,7 +276,7 @@ export default function NewCoursePage() {
               type="datetime-local"
               value={flashSaleStartsAt}
               onChange={(e) => setFlashSaleStartsAt(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -287,7 +287,7 @@ export default function NewCoursePage() {
               type="datetime-local"
               value={flashSaleEndsAt}
               onChange={(e) => setFlashSaleEndsAt(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
         </div>
@@ -301,7 +301,7 @@ export default function NewCoursePage() {
               type="file"
               accept="image/*"
               onChange={(e) => setThumbnail(e.currentTarget.files?.[0] ?? null)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <label className="flex items-center gap-2 text-sm text-emerald-900">

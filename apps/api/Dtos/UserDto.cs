@@ -8,4 +8,7 @@ public class UserDto
     public string LastName { get; set; } = string.Empty;
     public string? AvatarUrl { get; set; }
     public bool IsAdmin { get; set; }
+    public List<string> Roles { get; set; } = new();
+    public int LoyaltyPoints { get; set; }
+    public string LoyaltyTier { get; set; } = "Bronze";
 }

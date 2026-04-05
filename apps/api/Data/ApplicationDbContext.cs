@@ -30,6 +30,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
     public DbSet<SupportReply> SupportReplies => Set<SupportReply>();
     public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
+    public DbSet<AdminAuditLog> AdminAuditLogs => Set<AdminAuditLog>();
+    public DbSet<UserAddress> UserAddresses => Set<UserAddress>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -280,6 +283,68 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .IsUnique();
             entity.HasIndex(p => new { p.Locale, p.IsPublished });
             entity.HasIndex(p => p.PublishedAt);
+        });
+
+        builder.Entity<AdminAuditLog>(entity =>
+        {
+            entity.Property(a => a.UserEmail)
+                .HasMaxLength(256);
+            entity.Property(a => a.Action)
+                .HasMaxLength(200);
+            entity.Property(a => a.Method)
+                .HasMaxLength(10);
+            entity.Property(a => a.Path)
+                .HasMaxLength(260);
+            entity.Property(a => a.QueryString)
+                .HasMaxLength(260);
+            entity.Property(a => a.IpAddress)
+                .HasMaxLength(64);
+            entity.Property(a => a.UserAgent)
+                .HasMaxLength(300);
+            entity.HasIndex(a => new { a.UserId, a.CreatedAt });
+            entity.HasIndex(a => a.CreatedAt);
+        });
+
+        builder.Entity<UserAddress>(entity =>
+        {
+            entity.Property(a => a.Label)
+                .HasMaxLength(120);
+            entity.Property(a => a.RecipientName)
+                .HasMaxLength(200);
+            entity.Property(a => a.Phone)
+                .HasMaxLength(30);
+            entity.Property(a => a.Line1)
+                .HasMaxLength(200);
+            entity.Property(a => a.Line2)
+                .HasMaxLength(200);
+            entity.Property(a => a.City)
+                .HasMaxLength(120);
+            entity.Property(a => a.State)
+                .HasMaxLength(120);
+            entity.Property(a => a.PostalCode)
+                .HasMaxLength(30);
+            entity.Property(a => a.Country)
+                .HasMaxLength(120);
+            entity.HasIndex(a => new { a.UserId, a.IsDefault });
+            entity.HasIndex(a => a.UserId);
+            entity.HasOne(a => a.User)
+                .WithMany()
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<SystemSetting>(entity =>
+        {
+            entity.Property(s => s.Key)
+                .HasMaxLength(120);
+            entity.Property(s => s.Value)
+                .HasMaxLength(2000);
+            entity.Property(s => s.Group)
+                .HasMaxLength(120);
+            entity.Property(s => s.Description)
+                .HasMaxLength(300);
+            entity.HasIndex(s => s.Key).IsUnique();
+            entity.HasIndex(s => s.Group);
         });
     }
 }

@@ -225,6 +225,7 @@ app.UseStaticFiles();
 app.UseCors("web");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<AdminAuditMiddleware>();
 app.UseRateLimiter();
 
 app.MapControllers();

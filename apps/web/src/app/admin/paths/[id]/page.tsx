@@ -259,8 +259,8 @@ export default function AdminPathDetailPage() {
 
   if (needsAuth) {
     return (
-      <div className="mx-auto w-full max-w-4xl px-6 py-16 fade-in">
-        <div className="glass-card rounded-3xl p-10 text-center">
+      <div className="section-shell py-16 fade-in">
+        <div className="surface-card rounded-3xl p-10 text-center">
           <p className="text-sm text-emerald-800/70">
             {tx("Admin access only.", "Chi danh cho quan tri vien.")}
           </p>
@@ -277,14 +277,14 @@ export default function AdminPathDetailPage() {
 
   if (!path) {
     return (
-      <div className="mx-auto w-full max-w-4xl px-6 py-16 text-sm text-emerald-800/70">
+      <div className="section-shell py-16 text-sm text-emerald-800/70">
         {tx("Loading...", "Dang tai...")}
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-10 px-6 py-12 fade-in">
+    <div className="section-shell space-y-10 py-12 fade-in">
       <div className="space-y-2">
         <Link href="/admin" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
           {tx("Admin", "Quan tri")}
@@ -293,7 +293,7 @@ export default function AdminPathDetailPage() {
         <p className="text-sm text-emerald-800/70">{path.description}</p>
       </div>
 
-      <section className="glass-card space-y-6 rounded-3xl p-8">
+      <section className="surface-card space-y-6 rounded-3xl p-8">
         <div>
           <h2 className="section-title text-2xl font-semibold text-emerald-950">
             {tx("Sections", "Chuong")}
@@ -309,13 +309,13 @@ export default function AdminPathDetailPage() {
               value={sectionForm.title}
               onChange={(e) => setSectionForm((prev) => ({ ...prev, title: e.currentTarget.value }))}
               placeholder={tx("Section title", "Ten chuong")}
-              className="w-full rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm"
             />
             <textarea
               value={sectionForm.description}
               onChange={(e) => setSectionForm((prev) => ({ ...prev, description: e.currentTarget.value }))}
               placeholder={tx("Description", "Mo ta")}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
               rows={3}
             />
             <input
@@ -323,7 +323,7 @@ export default function AdminPathDetailPage() {
               value={sectionForm.sortOrder}
               onChange={(e) => setSectionForm((prev) => ({ ...prev, sortOrder: Number(e.currentTarget.value) }))}
               placeholder={tx("Sort order", "Thu tu")}
-              className="w-full rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+              className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm"
             />
             <div className="flex flex-wrap gap-2">
               <button
@@ -337,7 +337,7 @@ export default function AdminPathDetailPage() {
                 <button
                   type="button"
                   onClick={resetSectionForm}
-                  className="rounded-full border border-emerald-200 px-5 py-2 text-sm font-semibold text-emerald-900"
+                  className="rounded-full border border-[color:var(--stroke)] px-5 py-2 text-sm font-semibold text-emerald-900"
                 >
                   {tx("Cancel", "Huy")}
                 </button>
@@ -349,7 +349,7 @@ export default function AdminPathDetailPage() {
             {sectionOptions.map((section) => (
               <div
                 key={section.id}
-                className="flex flex-col gap-2 rounded-2xl border border-emerald-100 bg-white/70 p-4"
+                className="flex flex-col gap-2 rounded-2xl border border-[color:var(--stroke)] bg-white/70 p-4"
               >
                 <div>
                   <p className="text-sm font-semibold text-emerald-950">{section.title}</p>
@@ -359,14 +359,14 @@ export default function AdminPathDetailPage() {
                   <button
                     type="button"
                     onClick={() => handleEditSection(section)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-xs font-semibold text-emerald-900"
                   >
                     {tx("Edit", "Sua")}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDeleteSection(section.id)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-xs font-semibold text-emerald-900"
                   >
                     {tx("Delete", "Xoa")}
                   </button>
@@ -380,7 +380,7 @@ export default function AdminPathDetailPage() {
         </div>
       </section>
 
-      <section className="glass-card space-y-6 rounded-3xl p-8">
+      <section className="surface-card space-y-6 rounded-3xl p-8">
         <div>
           <h2 className="section-title text-2xl font-semibold text-emerald-950">
             {tx("Courses in path", "Khoa hoc trong lo trinh")}
@@ -395,7 +395,7 @@ export default function AdminPathDetailPage() {
             <select
               value={courseForm.courseId}
               onChange={(e) => setCourseForm((prev) => ({ ...prev, courseId: Number(e.currentTarget.value) }))}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             >
               <option value={0}>{tx("Select course", "Chon khoa hoc")}</option>
               {allCourses.map((course) => (
@@ -407,7 +407,7 @@ export default function AdminPathDetailPage() {
             <select
               value={courseForm.sectionId}
               onChange={(e) => setCourseForm((prev) => ({ ...prev, sectionId: Number(e.currentTarget.value) }))}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             >
               <option value={0}>{tx("No section", "Khong co chuong")}</option>
               {sectionOptions.map((section) => (
@@ -422,7 +422,7 @@ export default function AdminPathDetailPage() {
                 value={courseForm.sortOrder}
                 onChange={(e) => setCourseForm((prev) => ({ ...prev, sortOrder: Number(e.currentTarget.value) }))}
                 placeholder={tx("Sort order", "Thu tu")}
-                className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+                className="rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm"
               />
               <label className="flex items-center gap-2 text-xs font-semibold text-emerald-900">
                 <input
@@ -445,7 +445,7 @@ export default function AdminPathDetailPage() {
                 <button
                   type="button"
                   onClick={resetCourseForm}
-                  className="rounded-full border border-emerald-200 px-5 py-2 text-sm font-semibold text-emerald-900"
+                  className="rounded-full border border-[color:var(--stroke)] px-5 py-2 text-sm font-semibold text-emerald-900"
                 >
                   {tx("Cancel", "Huy")}
                 </button>
@@ -457,7 +457,7 @@ export default function AdminPathDetailPage() {
             {path.courses.map((course) => (
               <div
                 key={course.id}
-                className="flex flex-col gap-2 rounded-2xl border border-emerald-100 bg-white/70 p-4"
+                className="flex flex-col gap-2 rounded-2xl border border-[color:var(--stroke)] bg-white/70 p-4"
               >
                 <div>
                   <p className="text-sm font-semibold text-emerald-950">{course.courseTitle}</p>
@@ -471,14 +471,14 @@ export default function AdminPathDetailPage() {
                   <button
                     type="button"
                     onClick={() => handleEditCourse(course)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-xs font-semibold text-emerald-900"
                   >
                     {tx("Edit", "Sua")}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDeleteCourse(course.id)}
-                    className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-xs font-semibold text-emerald-900"
                   >
                     {tx("Delete", "Xoa")}
                   </button>
@@ -496,3 +496,4 @@ export default function AdminPathDetailPage() {
     </div>
   );
 }
+

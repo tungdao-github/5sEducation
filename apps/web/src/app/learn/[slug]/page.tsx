@@ -709,8 +709,8 @@ export default function LearnPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto w-full max-w-6xl px-6 py-12 fade-in">
-        <div className="glass-card rounded-3xl p-10 text-center text-sm text-emerald-800/70">
+      <div className="section-shell py-12 fade-in">
+        <div className="surface-card rounded-3xl p-10 text-center text-sm text-emerald-800/70">
           {t("loadingLesson")}
         </div>
       </div>
@@ -719,8 +719,8 @@ export default function LearnPage() {
 
   if (!course) {
     return (
-      <div className="mx-auto w-full max-w-6xl px-6 py-12 fade-in">
-        <div className="glass-card rounded-3xl p-10 text-center text-sm text-emerald-800/70">
+      <div className="section-shell py-12 fade-in">
+        <div className="surface-card rounded-3xl p-10 text-center text-sm text-emerald-800/70">
           {t("notFound")}
         </div>
       </div>
@@ -729,8 +729,8 @@ export default function LearnPage() {
 
   if (needsAuth) {
     return (
-      <div className="mx-auto w-full max-w-5xl px-6 py-12 fade-in">
-        <div className="glass-card rounded-3xl p-10 text-center">
+      <div className="section-shell py-12 fade-in">
+        <div className="surface-card rounded-3xl p-10 text-center">
           <h1 className="section-title text-3xl font-semibold text-emerald-950">{t("signInTitle")}</h1>
           <p className="mt-3 text-sm text-emerald-800/70">
             {t("signInDesc")}
@@ -749,8 +749,8 @@ export default function LearnPage() {
   if (!isEnrolled) {
     const imageUrl = resolveApiAsset(course.thumbnailUrl) || "/images/learning.jpg";
     return (
-      <div className="mx-auto w-full max-w-5xl px-6 py-12 fade-in">
-        <div className="glass-card grid gap-8 rounded-3xl p-8 lg:grid-cols-[1.1fr,1fr]">
+      <div className="section-shell py-12 fade-in">
+        <div className="surface-card grid gap-8 rounded-3xl p-8 lg:grid-cols-[1.1fr,1fr]">
           <img src={imageUrl} alt={course.title} className="h-full w-full rounded-3xl object-cover" />
           <div className="space-y-4">
             <h1 className="section-title text-3xl font-semibold text-emerald-950">{course.title}</h1>
@@ -776,7 +776,7 @@ export default function LearnPage() {
   const embedUrl = getEmbedUrl(activeVideoUrl);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-12 fade-in">
+    <div className="section-shell py-12 fade-in">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Link href="/dashboard" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
@@ -790,21 +790,21 @@ export default function LearnPage() {
           <button
             type="button"
             onClick={() => setLocale("vi")}
-            className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${locale === "vi" ? "border-emerald-500 bg-emerald-50 text-emerald-900" : "border-emerald-200 text-emerald-800"}`}
+            className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${locale === "vi" ? "border-[color:var(--brand)] bg-[color:var(--brand-soft)] text-emerald-900" : "border-[color:var(--stroke)] text-emerald-800"}`}
           >
             VI
           </button>
           <button
             type="button"
             onClick={() => setLocale("en")}
-            className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${locale === "en" ? "border-emerald-500 bg-emerald-50 text-emerald-900" : "border-emerald-200 text-emerald-800"}`}
+            className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${locale === "en" ? "border-[color:var(--brand)] bg-[color:var(--brand-soft)] text-emerald-900" : "border-[color:var(--stroke)] text-emerald-800"}`}
           >
             EN
           </button>
         </div>
         <Link
           href={`/courses/${course.slug}`}
-          className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+          className="rounded-full border border-[color:var(--stroke)] px-4 py-2 text-xs font-semibold text-emerald-900"
         >
           {t("courseDetails")}
         </Link>
@@ -812,9 +812,9 @@ export default function LearnPage() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[2.2fr,1fr]">
         <div className="space-y-6">
-          <div className="glass-card overflow-hidden rounded-3xl">
+          <div className="surface-card overflow-hidden rounded-3xl">
             {isExerciseLesson ? (
-              <div className="flex aspect-video items-center justify-center bg-emerald-50 text-center">
+              <div className="flex aspect-video items-center justify-center bg-[color:var(--brand-soft)] text-center">
                 <div className="space-y-2 px-6">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{t("exerciseStep")}</p>
                   <p className="text-sm text-emerald-900">
@@ -840,7 +840,7 @@ export default function LearnPage() {
               </div>
             )}
           </div>
-          <div className="glass-card rounded-3xl p-6">
+          <div className="surface-card rounded-3xl p-6">
             <h2 className="section-title text-2xl font-semibold text-emerald-950">
               {currentLesson?.title || t("lessonLabel")}
             </h2>
@@ -873,7 +873,7 @@ export default function LearnPage() {
                 }}
                 className={`rounded-full px-4 py-2 text-xs font-semibold ${
                   isLessonCompleted
-                    ? "border border-emerald-200 text-emerald-900"
+                    ? "border border-[color:var(--stroke)] text-emerald-900"
                     : "bg-emerald-700 text-white"
                 }`}
                 disabled={!currentLesson || isSyncing || isExerciseGateActive}
@@ -888,7 +888,7 @@ export default function LearnPage() {
                 type="button"
                 onClick={() => previousLesson && setSelectedLessonId(previousLesson.id)}
                 disabled={!previousLesson}
-                className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900 disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-full border border-[color:var(--stroke)] px-4 py-2 text-xs font-semibold text-emerald-900 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {t("previous")}
               </button>
@@ -910,11 +910,11 @@ export default function LearnPage() {
             </div>
             {isExerciseLesson && (
               currentExercise && exerciseReady ? (
-                <div className="mt-6 rounded-2xl border border-emerald-100 bg-white/70 p-4">
+                <div className="mt-6 rounded-2xl border border-[color:var(--stroke)] bg-white/70 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{t("lessonExercise")}</p>
                     {effectiveTimeLimitSeconds > 0 && (
-                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-semibold text-emerald-800">
+                      <span className="rounded-full bg-[color:var(--brand-soft)] px-3 py-1 text-[11px] font-semibold text-emerald-800">
                         {formatSeconds(remainingSeconds ?? effectiveTimeLimitSeconds)}
                       </span>
                     )}
@@ -933,7 +933,7 @@ export default function LearnPage() {
                       const options = [question.optionA, question.optionB, question.optionC, question.optionD];
 
                       return (
-                        <div key={`${currentLesson?.id}-question-${question.id}`} className="rounded-xl border border-emerald-100 bg-white p-3">
+                        <div key={`${currentLesson?.id}-question-${question.id}`} className="rounded-xl border border-[color:var(--stroke)] bg-white p-3">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
                             {t("questionLabel", { index: questionIndex + 1 })}
                           </p>
@@ -955,11 +955,11 @@ export default function LearnPage() {
                                   }}
                                   className={`flex w-full items-start gap-3 rounded-xl border px-3 py-2 text-left text-sm transition ${
                                     isSelected
-                                      ? "border-emerald-300 bg-emerald-50 text-emerald-900"
-                                      : "border-emerald-100 bg-white text-emerald-900 hover:border-emerald-200"
+                                      ? "border-[color:var(--brand)] bg-[color:var(--brand-soft)] text-emerald-900"
+                                      : "border-[color:var(--stroke)] bg-white text-emerald-900 hover:border-[color:var(--stroke)]"
                                   }`}
                                 >
-                                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-emerald-200 text-[11px] font-semibold text-emerald-700">
+                                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[color:var(--stroke)] text-[11px] font-semibold text-emerald-700">
                                     {String.fromCharCode(64 + optionNumber)}
                                   </span>
                                   <span>{option}</span>
@@ -1001,7 +1001,7 @@ export default function LearnPage() {
                     </div>
                   )}
                   {exerciseResult && (
-                    <div className="mt-3 rounded-xl bg-emerald-50/70 px-3 py-2 text-xs text-emerald-900">
+                    <div className="mt-3 rounded-xl bg-[color:var(--brand-soft)] px-3 py-2 text-xs text-emerald-900">
                       <p>{t("score", { score: exerciseResult.scorePercent.toFixed(2), correct: exerciseResult.correctAnswers, total: exerciseResult.totalQuestions })}</p>
                       <p>{t("passNeed", { percent: exerciseResult.passingPercent })}</p>
                       <p>{t("timeSpent", { spent: exerciseResult.timeSpentSeconds })}</p>
@@ -1039,12 +1039,12 @@ export default function LearnPage() {
         </div>
 
         <aside className="space-y-6">
-          <div className="glass-card rounded-3xl p-6">
+          <div className="surface-card rounded-3xl p-6">
             <h3 className="text-lg font-semibold text-emerald-950">{t("yourProgress")}</h3>
             <p className="mt-1 text-xs text-emerald-800/70">
               {t("lessonsCompleted", { completed: completedLessons, total: totalLessons || course.lessons.length })}
             </p>
-            <div className="mt-3 h-2 w-full rounded-full bg-emerald-100">
+            <div className="mt-3 h-2 w-full rounded-full bg-[color:var(--brand-soft)]">
               <div
                 className="h-2 rounded-full bg-emerald-600 transition-all"
                 style={{ width: `${Math.min(100, Math.max(0, progressPercent))}%` }}
@@ -1052,7 +1052,7 @@ export default function LearnPage() {
             </div>
             <p className="mt-2 text-xs text-emerald-800/70">{t("completePercent", { percent: progressPercent.toFixed(1) })}</p>
           </div>
-          <div className="glass-card rounded-3xl p-6">
+          <div className="surface-card rounded-3xl p-6">
             <h3 className="text-lg font-semibold text-emerald-950">{t("lessons")}</h3>
             <p className="mt-1 text-xs text-emerald-800/70">{t("lessonCount", { count: course.lessons.length })}</p>
             <div className="mt-4 space-y-2">
@@ -1071,10 +1071,10 @@ export default function LearnPage() {
                     disabled={isLockedByExerciseGate}
                     className={`flex w-full items-start gap-3 rounded-2xl border px-3 py-3 text-left text-sm transition ${
                       isActive
-                        ? "border-emerald-300 bg-emerald-50 text-emerald-900"
+                        ? "border-[color:var(--brand)] bg-[color:var(--brand-soft)] text-emerald-900"
                         : isLockedByExerciseGate
                           ? "border-transparent bg-white/70 text-emerald-800/50 opacity-60"
-                          : "border-transparent bg-white/70 text-emerald-800/80 hover:border-emerald-200"
+                          : "border-transparent bg-white/70 text-emerald-800/80 hover:border-[color:var(--stroke)]"
                     }`}
                   >
                     <span className="text-xs font-semibold text-emerald-700">{index + 1}</span>
@@ -1085,7 +1085,7 @@ export default function LearnPage() {
                       </span>
                     </span>
                     {isCompleted && (
-                      <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-700">
+                      <span className="rounded-full bg-[color:var(--brand-soft)] px-2 py-1 text-[10px] font-semibold text-emerald-700">
                         {t("done")}
                       </span>
                     )}
@@ -1099,7 +1099,7 @@ export default function LearnPage() {
               })}
             </div>
           </div>
-          <div className="glass-card rounded-3xl p-6 text-sm text-emerald-800/70">
+          <div className="surface-card rounded-3xl p-6 text-sm text-emerald-800/70">
             {t("help")}
           </div>
         </aside>
@@ -1107,3 +1107,6 @@ export default function LearnPage() {
     </div>
   );
 }
+
+
+

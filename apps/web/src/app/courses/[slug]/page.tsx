@@ -113,6 +113,13 @@ function formatDuration(totalMinutes: number, t: (en: string, vi: string) => str
   return `${hours} ${t("hours", "gio")} ${minutes} ${t("mins", "phut")}`;
 }
 
+function splitIntoItems(text: string) {
+  return text
+    .split(/\r?\n|\u2022|\|/g)
+    .map((item) => item.replace(/^\s*[-\u2013\u2022]\s*/, "").trim())
+    .filter((item) => item.length > 0);
+}
+
 async function getCourse(slug: string): Promise<CourseDetail | null> {
   try {
     const res = await fetch(`${API_URL}/api/courses/${slug}`, { cache: "no-store" });
@@ -185,44 +192,139 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   const averageRating = course.averageRating ?? 0;
   const reviewCount = course.reviewCount ?? 0;
   const studentCount = course.studentCount ?? 0;
+  const levelLabel = course.level || t("Beginner", "Co ban");
+  const languageLabel = course.language || t("English", "Tieng Anh");
+  const metaBadges = [course.category?.title, levelLabel, languageLabel].filter(Boolean) as string[];
+  if (isFlashSale) {
+    metaBadges.push(t("Flash sale", "Giam gia nhanh"));
+  }
+  const outcomeItems = splitIntoItems(course.outcome || "");
+  const requirementItems = splitIntoItems(course.requirements || "");
+  const lastUpdated = course.updatedAt || course.createdAt;
+  const lastUpdatedLabel = lastUpdated
+    ? new Intl.DateTimeFormat(locale === "vi" ? "vi-VN" : "en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }).format(new Date(lastUpdated))
+    : null;
+  const navItems = [
+    { id: "overview", label: t("Overview", "Tong quan") },
+    { id: "curriculum", label: t("Curriculum", "Chuong trinh") },
+    { id: "requirements", label: t("Requirements", "Yeu cau") },
+    { id: "about", label: t("About", "Gioi thieu") },
+    { id: "reviews", label: t("Reviews", "Danh gia") },
+  ];
+  if (relatedCourses.length > 0) {
+    navItems.push({ id: "related", label: t("Related", "Lien quan") });
+  }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-12 fade-in">
+    <div className="section-shell py-12 fade-in">
       <CourseViewTracker courseId={course.id} />
-      <div className="mb-10 space-y-3">
+      <div className="mb-10 space-y-4">
         <Link href="/courses" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
           {t("Courses", "Khoa hoc")}
         </Link>
         <h1 className="section-title text-4xl font-semibold text-emerald-950 md:text-5xl">{course.title}</h1>
         <p className="text-lg text-emerald-800/70">{course.shortDescription}</p>
-        <div className="flex flex-wrap items-center gap-3 text-sm text-emerald-800/70">
-          {course.category?.title && <span>{course.category.title}</span>}
-          <span>{course.level || t("Beginner", "Co ban")}</span>
-          <span>{course.language || t("English", "Tieng Anh")}</span>
-          <span>
-            {course.lessons.length} {t("lessons", "bai hoc")}
-          </span>
-          <span>
-            {studentCount} {t("students", "hoc vien")}
-          </span>
-          <span>
-            {averageRating.toFixed(1)} * ({reviewCount})
-          </span>
+        {metaBadges.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            {metaBadges.map((item) => (
+              <span key={item} className="badge">
+                {item}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-wrap gap-3 text-sm text-emerald-800/70">
+          <div className="stat-pill">
+            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
+              {t("Rating", "Danh gia")}
+            </span>
+            <span className="text-sm font-semibold text-emerald-950">
+              {averageRating.toFixed(1)} ({reviewCount})
+            </span>
+          </div>
+          <div className="stat-pill">
+            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
+              {t("Students", "Hoc vien")}
+            </span>
+            <span className="text-sm font-semibold text-emerald-950">
+              {studentCount} {t("enrolled", "dang hoc")}
+            </span>
+          </div>
+          <div className="stat-pill">
+            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
+              {t("Duration", "Thoi luong")}
+            </span>
+            <span className="text-sm font-semibold text-emerald-950">{totalDurationLabel}</span>
+          </div>
         </div>
+        <nav className="flex flex-wrap gap-4 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+          {navItems.map((item) => (
+            <a key={item.id} href={`#${item.id}`} className="underline-hover">
+              {item.label}
+            </a>
+          ))}
+        </nav>
       </div>
 
       <div className="grid gap-10 lg:grid-cols-[2fr,1fr]">
         <div className="space-y-8">
-          <section className="glass-card rounded-3xl p-6">
-            <h2 className="section-title text-2xl font-semibold text-emerald-950">
-              {t("What you will learn", "Ban se hoc duoc")}
-            </h2>
-            <p className="mt-3 text-sm text-emerald-800/70">
-              {course.outcome || t("Build practical skills.", "Xay dung ky nang thuc hanh.")}
-            </p>
+          <section id="overview" className="surface-card p-6">
+            <div className="grid gap-6 lg:grid-cols-[1.25fr,0.75fr]">
+              <div>
+                <h2 className="section-title text-2xl font-semibold text-emerald-950">
+                  {t("What you will learn", "Ban se hoc duoc")}
+                </h2>
+                <p className="mt-3 text-sm text-emerald-800/70">
+                  {course.outcome || t("Build practical skills.", "Xay dung ky nang thuc hanh.")}
+                </p>
+                {outcomeItems.length > 0 && (
+                  <ul className="mt-4 grid gap-3 md:grid-cols-2">
+                    {outcomeItems.map((item) => (
+                      <li key={item} className="flex items-start gap-3 text-sm text-emerald-900">
+                        <span className="mt-1 h-2 w-2 rounded-full bg-emerald-600/80" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div className="surface-muted p-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                  {t("Course at a glance", "Tong quan khoa hoc")}
+                </h3>
+                <dl className="mt-4 space-y-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <dt className="text-emerald-800/70">{t("Chapters", "Chuong")}</dt>
+                    <dd className="font-semibold text-emerald-950">{chapters.length}</dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt className="text-emerald-800/70">{t("Lessons", "Bai hoc")}</dt>
+                    <dd className="font-semibold text-emerald-950">{course.lessons.length}</dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt className="text-emerald-800/70">{t("Level", "Trinh do")}</dt>
+                    <dd className="font-semibold text-emerald-950">{levelLabel}</dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt className="text-emerald-800/70">{t("Language", "Ngon ngu")}</dt>
+                    <dd className="font-semibold text-emerald-950">{languageLabel}</dd>
+                  </div>
+                  {lastUpdatedLabel && (
+                    <div className="flex items-center justify-between">
+                      <dt className="text-emerald-800/70">{t("Last updated", "Cap nhat")}</dt>
+                      <dd className="font-semibold text-emerald-950">{lastUpdatedLabel}</dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            </div>
           </section>
 
-          <section className="glass-card rounded-3xl p-6">
+          <section id="curriculum" className="surface-card p-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="section-title text-2xl font-semibold text-emerald-950">
                 {t("Course curriculum", "Noi dung khoa hoc")}
@@ -235,7 +337,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               {chapters.map((chapter, index) => (
                 <details
                   key={chapter.key}
-                  className="group rounded-3xl border border-emerald-100 bg-white/70 p-4"
+                  className="group surface-muted p-4"
                   open={index < 2}
                 >
                   <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2">
@@ -259,24 +361,35 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             </div>
           </section>
 
-          <section className="glass-card rounded-3xl p-6">
+          <section id="requirements" className="surface-card p-6">
             <h2 className="section-title text-2xl font-semibold text-emerald-950">
               {t("Requirements", "Yeu cau")}
             </h2>
-            <p className="mt-3 text-sm text-emerald-800/70">
-              {course.requirements || t("No prerequisites.", "Khong yeu cau kien thuc truoc.")}
-            </p>
+            {requirementItems.length > 0 ? (
+              <ul className="mt-4 space-y-3 text-sm text-emerald-900">
+                {requirementItems.map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="mt-1 h-2 w-2 rounded-full bg-emerald-600/80" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-sm text-emerald-800/70">
+                {course.requirements || t("No prerequisites.", "Khong yeu cau kien thuc truoc.")}
+              </p>
+            )}
           </section>
 
-          <section className="glass-card rounded-3xl p-6">
+          <section id="about" className="surface-card p-6">
             <h2 className="section-title text-2xl font-semibold text-emerald-950">
               {t("About this course", "Gioi thieu khoa hoc")}
             </h2>
-            <p className="mt-3 text-sm text-emerald-800/70">{course.description}</p>
+            <p className="mt-3 whitespace-pre-line text-sm text-emerald-800/70">{course.description}</p>
           </section>
 
           {relatedCourses.length > 0 && (
-            <section className="glass-card rounded-3xl p-6">
+            <section id="related" className="surface-card p-6">
               <div className="flex items-center justify-between">
                 <h2 className="section-title text-2xl font-semibold text-emerald-950">
                   {t("Related courses", "Khoa hoc lien quan")}
@@ -290,11 +403,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             </section>
           )}
 
-          <CourseReviews courseId={course.id} courseSlug={course.slug} />
+          <section id="reviews">
+            <CourseReviews courseId={course.id} courseSlug={course.slug} />
+          </section>
         </div>
 
-        <aside className="space-y-6">
-          <div className="glass-card rounded-3xl p-6 shadow-sm">
+        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+          <div className="surface-card p-6 shadow-sm">
             <img src={imageUrl} alt={course.title} className="h-48 w-full rounded-2xl object-cover" />
             <div className="mt-5 flex items-baseline justify-between">
               <div className="flex items-baseline gap-3">
@@ -319,7 +434,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <CourseActions courseId={course.id} courseSlug={course.slug} />
             <Link
               href={`/learn/${course.slug}`}
-              className="mt-3 inline-flex w-full justify-center rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+              className="mt-3 inline-flex w-full justify-center rounded-full border border-[color:var(--stroke)] px-4 py-2 text-xs font-semibold text-emerald-900"
             >
               {t("Start learning", "Bat dau hoc")}
             </Link>
@@ -333,7 +448,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             </div>
           </div>
 
-          <div className="glass-card rounded-3xl p-6">
+          <div className="surface-card p-6">
             <h3 className="text-lg font-semibold text-emerald-950">
               {t("Need help deciding?", "Can tu van them?")}
             </h3>
@@ -345,7 +460,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             </p>
             <Link
               href="/register"
-              className="mt-4 inline-flex rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+              className="mt-4 inline-flex rounded-full border border-[color:var(--stroke)] px-4 py-2 text-xs font-semibold text-emerald-900"
             >
               {t("Book a consult", "Dat lich tu van")}
             </Link>
@@ -355,3 +470,5 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
     </div>
   );
 }
+
+

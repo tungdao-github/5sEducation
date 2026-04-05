@@ -23,6 +23,10 @@ export function GoogleSignInButton({
   const buttonContainerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const configHint = tx(
+    "Set NEXT_PUBLIC_GOOGLE_CLIENT_ID in apps/web/.env and GoogleAuth:ClientId in apps/api/appsettings.Development.json.",
+    "Can dat NEXT_PUBLIC_GOOGLE_CLIENT_ID trong apps/web/.env va GoogleAuth:ClientId trong apps/api/appsettings.Development.json."
+  );
 
   useEffect(() => {
     const clientId = getGoogleClientId();
@@ -92,14 +96,20 @@ export function GoogleSignInButton({
   }, [locale, mode, nextPath, router, tx]);
 
   const clientId = getGoogleClientId();
+  const showConfigHint =
+    error.toLowerCase().includes("not configured") ||
+    error.toLowerCase().includes("client id");
   if (!clientId) {
     return (
-      <p className="text-xs text-amber-700">
-        {tx(
-          "Google sign-in is not configured yet.",
-          "Dang nhap Google chua duoc cau hinh."
-        )}
-      </p>
+      <div className="space-y-1 text-center">
+        <p className="text-xs text-amber-700">
+          {tx(
+            "Google sign-in is not configured yet.",
+            "Dang nhap Google chua duoc cau hinh."
+          )}
+        </p>
+        <p className="text-[11px] text-amber-700/80">{configHint}</p>
+      </div>
     );
   }
 
@@ -113,6 +123,9 @@ export function GoogleSignInButton({
       )}
       {error && (
         <p className="text-center text-xs text-red-700">{error}</p>
+      )}
+      {showConfigHint && (
+        <p className="text-center text-[11px] text-amber-700">{configHint}</p>
       )}
     </div>
   );

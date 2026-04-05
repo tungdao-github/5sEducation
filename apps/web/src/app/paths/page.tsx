@@ -20,7 +20,7 @@ export default async function PathsPage() {
   const paths = await getLearningPaths();
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8 px-6 py-12 fade-in">
+    <div className="section-shell space-y-8 py-12 fade-in">
       <div className="space-y-2">
         <Link href="/" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
           {t("Home", "Trang chu")}
@@ -38,7 +38,7 @@ export default async function PathsPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {paths.length === 0 && (
-          <div className="glass-card rounded-2xl p-6 text-sm text-emerald-800/70">
+          <div className="surface-card p-6 text-sm text-emerald-800/70">
             {t("No learning paths yet.", "Chua co lo trinh hoc tap.")}
           </div>
         )}

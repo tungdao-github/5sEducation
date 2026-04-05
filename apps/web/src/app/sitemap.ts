@@ -51,6 +51,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/compare`,
       lastModified: now,
     },
+    {
+      url: `${baseUrl}/faq`,
+      lastModified: now,
+    },
+    {
+      url: `${baseUrl}/policy/privacy`,
+      lastModified: now,
+    },
+    {
+      url: `${baseUrl}/policy/terms`,
+      lastModified: now,
+    },
     ...courses.map((course) => ({
       url: `${baseUrl}/courses/${course.slug}`,
       lastModified: now,

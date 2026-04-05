@@ -69,13 +69,37 @@ export default async function HomePage() {
   const featuredPaths = learningPaths.slice(0, 4);
   const hasHeroBlock = blocks.some((block) => block.type === "hero");
   const hasCtaBlock = blocks.some((block) => block.type === "cta");
+  const hasFeatureBlock = blocks.some((block) => block.type === "feature");
+  const valueProps = [
+    {
+      title: t("Mentor-led studio sprints", "Sprint thuc chien co mentor"),
+      description: t(
+        "Weekly feedback cycles with senior mentors so you ship real portfolio work.",
+        "Review hang tuan voi mentor senior de ban hoan thanh case study that."
+      ),
+    },
+    {
+      title: t("Job-ready skill tracks", "Lo trinh ky nang san sang di lam"),
+      description: t(
+        "Structured paths for product, data, and engineering roles with clear milestones.",
+        "Lo trinh co cau truc cho product, data, va engineering voi moc tien do ro rang."
+      ),
+    },
+    {
+      title: t("Cohort learning community", "Cong dong hoc theo cohort"),
+      description: t(
+        "Small cohorts keep you accountable, supported, and moving fast with peers.",
+        "Cohort nho giup ban co dong luc va tien nhanh cung dong doi."
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-16 pb-16">
       {blocks.length > 0 && <HomeBlocks blocks={blocks} locale={locale} />}
       {!hasHeroBlock && (
         <section className="hero-grid fade-in">
-          <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[1.2fr,0.8fr]">
+          <div className="section-shell grid gap-10 py-16 lg:grid-cols-[1.2fr,0.8fr]">
             <div className="space-y-6">
               <span className="badge">{t("New season", "Mua hoc moi")}</span>
               <h1 className="section-title text-4xl font-semibold text-emerald-950 md:text-5xl">
@@ -90,7 +114,7 @@ export default async function HomePage() {
               <form
                 action="/courses"
                 method="get"
-                className="flex flex-col gap-3 rounded-3xl bg-white/80 p-4 shadow-sm ring-1 ring-emerald-100 sm:flex-row"
+                className="flex flex-col gap-3 rounded-3xl bg-white/80 p-4 shadow-sm ring-1 ring-[color:var(--stroke)] sm:flex-row"
               >
                 <SearchSuggestInput
                   name="q"
@@ -106,22 +130,22 @@ export default async function HomePage() {
                 </button>
               </form>
               <div className="flex flex-wrap gap-4 text-sm text-emerald-800/70">
-                <div className="glass-card rounded-2xl px-4 py-3">
+                <div className="stat-pill">
                   <p className="text-lg font-semibold text-emerald-950">{courses.length}</p>
                   <p>{t("Curated courses", "Khoa hoc chon loc")}</p>
                 </div>
-                <div className="glass-card rounded-2xl px-4 py-3">
+                <div className="stat-pill">
                   <p className="text-lg font-semibold text-emerald-950">120+</p>
                   <p>{t("Mentor hours", "Gio mentor")}</p>
                 </div>
-                <div className="glass-card rounded-2xl px-4 py-3">
+                <div className="stat-pill">
                   <p className="text-lg font-semibold text-emerald-950">95%</p>
                   <p>{t("Completion rate", "Ty le hoan thanh")}</p>
                 </div>
               </div>
             </div>
 
-            <div className="glass-card flex flex-col gap-6 rounded-3xl p-6">
+            <div className="surface-card flex flex-col gap-6 p-6">
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
                   {t("Featured", "Noi bat")}
@@ -136,7 +160,7 @@ export default async function HomePage() {
                   )}
                 </p>
               </div>
-              <div className="rounded-2xl bg-emerald-900/5 p-4">
+              <div className="surface-muted p-4">
                 <p className="text-sm font-semibold text-emerald-900">
                   {t("Next cohort starts", "Khai giang dot tiep theo")}
                 </p>
@@ -156,7 +180,26 @@ export default async function HomePage() {
         </section>
       )}
 
-      <section className="mx-auto w-full max-w-6xl space-y-6 px-6">
+      {!hasFeatureBlock && (
+        <section className="section-shell space-y-6">
+          <div>
+            <span className="section-eyebrow">{t("Why 5S", "Vi sao 5S")}</span>
+            <h2 className="section-title mt-3 text-3xl font-semibold text-emerald-950">
+              {t("A learning studio built for outcomes", "Studio hoc tap tap trung vao ket qua")}
+            </h2>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {valueProps.map((item) => (
+              <div key={item.title} className="surface-card space-y-3 p-6">
+                <h3 className="text-lg font-semibold text-emerald-950">{item.title}</h3>
+                <p className="text-sm text-emerald-800/70">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="section-shell space-y-6">
         <div>
           <h2 className="section-title text-3xl font-semibold text-emerald-950">
             {t("Popular categories", "Danh muc pho bien")}
@@ -167,7 +210,7 @@ export default async function HomePage() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger">
           {featuredCategories.length === 0 && (
-            <div className="glass-card rounded-2xl p-6 text-sm text-emerald-800/70">
+            <div className="surface-card p-6 text-sm text-emerald-800/70">
               {t(
                 "Categories will appear once you add them in the admin panel.",
                 "Danh muc se hien thi sau khi ban them trong trang admin."
@@ -178,7 +221,7 @@ export default async function HomePage() {
             <Link
               key={category.id}
               href={`/courses?category=${category.slug}`}
-              className="glass-card rounded-2xl p-6 transition hover:-translate-y-1"
+              className="surface-card p-6 transition hover:-translate-y-1"
             >
               <p className="text-sm font-semibold text-emerald-950">{category.title}</p>
               <p className="text-xs text-emerald-800/70">
@@ -189,7 +232,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl space-y-6 px-6">
+      <section className="section-shell space-y-6">
         <div className="flex items-end justify-between">
           <div>
             <h2 className="section-title text-3xl font-semibold text-emerald-950">
@@ -213,7 +256,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl space-y-6 px-6">
+      <section className="section-shell space-y-6">
         <div className="flex items-end justify-between">
           <div>
             <h2 className="section-title text-3xl font-semibold text-emerald-950">
@@ -229,7 +272,7 @@ export default async function HomePage() {
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 stagger">
           {featuredPaths.length === 0 && (
-            <div className="glass-card rounded-2xl p-6 text-sm text-emerald-800/70">
+            <div className="surface-card p-6 text-sm text-emerald-800/70">
               {t("Paths will appear once admin adds them.", "Lo trinh se hien sau khi admin them.")}
             </div>
           )}
@@ -240,8 +283,8 @@ export default async function HomePage() {
       </section>
 
       {!hasCtaBlock && (
-        <section className="mx-auto w-full max-w-6xl px-6">
-          <div className="glass-card grid gap-6 rounded-3xl p-10 lg:grid-cols-[1.2fr,0.8fr]">
+        <section className="section-shell">
+          <div className="surface-card grid gap-6 p-10 lg:grid-cols-[1.2fr,0.8fr]">
             <div className="space-y-4">
               <h2 className="section-title text-3xl font-semibold text-emerald-950">
                 {t("Build a learning journey for your team", "Xay dung hanh trinh hoc tap cho doi ngu")}

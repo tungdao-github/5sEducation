@@ -15,6 +15,27 @@ interface CartItem {
   quantity: number;
 }
 
+interface OrderItem {
+  id: number;
+  courseId: number;
+  courseTitle: string;
+  courseSlug: string;
+  unitPrice: number;
+  quantity: number;
+  lineTotal: number;
+}
+
+interface Order {
+  id: number;
+  status: string;
+  subtotal: number;
+  discountTotal: number;
+  total: number;
+  currency: string;
+  createdAt: string;
+  items: OrderItem[];
+}
+
 export default function CartPage() {
   const { tx } = useI18n();
   const [items, setItems] = useState<CartItem[]>([]);
@@ -22,6 +43,7 @@ export default function CartPage() {
   const [needsAuth, setNeedsAuth] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [checkoutSummary, setCheckoutSummary] = useState<CartItem[]>([]);
+  const [checkoutOrder, setCheckoutOrder] = useState<Order | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const loadCart = async () => {
@@ -74,11 +96,19 @@ export default function CartPage() {
     });
 
     if (res.ok) {
+      let order: Order | null = null;
+      try {
+        order = (await res.json()) as Order;
+      } catch {
+        order = null;
+      }
       setItems([]);
       setCheckoutSummary(snapshot);
+      setCheckoutOrder(order);
       setCheckoutSuccess(true);
     } else {
       setCheckoutSuccess(false);
+      setCheckoutOrder(null);
       const message = await res.text().catch(() => "");
       setCheckoutError(message || tx("Checkout failed. Please try again.", "Thanh toan that bai. Vui long thu lai."));
     }
@@ -91,8 +121,13 @@ export default function CartPage() {
     [items]
   );
 
+  const itemCount = useMemo(
+    () => items.reduce((sum, item) => sum + item.quantity, 0),
+    [items]
+  );
+
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8 px-6 py-12 fade-in">
+    <div className="section-shell space-y-8 py-12 fade-in">
       <div className="space-y-2">
         <Link href="/courses" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
           {tx("Courses", "Khoa hoc")}
@@ -103,10 +138,24 @@ export default function CartPage() {
         <p className="text-sm text-emerald-800/70">
           {tx("Review your selected courses.", "Kiem tra cac khoa hoc da chon.")}
         </p>
+        <div className="flex flex-wrap gap-3 text-sm text-emerald-800/70">
+          <div className="stat-pill">
+            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
+              {tx("Items", "So luong")}
+            </span>
+            <span className="text-sm font-semibold text-emerald-950">{itemCount}</span>
+          </div>
+          <div className="stat-pill">
+            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
+              {tx("Total", "Tong")}
+            </span>
+            <span className="text-sm font-semibold text-emerald-950">${totalPrice.toFixed(2)}</span>
+          </div>
+        </div>
       </div>
 
       {needsAuth ? (
-        <div className="glass-card rounded-3xl p-10 text-center">
+        <div className="surface-card p-10 text-center">
           <p className="text-sm text-emerald-800/70">
             {tx("Please sign in to view your cart.", "Vui long dang nhap de xem gio hang.")}
           </p>
@@ -118,12 +167,17 @@ export default function CartPage() {
           </Link>
         </div>
       ) : items.length === 0 ? (
-        <div className="glass-card rounded-3xl p-10 text-center text-sm text-emerald-800/70">
+        <div className="surface-card p-10 text-center text-sm text-emerald-800/70">
           {checkoutSuccess ? (
             <div className="space-y-4">
               <p className="text-sm text-emerald-900">
                 {tx("Order successful!", "Dat hang thanh cong!")}
               </p>
+              {checkoutOrder && (
+                <p className="text-xs text-emerald-800/70">
+                  {tx("Order", "Don hang")} #{checkoutOrder.id} - {checkoutOrder.currency} {checkoutOrder.total.toFixed(2)}
+                </p>
+              )}
               <p className="text-xs text-emerald-800/70">
                 {tx(
                   "Your courses are now available in My Learning.",
@@ -133,7 +187,7 @@ export default function CartPage() {
               {checkoutSummary.length > 0 && (
                 <div className="grid gap-3 md:grid-cols-2">
                   {checkoutSummary.map((item) => (
-                    <div key={item.courseId} className="rounded-2xl border border-emerald-100 bg-white/70 p-3 text-left">
+                    <div key={item.courseId} className="surface-muted p-3 text-left">
                       <p className="text-xs font-semibold text-emerald-950">{item.courseTitle}</p>
                       <p className="text-[11px] text-emerald-800/70">${item.price.toFixed(2)}</p>
                     </div>
@@ -147,15 +201,23 @@ export default function CartPage() {
                 >
                   {tx("Go to My Learning", "Den trang Hoc tap")}
                 </Link>
+                {checkoutOrder && (
+                  <Link
+                    href={`/orders/${checkoutOrder.id}`}
+                    className="rounded-full border border-[color:var(--stroke)] px-5 py-2 text-xs font-semibold text-emerald-900"
+                  >
+                    {tx("View order details", "Xem chi tiet don hang")}
+                  </Link>
+                )}
                 <Link
                   href="/orders"
-                  className="rounded-full border border-emerald-200 px-5 py-2 text-xs font-semibold text-emerald-900"
+                  className="rounded-full border border-[color:var(--stroke)] px-5 py-2 text-xs font-semibold text-emerald-900"
                 >
                   {tx("View orders", "Xem don hang")}
                 </Link>
                 <Link
                   href="/courses"
-                  className="rounded-full border border-emerald-200 px-5 py-2 text-xs font-semibold text-emerald-900"
+                  className="rounded-full border border-[color:var(--stroke)] px-5 py-2 text-xs font-semibold text-emerald-900"
                 >
                   {tx("Browse more courses", "Xem them khoa hoc")}
                 </Link>
@@ -168,8 +230,21 @@ export default function CartPage() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
           <div className="space-y-4">
+            <div className="surface-card flex flex-wrap items-center justify-between gap-3 p-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                  {tx("Cart items", "Khoa hoc trong gio")}
+                </p>
+                <p className="text-sm text-emerald-800/70">
+                  {tx("Manage your selection before checkout.", "Quan ly khoa hoc truoc khi thanh toan.")}
+                </p>
+              </div>
+              <span className="text-sm font-semibold text-emerald-950">
+                {itemCount} {tx("items", "khoa hoc")}
+              </span>
+            </div>
             {items.map((item) => (
-              <div key={item.id} className="glass-card flex flex-col gap-4 rounded-3xl p-4 md:flex-row">
+              <div key={item.id} className="surface-card flex flex-col gap-4 p-4 md:flex-row">
                 <img
                   src={resolveApiAsset(item.thumbnailUrl) || "/images/learning.jpg"}
                   alt={item.courseTitle}
@@ -189,7 +264,7 @@ export default function CartPage() {
                     <button
                       type="button"
                       onClick={() => handleRemove(item.courseId)}
-                      className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                      className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-xs font-semibold text-emerald-900"
                     >
                       {tx("Remove", "Xoa")}
                     </button>
@@ -199,19 +274,33 @@ export default function CartPage() {
             ))}
           </div>
 
-          <div className="glass-card h-fit rounded-3xl p-6">
-            <p className="text-sm text-emerald-800/70">{tx("Total", "Tong")}</p>
-            <p className="text-3xl font-semibold text-emerald-950">${totalPrice.toFixed(2)}</p>
+          <div className="surface-card h-fit space-y-4 p-6">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                {tx("Order summary", "Tong ket don hang")}
+              </p>
+              <p className="text-3xl font-semibold text-emerald-950">${totalPrice.toFixed(2)}</p>
+              <p className="text-xs text-emerald-800/70">
+                {tx("Includes", "Bao gom")} {itemCount} {tx("items", "khoa hoc")}
+              </p>
+            </div>
             {checkoutError && (
               <p className="mt-3 text-xs text-rose-600">{checkoutError}</p>
             )}
             <button
               type="button"
               onClick={handleCheckout}
-              className="mt-6 w-full rounded-full bg-emerald-700 px-6 py-3 text-sm font-semibold text-white"
+              className="w-full rounded-full bg-emerald-700 px-6 py-3 text-sm font-semibold text-white"
+              disabled={loading}
             >
               {loading ? tx("Processing...", "Dang xu ly...") : tx("Checkout", "Thanh toan")}
             </button>
+            <Link
+              href="/courses"
+              className="inline-flex w-full justify-center rounded-full border border-[color:var(--stroke)] px-6 py-2 text-xs font-semibold text-emerald-900"
+            >
+              {tx("Continue browsing", "Tiep tuc xem khoa hoc")}
+            </Link>
           </div>
         </div>
       )}

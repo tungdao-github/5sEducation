@@ -442,10 +442,114 @@ public static class SeedData
                     CtaUrl = "/register",
                     SortOrder = 20,
                     IsPublished = true
+                },
+                new HomePageBlock
+                {
+                    Key = "stats-default",
+                    Type = "stats",
+                    Title = "Proof of outcomes",
+                    Subtitle = "Highlights",
+                    ItemsJson = "[{\"value\":\"120+\",\"label\":\"Mentor hours\",\"subLabel\":\"Weekly review cycles\"},{\"value\":\"95%\",\"label\":\"Completion rate\"},{\"value\":\"50+\",\"label\":\"Hiring partners\"},{\"value\":\"7d\",\"label\":\"Project sprint\",\"subLabel\":\"From brief to delivery\"}]",
+                    Locale = "en",
+                    SortOrder = 12,
+                    IsPublished = true
+                },
+                new HomePageBlock
+                {
+                    Key = "stats-default-vi",
+                    Type = "stats",
+                    Title = "So lieu noi bat",
+                    Subtitle = "Thanh tuu",
+                    ItemsJson = "[{\"value\":\"120+\",\"label\":\"Gio mentor\",\"subLabel\":\"Review hang tuan\"},{\"value\":\"95%\",\"label\":\"Ty le hoan thanh\"},{\"value\":\"50+\",\"label\":\"Doi tac tuyen dung\"},{\"value\":\"7 ngay\",\"label\":\"Sprint du an\",\"subLabel\":\"Tu brief den delivery\"}]",
+                    Locale = "vi",
+                    SortOrder = 12,
+                    IsPublished = true
+                },
+                new HomePageBlock
+                {
+                    Key = "testimonial-default",
+                    Type = "testimonial",
+                    Title = "Learners share the impact",
+                    Subtitle = "Testimonials",
+                    ItemsJson = "[{\"quote\":\"Clear feedback loops and practical projects kept me shipping every week.\",\"name\":\"Minh Tran\",\"role\":\"Product Designer\",\"company\":\"Fintech\"},{\"quote\":\"The mentor sessions felt like real product reviews — super actionable.\",\"name\":\"Le Quang\",\"role\":\"Frontend Engineer\",\"company\":\"SaaS\"},{\"quote\":\"I finally built a portfolio case study I am proud to show.\",\"name\":\"Ngoc Anh\",\"role\":\"Business Analyst\",\"company\":\"Consulting\"}]",
+                    Locale = "en",
+                    SortOrder = 14,
+                    IsPublished = true
+                },
+                new HomePageBlock
+                {
+                    Key = "testimonial-default-vi",
+                    Type = "testimonial",
+                    Title = "Hoc vien noi gi",
+                    Subtitle = "Danh gia",
+                    ItemsJson = "[{\"quote\":\"Co feedback ro rang nen tuan nao minh cung ship du an.\",\"name\":\"Minh Tran\",\"role\":\"Product Designer\",\"company\":\"Fintech\"},{\"quote\":\"Mentor review nhu review san pham that, rat de ap dung.\",\"name\":\"Le Quang\",\"role\":\"Frontend Engineer\",\"company\":\"SaaS\"},{\"quote\":\"Lan dau tien minh co case study portfolio day du.\",\"name\":\"Ngoc Anh\",\"role\":\"Business Analyst\",\"company\":\"Consulting\"}]",
+                    Locale = "vi",
+                    SortOrder = 14,
+                    IsPublished = true
                 }
             );
             await db.SaveChangesAsync();
         }
+        else
+        {
+            var existingKeys = await db.HomePageBlocks.Select(b => b.Key).ToListAsync();
+            var extraBlocks = new List<HomePageBlock>
+            {
+                new HomePageBlock
+                {
+                    Key = "stats-default",
+                    Type = "stats",
+                    Title = "Proof of outcomes",
+                    Subtitle = "Highlights",
+                    ItemsJson = "[{\"value\":\"120+\",\"label\":\"Mentor hours\",\"subLabel\":\"Weekly review cycles\"},{\"value\":\"95%\",\"label\":\"Completion rate\"},{\"value\":\"50+\",\"label\":\"Hiring partners\"},{\"value\":\"7d\",\"label\":\"Project sprint\",\"subLabel\":\"From brief to delivery\"}]",
+                    Locale = "en",
+                    SortOrder = 12,
+                    IsPublished = true
+                },
+                new HomePageBlock
+                {
+                    Key = "stats-default-vi",
+                    Type = "stats",
+                    Title = "So lieu noi bat",
+                    Subtitle = "Thanh tuu",
+                    ItemsJson = "[{\"value\":\"120+\",\"label\":\"Gio mentor\",\"subLabel\":\"Review hang tuan\"},{\"value\":\"95%\",\"label\":\"Ty le hoan thanh\"},{\"value\":\"50+\",\"label\":\"Doi tac tuyen dung\"},{\"value\":\"7 ngay\",\"label\":\"Sprint du an\",\"subLabel\":\"Tu brief den delivery\"}]",
+                    Locale = "vi",
+                    SortOrder = 12,
+                    IsPublished = true
+                },
+                new HomePageBlock
+                {
+                    Key = "testimonial-default",
+                    Type = "testimonial",
+                    Title = "Learners share the impact",
+                    Subtitle = "Testimonials",
+                    ItemsJson = "[{\"quote\":\"Clear feedback loops and practical projects kept me shipping every week.\",\"name\":\"Minh Tran\",\"role\":\"Product Designer\",\"company\":\"Fintech\"},{\"quote\":\"The mentor sessions felt like real product reviews — super actionable.\",\"name\":\"Le Quang\",\"role\":\"Frontend Engineer\",\"company\":\"SaaS\"},{\"quote\":\"I finally built a portfolio case study I am proud to show.\",\"name\":\"Ngoc Anh\",\"role\":\"Business Analyst\",\"company\":\"Consulting\"}]",
+                    Locale = "en",
+                    SortOrder = 14,
+                    IsPublished = true
+                },
+                new HomePageBlock
+                {
+                    Key = "testimonial-default-vi",
+                    Type = "testimonial",
+                    Title = "Hoc vien noi gi",
+                    Subtitle = "Danh gia",
+                    ItemsJson = "[{\"quote\":\"Co feedback ro rang nen tuan nao minh cung ship du an.\",\"name\":\"Minh Tran\",\"role\":\"Product Designer\",\"company\":\"Fintech\"},{\"quote\":\"Mentor review nhu review san pham that, rat de ap dung.\",\"name\":\"Le Quang\",\"role\":\"Frontend Engineer\",\"company\":\"SaaS\"},{\"quote\":\"Lan dau tien minh co case study portfolio day du.\",\"name\":\"Ngoc Anh\",\"role\":\"Business Analyst\",\"company\":\"Consulting\"}]",
+                    Locale = "vi",
+                    SortOrder = 14,
+                    IsPublished = true
+                }
+            };
+
+            var newBlocks = extraBlocks.Where(block => !existingKeys.Contains(block.Key)).ToList();
+            if (newBlocks.Count > 0)
+            {
+                db.HomePageBlocks.AddRange(newBlocks);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        await EnsureSystemSettingsAsync(db);
 
         if (!await db.BlogPosts.AnyAsync())
         {
@@ -641,5 +745,33 @@ public static class SeedData
         {
             await db.SaveChangesAsync();
         }
+    }
+
+    private static async Task EnsureSystemSettingsAsync(ApplicationDbContext db)
+    {
+        var defaults = new List<SystemSetting>
+        {
+            new() { Key = "siteName", Value = "5S Education", Group = "branding", Description = "Site display name" },
+            new() { Key = "logoUrl", Value = "/frontend/img/logo.svg", Group = "branding", Description = "Logo image URL" },
+            new() { Key = "footerTagline", Value = "Curated learning paths, expert-led classes, and hands-on projects to get you job-ready.", Group = "footer" },
+            new() { Key = "footerNote", Value = "Designed for skill-first teams.", Group = "footer" },
+            new() { Key = "contactEmail", Value = "hello@lumen.academy", Group = "contact" },
+            new() { Key = "contactPhone", Value = "+1 (415) 555-0199", Group = "contact" },
+            new() { Key = "contactAddress", Value = "San Francisco, CA", Group = "contact" },
+            new() { Key = "socialFacebook", Value = "", Group = "social" },
+            new() { Key = "socialLinkedIn", Value = "", Group = "social" },
+            new() { Key = "socialYoutube", Value = "", Group = "social" },
+            new() { Key = "cacheVersion", Value = DateTime.UtcNow.Ticks.ToString(), Group = "system" }
+        };
+
+        var existingKeys = await db.SystemSettings.Select(s => s.Key).ToListAsync();
+        var missing = defaults.Where(d => !existingKeys.Contains(d.Key)).ToList();
+        if (missing.Count == 0)
+        {
+            return;
+        }
+
+        db.SystemSettings.AddRange(missing);
+        await db.SaveChangesAsync();
     }
 }

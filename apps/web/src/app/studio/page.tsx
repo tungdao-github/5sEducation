@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -48,7 +48,7 @@ export default function StudioPage() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8 px-6 py-12 fade-in">
+    <div className="section-shell space-y-8 py-12 fade-in">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
           <Link href="/" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
@@ -70,7 +70,7 @@ export default function StudioPage() {
       </div>
 
       {needsAuth ? (
-        <div className="glass-card rounded-3xl p-10 text-center">
+        <div className="surface-card rounded-3xl p-10 text-center">
           <p className="text-sm text-emerald-800/70">
             {tx("Please sign in to access Studio.", "Vui long dang nhap de vao Studio.")}
           </p>
@@ -82,13 +82,13 @@ export default function StudioPage() {
           </Link>
         </div>
       ) : courses.length === 0 ? (
-        <div className="glass-card rounded-3xl p-10 text-center text-sm text-emerald-800/70">
+        <div className="surface-card rounded-3xl p-10 text-center text-sm text-emerald-800/70">
           {tx("No courses yet. Create your first course to get started.", "Chua co khoa hoc. Hay tao khoa hoc dau tien.")}
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 stagger">
           {courses.map((course) => (
-            <div key={course.id} className="glass-card rounded-3xl p-4">
+            <div key={course.id} className="surface-card rounded-3xl p-4">
               <img
                 src={resolveApiAsset(course.thumbnailUrl) || "/images/learning.jpg"}
                 alt={course.title}
@@ -102,7 +102,7 @@ export default function StudioPage() {
                   <span
                     className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
                       course.isPublished
-                        ? "bg-emerald-100 text-emerald-900"
+                        ? "bg-[color:var(--brand-soft)] text-emerald-900"
                         : "bg-amber-100 text-amber-900"
                     }`}
                   >
@@ -116,7 +116,7 @@ export default function StudioPage() {
                 </p>
                 <Link
                   href={`/studio/${course.id}`}
-                  className="inline-flex rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+                  className="inline-flex rounded-full border border-[color:var(--stroke)] px-4 py-2 text-xs font-semibold text-emerald-900"
                 >
                   {tx("Edit course", "Sua khoa hoc")}
                 </Link>
@@ -128,3 +128,5 @@ export default function StudioPage() {
     </div>
   );
 }
+
+

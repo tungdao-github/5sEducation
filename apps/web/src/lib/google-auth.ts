@@ -96,6 +96,10 @@ export async function loadGoogleIdentityScript() {
 
   if (!googleScriptPromise) {
     googleScriptPromise = new Promise<void>((resolve, reject) => {
+      const rejectWithReset = (error: Error) => {
+        googleScriptPromise = null;
+        reject(error);
+      };
       const existingScript = document.querySelector<HTMLScriptElement>(
         'script[src="https://accounts.google.com/gsi/client"]'
       );
@@ -106,7 +110,7 @@ export async function loadGoogleIdentityScript() {
         });
         existingScript.addEventListener(
           "error",
-          () => reject(new Error("Could not load Google script.")),
+          () => rejectWithReset(new Error("Could not load Google script.")),
           { once: true }
         );
         return;
@@ -117,7 +121,7 @@ export async function loadGoogleIdentityScript() {
       script.async = true;
       script.defer = true;
       script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Could not load Google script."));
+      script.onerror = () => rejectWithReset(new Error("Could not load Google script."));
       document.head.appendChild(script);
     });
   }

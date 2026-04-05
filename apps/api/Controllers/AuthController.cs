@@ -477,7 +477,10 @@ public class AuthController : ControllerBase
             FirstName = user.FirstName ?? string.Empty,
             LastName = user.LastName ?? string.Empty,
             AvatarUrl = user.AvatarUrl,
-            IsAdmin = roles.Contains("Admin")
+            IsAdmin = roles.Contains("Admin"),
+            Roles = roles.ToList(),
+            LoyaltyPoints = user.LoyaltyPoints,
+            LoyaltyTier = string.IsNullOrWhiteSpace(user.LoyaltyTier) ? "Bronze" : user.LoyaltyTier
         };
     }
 

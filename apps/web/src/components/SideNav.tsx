@@ -141,7 +141,7 @@ function ShieldIcon() {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+    <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">
       {children}
     </p>
   );
@@ -218,7 +218,7 @@ export function SideNav() {
   };
 
   return (
-    <aside className="hidden w-60 shrink-0 border-r border-slate-200/70 bg-white/90 px-4 pb-8 pt-6 lg:flex lg:flex-col">
+    <aside className="hidden w-60 shrink-0 border-r border-[color:var(--stroke)] bg-white/90 px-4 pb-8 pt-6 lg:flex lg:flex-col">
       <div className="sticky top-24 flex h-[calc(100vh-6rem)] flex-col gap-6 overflow-y-auto pr-2">
         {sections.map((section) => (
           <div key={section.title} className="space-y-3">
@@ -231,7 +231,7 @@ export function SideNav() {
                     key={item.href}
                     href={item.href}
                     className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                      active ? "bg-blue-600 text-white shadow-sm" : "text-slate-700 hover:bg-slate-100/80"
+                      active ? "bg-emerald-700 text-white shadow-sm" : "text-[color:var(--muted)] hover:bg-slate-100/80"
                     }`}
                   >
                     <span className={active ? "text-white" : "text-slate-500"}>{item.icon}</span>

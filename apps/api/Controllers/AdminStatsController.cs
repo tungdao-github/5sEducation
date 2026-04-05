@@ -23,6 +23,7 @@ public class AdminStatsController : ControllerBase
     {
         var now = DateTime.UtcNow;
         var startDate = now.Date.AddDays(-6);
+        var revenueStart = now.Date.AddDays(-29);
         var since30d = now.Date.AddDays(-30);
 
         var totalUsersTask = _db.Users.CountAsync();
@@ -54,6 +55,39 @@ public class AdminStatsController : ControllerBase
             })
             .ToListAsync();
 
+        var revenueDailyTask = _db.Orders
+            .Where(o => o.Status == "paid" && o.CreatedAt >= revenueStart)
+            .GroupBy(o => o.CreatedAt.Date)
+            .Select(group => new
+            {
+                Date = group.Key,
+                Value = group.Sum(o => o.Total)
+            })
+            .ToListAsync();
+
+        var ordersByStatusTask = _db.Orders
+            .GroupBy(o => o.Status)
+            .Select(group => new StatusCountDto
+            {
+                Status = group.Key,
+                Count = group.Count()
+            })
+            .ToListAsync();
+
+        var topCoursesTask = _db.OrderItems
+            .Where(item => item.Order != null && item.Order.Status == "paid")
+            .GroupBy(item => new { item.CourseId, item.CourseTitle })
+            .Select(group => new TopCourseRevenueDto
+            {
+                CourseId = group.Key.CourseId,
+                CourseTitle = group.Key.CourseTitle,
+                Revenue = group.Sum(item => item.LineTotal),
+                Orders = group.Select(item => item.OrderId).Distinct().Count()
+            })
+            .OrderByDescending(item => item.Revenue)
+            .Take(5)
+            .ToListAsync();
+
         await Task.WhenAll(
             totalUsersTask,
             totalCoursesTask,
@@ -64,7 +98,10 @@ public class AdminStatsController : ControllerBase
             averageRatingTask,
             revenueTask,
             activeStudentsTask,
-            dailyRawTask
+            dailyRawTask,
+            revenueDailyTask,
+            ordersByStatusTask,
+            topCoursesTask
         );
 
         var dailyLookup = dailyRawTask.Result
@@ -81,6 +118,20 @@ public class AdminStatsController : ControllerBase
             });
         }
 
+        var revenueLookup = revenueDailyTask.Result
+            .ToDictionary(item => item.Date.Date, item => item.Value);
+
+        var revenueDaily = new List<DailyValueDto>();
+        for (var i = 0; i < 30; i++)
+        {
+            var day = revenueStart.AddDays(i);
+            revenueDaily.Add(new DailyValueDto
+            {
+                Date = day.ToString("yyyy-MM-dd"),
+                Value = revenueLookup.TryGetValue(day, out var value) ? value : 0
+            });
+        }
+
         return Ok(new AdminStatsOverviewDto
         {
             TotalUsers = totalUsersTask.Result,
@@ -92,7 +143,10 @@ public class AdminStatsController : ControllerBase
             ActiveStudents30d = activeStudentsTask.Result,
             TotalRevenue = revenueTask.Result,
             AverageRating = averageRatingTask.Result ?? 0,
-            EnrollmentsLast7Days = dailyCounts
+            EnrollmentsLast7Days = dailyCounts,
+            RevenueLast30Days = revenueDaily,
+            OrdersByStatus = ordersByStatusTask.Result,
+            TopCoursesByRevenue = topCoursesTask.Result
         });
     }
 }

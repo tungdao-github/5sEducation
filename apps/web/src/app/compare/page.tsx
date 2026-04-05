@@ -121,9 +121,18 @@ export default function ComparePage() {
     { label: tx("Outcome", "Ket qua"), render: (c: CourseCompareDto) => c.outcome || "-" },
     { label: tx("Requirements", "Yeu cau"), render: (c: CourseCompareDto) => c.requirements || "-" },
   ];
+  const courseCount = courses.length;
+  const averageRating =
+    courses.length > 0
+      ? courses.reduce((sum, item) => sum + (item.averageRating || 0), 0) / courses.length
+      : 0;
+  const averagePrice =
+    courses.length > 0
+      ? courses.reduce((sum, item) => sum + (item.effectivePrice ?? item.price ?? 0), 0) / courses.length
+      : 0;
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-10 px-6 py-12 fade-in">
+    <div className="section-shell space-y-10 py-12 fade-in">
       <div className="space-y-3">
         <Link href="/" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
           {tx("Home", "Trang chu")}
@@ -137,27 +146,59 @@ export default function ComparePage() {
             "So sanh toi da 3 khoa hoc de chon lua phu hop."
           )}
         </p>
+        <div className="flex flex-wrap gap-3 text-sm text-emerald-800/70">
+          <div className="stat-pill">
+            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
+              {tx("Selected", "Da chon")}
+            </span>
+            <span className="text-sm font-semibold text-emerald-950">{courseCount}</span>
+          </div>
+          <div className="stat-pill">
+            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
+              {tx("Avg rating", "Danh gia TB")}
+            </span>
+            <span className="text-sm font-semibold text-emerald-950">
+              {courseCount ? averageRating.toFixed(1) : "-"}
+            </span>
+          </div>
+          <div className="stat-pill">
+            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
+              {tx("Avg price", "Gia TB")}
+            </span>
+            <span className="text-sm font-semibold text-emerald-950">
+              {courseCount ? formatPrice(averagePrice) : "-"}
+            </span>
+          </div>
+        </div>
       </div>
 
       {courses.length === 0 ? (
-        <div className="glass-card rounded-3xl p-10 text-center text-sm text-emerald-800/70">
+        <div className="surface-card p-10 text-center text-sm text-emerald-800/70">
           {tx("No courses selected. Use Compare on a course card.", "Chua co khoa hoc nao. Hay bam So sanh tren the khoa hoc.")}
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                {tx("Comparison table", "Bang so sanh")}
+              </p>
+              <p className="text-sm text-emerald-800/70">
+                {tx("Scan differences by row.", "Quet nhanh theo tung dong thong tin.")}
+              </p>
+            </div>
             <button
               type="button"
               onClick={clearAll}
-              className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+              className="rounded-full border border-[color:var(--stroke)] px-4 py-2 text-xs font-semibold text-emerald-900"
             >
               {tx("Clear all", "Xoa tat ca")}
             </button>
           </div>
 
-          <div className="overflow-x-auto rounded-3xl border border-emerald-100 bg-white/80">
+          <div className="overflow-x-auto rounded-3xl border border-[color:var(--stroke)] bg-white/80">
             <div className="min-w-[720px]">
-              <div className="grid grid-cols-[220px_repeat(3,1fr)] gap-0 border-b border-emerald-100">
+              <div className="grid grid-cols-[220px_repeat(3,1fr)] gap-0 border-b border-[color:var(--stroke)]">
                 <div className="p-4 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
                   {tx("Course", "Khoa hoc")}
                 </div>
@@ -179,7 +220,7 @@ export default function ComparePage() {
                         <button
                           type="button"
                           onClick={() => remove(course.id)}
-                          className="rounded-full border border-emerald-200 px-3 py-1 text-[11px] font-semibold text-emerald-900"
+                          className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-[11px] font-semibold text-emerald-900"
                         >
                           {tx("Remove", "Xoa")}
                         </button>
@@ -190,7 +231,7 @@ export default function ComparePage() {
               </div>
 
               {rows.map((row) => (
-                <div key={row.label} className="grid grid-cols-[220px_repeat(3,1fr)] border-b border-emerald-100">
+                <div key={row.label} className="grid grid-cols-[220px_repeat(3,1fr)] border-b border-[color:var(--stroke)]">
                   <div className="p-4 text-xs font-semibold text-emerald-900">{row.label}</div>
                   {courses.map((course) => (
                     <div key={course.id} className="p-4 text-xs text-emerald-800/80">
@@ -206,3 +247,4 @@ export default function ComparePage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -157,7 +157,7 @@ export function CourseActions({
         type="button"
         onClick={saveWishlist}
         disabled={loading !== null}
-        className="rounded-full border border-emerald-200 px-5 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-70"
+        className="rounded-full border border-[color:var(--stroke)] px-5 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-[color:var(--brand-soft)] disabled:cursor-not-allowed disabled:opacity-70"
       >
         {loading === "wishlist"
           ? tx("Saving...", "Dang luu...")
@@ -167,7 +167,7 @@ export function CourseActions({
         type="button"
         onClick={enrollNow}
         disabled={loading !== null}
-        className="rounded-full border border-emerald-200 px-5 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-70"
+        className="rounded-full border border-[color:var(--stroke)] px-5 py-3 text-sm font-semibold text-emerald-900 transition hover:bg-[color:var(--brand-soft)] disabled:cursor-not-allowed disabled:opacity-70"
       >
         {loading === "enroll"
           ? tx("Enrolling...", "Dang dang ky...")
@@ -176,3 +176,4 @@ export function CourseActions({
     </div>
   );
 }
+

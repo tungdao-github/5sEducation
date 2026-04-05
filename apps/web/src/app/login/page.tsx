@@ -102,8 +102,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-16 fade-in">
-      <div className="glass-card mx-auto max-w-md rounded-3xl p-8">
+    <div className="section-shell py-16 fade-in">
+      <div className="surface-card mx-auto max-w-md p-8">
         <h1 className="section-title text-3xl font-semibold text-emerald-950">
           {tx("Welcome back", "Chao mung tro lai")}
         </h1>
@@ -111,14 +111,14 @@ export default function LoginPage() {
           {tx("Sign in to continue your learning journey.", "Dang nhap de tiep tuc hanh trinh hoc tap.")}
         </p>
 
-        <div className="mt-4 rounded-2xl border border-emerald-100 bg-white/70 p-4">
+        <div className="surface-muted mt-4 p-4">
           <GoogleSignInButton nextPath={nextPath} mode="signin" />
         </div>
 
         <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-emerald-700/70">
-          <span className="h-px flex-1 bg-emerald-100" />
+          <span className="h-px flex-1 bg-[color:var(--stroke)]" />
           <span>{tx("Or continue with email", "Hoac dang nhap bang email")}</span>
-          <span className="h-px flex-1 bg-emerald-100" />
+          <span className="h-px flex-1 bg-[color:var(--stroke)]" />
         </div>
 
         {error && (
@@ -150,7 +150,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-emerald-950 focus:outline-none"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm text-emerald-950 focus:outline-none"
             />
           </div>
 
@@ -167,7 +167,7 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-emerald-950 focus:outline-none"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm text-emerald-950 focus:outline-none"
             />
           </div>
 

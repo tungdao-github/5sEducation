@@ -109,7 +109,7 @@ public class CartController : ControllerBase
     }
 
     [HttpPost("checkout")]
-    public async Task<IActionResult> Checkout()
+    public async Task<ActionResult<OrderDto>> Checkout()
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (userId is null)
@@ -186,6 +186,15 @@ public class CartController : ControllerBase
         }
 
         _db.CartItems.RemoveRange(items);
+        var loyaltyUser = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (loyaltyUser != null)
+        {
+            var pointsEarned = CalculateLoyaltyPoints(order.Total);
+            loyaltyUser.LoyaltyPoints += pointsEarned;
+            loyaltyUser.LoyaltyTier = ResolveLoyaltyTier(loyaltyUser.LoyaltyPoints);
+            loyaltyUser.LoyaltyUpdatedAt = now;
+        }
+
         await _db.SaveChangesAsync();
         await transaction.CommitAsync();
 
@@ -214,7 +223,64 @@ public class CartController : ControllerBase
             // ignore email errors to avoid blocking checkout
         }
 
-        return Ok();
+        return Ok(MapOrder(order));
+    }
+
+    private static int CalculateLoyaltyPoints(decimal total)
+    {
+        if (total <= 0)
+        {
+            return 0;
+        }
+
+        return (int)Math.Round(total, MidpointRounding.AwayFromZero);
+    }
+
+    private static string ResolveLoyaltyTier(int points)
+    {
+        if (points >= 1000)
+        {
+            return "Platinum";
+        }
+
+        if (points >= 500)
+        {
+            return "Gold";
+        }
+
+        if (points >= 200)
+        {
+            return "Silver";
+        }
+
+        return "Bronze";
+    }
+
+    private static OrderDto MapOrder(Order order)
+    {
+        return new OrderDto
+        {
+            Id = order.Id,
+            Status = order.Status,
+            Subtotal = order.Subtotal,
+            DiscountTotal = order.DiscountTotal,
+            Total = order.Total,
+            Currency = order.Currency,
+            CreatedAt = order.CreatedAt,
+            Items = order.Items
+                .OrderBy(i => i.Id)
+                .Select(i => new OrderItemDto
+                {
+                    Id = i.Id,
+                    CourseId = i.CourseId,
+                    CourseTitle = i.CourseTitle,
+                    CourseSlug = i.CourseSlug,
+                    UnitPrice = i.UnitPrice,
+                    Quantity = i.Quantity,
+                    LineTotal = i.LineTotal
+                })
+                .ToList()
+        };
     }
 
     private static bool IsFlashSaleActive(Course course, DateTime now)

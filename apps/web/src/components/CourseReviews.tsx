@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -69,10 +69,10 @@ export function CourseReviews({ courseId, courseSlug }: { courseId: number; cour
     ? reviews.reduce((sum, item) => sum + item.rating, 0) / reviews.length
     : 0;
   const rounded = Math.round(average);
-  const stars = Array.from({ length: 5 }, (_, i) => (i < rounded ? "★" : "☆")).join("");
+  const stars = Array.from({ length: 5 }, (_, i) => (i < rounded ? "\u2605" : "\u2606")).join("");
 
   return (
-    <section className="glass-card space-y-6 rounded-3xl p-6">
+    <section className="surface-card space-y-6 rounded-3xl p-6">
       <div className="flex flex-col gap-2">
         <h2 className="section-title text-2xl font-semibold text-emerald-950">
           {tx("Student feedback", "Danh gia hoc vien")}
@@ -91,7 +91,7 @@ export function CourseReviews({ courseId, courseSlug }: { courseId: number; cour
           <select
             value={rating}
             onChange={(e) => setRating(Number(e.currentTarget.value))}
-            className="rounded-2xl border border-emerald-100 bg-white px-3 py-2 text-sm"
+            className="rounded-2xl border border-[color:var(--stroke)] bg-white px-3 py-2 text-sm"
           >
             {[5, 4, 3, 2, 1].map((value) => (
               <option key={value} value={value}>
@@ -103,7 +103,7 @@ export function CourseReviews({ courseId, courseSlug }: { courseId: number; cour
             value={comment}
             onChange={(e) => setComment(e.currentTarget.value)}
             placeholder={tx("Write your feedback", "Viet nhan xet cua ban")}
-            className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-2 text-sm"
+            className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm"
           />
         </div>
         <div className="flex items-center gap-3">
@@ -134,10 +134,11 @@ export function CourseReviews({ courseId, courseSlug }: { courseId: number; cour
               <span>{new Date(review.createdAt).toLocaleDateString()}</span>
             </div>
             <div className="mt-2 text-sm text-emerald-900">{review.comment}</div>
-            <div className="mt-1 text-xs text-amber-500">{"★".repeat(review.rating)}</div>
+            <div className="mt-1 text-xs text-amber-500">{"\u2605".repeat(review.rating)}</div>
           </div>
         ))}
       </div>
     </section>
   );
 }
+

@@ -48,7 +48,7 @@ export function CourseCard({ course, locale = "en" }: { course: CourseSummary; l
   const isFlashSale = Boolean(course.isFlashSaleActive && originalPrice);
 
   return (
-    <article className="glass-card flex h-full flex-col gap-4 rounded-3xl p-4 shadow-sm">
+    <article className="surface-card flex h-full flex-col gap-4 p-4">
       <div className="relative overflow-hidden rounded-2xl">
         <img
           src={imageUrl}
@@ -57,7 +57,7 @@ export function CourseCard({ course, locale = "en" }: { course: CourseSummary; l
           loading="lazy"
           decoding="async"
         />
-        <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold text-emerald-900">
+        <span className="badge absolute left-3 top-3 bg-white/90">
           {course.level || "Beginner"}
         </span>
         {isFlashSale && (
@@ -69,7 +69,7 @@ export function CourseCard({ course, locale = "en" }: { course: CourseSummary; l
 
       <div className="flex flex-1 flex-col gap-3">
         {course.category?.title && (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
+          <p className="section-eyebrow">
             {course.category.title}
           </p>
         )}

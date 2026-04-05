@@ -137,6 +137,36 @@ export default async function CoursesPage({
   const nextPage = currentPage < totalPages ? currentPage + 1 : null;
   const startIndex = totalCourses === 0 ? 0 : (currentPage - 1) * resolvedPageSize + 1;
   const endIndex = totalCourses === 0 ? 0 : Math.min(currentPage * resolvedPageSize, totalCourses);
+  const categoryLabel = category
+    ? categories.find((item) => item.slug === category)?.title ?? category
+    : "";
+  const levelLabel =
+    level === "Beginner"
+      ? t("Beginner", "Co ban")
+      : level === "Intermediate"
+        ? t("Intermediate", "Trung cap")
+        : level === "Advanced"
+          ? t("Advanced", "Nang cao")
+          : level;
+  const languageLabel =
+    language === "English" ? t("English", "Tieng Anh") : language === "Vietnamese" ? t("Vietnamese", "Tieng Viet") : language;
+  const sortLabelMap: Record<string, string> = {
+    popular: t("Most popular", "Pho bien"),
+    rating: t("Top rated", "Danh gia cao"),
+    price_asc: t("Price low to high", "Gia tang dan"),
+    price_desc: t("Price high to low", "Gia giam dan"),
+  };
+  const sortLabel = sort ? sortLabelMap[sort] ?? sort : "";
+  const activeFilters = [
+    search ? `${t("Search", "Tim kiem")}: ${search}` : null,
+    categoryLabel ? `${t("Category", "Danh muc")}: ${categoryLabel}` : null,
+    levelLabel ? `${t("Level", "Cap do")}: ${levelLabel}` : null,
+    languageLabel ? `${t("Language", "Ngon ngu")}: ${languageLabel}` : null,
+    minPrice ? `${t("Min price", "Gia tu")}: $${minPrice}` : null,
+    maxPrice ? `${t("Max price", "Gia den")}: $${maxPrice}` : null,
+    minRating ? `${t("Rating", "Danh gia")}: ${minRating}+` : null,
+    sortLabel ? `${t("Sort", "Sap xep")}: ${sortLabel}` : null,
+  ].filter(Boolean) as string[];
 
   const baseParams = new URLSearchParams();
   if (search) baseParams.set("q", search);
@@ -149,7 +179,7 @@ export default async function CoursesPage({
   baseParams.set("pageSize", resolvedPageSize.toString());
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-10 px-6 py-12 fade-in">
+    <div className="section-shell space-y-10 py-12 fade-in">
       <div className="space-y-3">
         <Link href="/" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
           {t("Home", "Trang chu")}
@@ -163,140 +193,221 @@ export default async function CoursesPage({
             "Tim lo trinh phu hop voi muc tieu, kinh nghiem va thoi gian cua ban."
           )}
         </p>
+        <div className="flex flex-wrap gap-3 text-sm text-emerald-800/70">
+          <div className="stat-pill">
+            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
+              {t("Results", "Ket qua")}
+            </span>
+            <span className="text-sm font-semibold text-emerald-950">{totalCourses}</span>
+          </div>
+          <div className="stat-pill">
+            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
+              {t("Showing", "Hien thi")}
+            </span>
+            <span className="text-sm font-semibold text-emerald-950">
+              {startIndex}-{endIndex}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div className="glass-card space-y-4 rounded-3xl p-6">
+      <div className="surface-card space-y-6 p-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              {t("Filters", "Bo loc")}
+            </p>
+            <h2 className="section-title text-2xl font-semibold text-emerald-950">
+              {t("Find the right course", "Tim khoa hoc phu hop")}
+            </h2>
+            <p className="text-sm text-emerald-800/70">
+              {t("Narrow by price, level, and topic to move faster.", "Loc theo gia, cap do, va chu de de tim nhanh hon.")}
+            </p>
+          </div>
+          <div className="stat-pill">
+            <span className="text-[0.7rem] uppercase tracking-[0.2em] text-emerald-700">
+              {t("Page size", "So khoa hoc")}
+            </span>
+            <span className="text-sm font-semibold text-emerald-950">{resolvedPageSize}</span>
+          </div>
+        </div>
         <form action="/courses" method="get" className="flex flex-col gap-3">
           {category && <input type="hidden" name="category" value={category} />}
-          <SearchSuggestInput
-            name="q"
-            defaultValue={search}
-            placeholder={t("Search courses", "Tim khoa hoc")}
-            className="flex-1"
-            inputClassName="flex-1 rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm text-emerald-950 focus:outline-none"
-            enableVoice
-          />
-          <div className="grid gap-3 md:grid-cols-4">
-            <input
-              name="minPrice"
-              type="number"
-              step="0.01"
-              min="0"
-              defaultValue={minPrice}
-              placeholder={t("Min price", "Gia tu")}
-              className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              {t("Search", "Tim kiem")}
+            </label>
+            <SearchSuggestInput
+              name="q"
+              defaultValue={search}
+              placeholder={t("Search courses", "Tim khoa hoc")}
+              className="flex-1"
+              inputClassName="flex-1 rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm text-emerald-950 focus:outline-none"
+              enableVoice
             />
-            <input
-              name="maxPrice"
-              type="number"
-              step="0.01"
-              min="0"
-              defaultValue={maxPrice}
-              placeholder={t("Max price", "Gia den")}
-              className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
-            />
-            <select
-              name="level"
-              defaultValue={level}
-              className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
-            >
-              <option value="">{t("All levels", "Tat ca cap do")}</option>
-              <option value="Beginner">{t("Beginner", "Co ban")}</option>
-              <option value="Intermediate">{t("Intermediate", "Trung cap")}</option>
-              <option value="Advanced">{t("Advanced", "Nang cao")}</option>
-            </select>
-            <select
-              name="language"
-              defaultValue={language}
-              className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
-            >
-              <option value="">{t("All languages", "Tat ca ngon ngu")}</option>
-              <option value="English">{t("English", "Tieng Anh")}</option>
-              <option value="Vietnamese">{t("Vietnamese", "Tieng Viet")}</option>
-            </select>
           </div>
           <div className="grid gap-3 md:grid-cols-4">
-            <select
-              name="minRating"
-              defaultValue={minRating}
-              className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
-            >
-              <option value="">{t("Any rating", "Moi danh gia")}</option>
-              <option value="3">3+</option>
-              <option value="3.5">3.5+</option>
-              <option value="4">4+</option>
-              <option value="4.5">4.5+</option>
-            </select>
-            <select
-              name="sort"
-              defaultValue={sort}
-              className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
-            >
-              <option value="">{t("Newest", "Moi nhat")}</option>
-              <option value="popular">{t("Most popular", "Pho bien")}</option>
-              <option value="rating">{t("Top rated", "Danh gia cao")}</option>
-              <option value="price_asc">{t("Price low to high", "Gia tang dan")}</option>
-              <option value="price_desc">{t("Price high to low", "Gia giam dan")}</option>
-            </select>
-            <select
-              name="pageSize"
-              defaultValue={resolvedPageSize.toString()}
-              className="rounded-full border border-emerald-100 bg-white px-4 py-2 text-sm"
-            >
-              <option value="12">12 / {t("page", "trang")}</option>
-              <option value="24">24 / {t("page", "trang")}</option>
-              <option value="36">36 / {t("page", "trang")}</option>
-              <option value="48">48 / {t("page", "trang")}</option>
-              <option value="60">60 / {t("page", "trang")}</option>
-            </select>
+            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              <span>{t("Min price", "Gia tu")}</span>
+              <input
+                name="minPrice"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={minPrice}
+                placeholder={t("Min price", "Gia tu")}
+                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
+              />
+            </label>
+            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              <span>{t("Max price", "Gia den")}</span>
+              <input
+                name="maxPrice"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={maxPrice}
+                placeholder={t("Max price", "Gia den")}
+                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
+              />
+            </label>
+            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              <span>{t("Level", "Cap do")}</span>
+              <select
+                name="level"
+                defaultValue={level}
+                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
+              >
+                <option value="">{t("All levels", "Tat ca cap do")}</option>
+                <option value="Beginner">{t("Beginner", "Co ban")}</option>
+                <option value="Intermediate">{t("Intermediate", "Trung cap")}</option>
+                <option value="Advanced">{t("Advanced", "Nang cao")}</option>
+              </select>
+            </label>
+            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              <span>{t("Language", "Ngon ngu")}</span>
+              <select
+                name="language"
+                defaultValue={language}
+                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
+              >
+                <option value="">{t("All languages", "Tat ca ngon ngu")}</option>
+                <option value="English">{t("English", "Tieng Anh")}</option>
+                <option value="Vietnamese">{t("Vietnamese", "Tieng Viet")}</option>
+              </select>
+            </label>
+          </div>
+          <div className="grid gap-3 md:grid-cols-4">
+            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              <span>{t("Rating", "Danh gia")}</span>
+              <select
+                name="minRating"
+                defaultValue={minRating}
+                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
+              >
+                <option value="">{t("Any rating", "Moi danh gia")}</option>
+                <option value="3">3+</option>
+                <option value="3.5">3.5+</option>
+                <option value="4">4+</option>
+                <option value="4.5">4.5+</option>
+              </select>
+            </label>
+            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              <span>{t("Sort", "Sap xep")}</span>
+              <select
+                name="sort"
+                defaultValue={sort}
+                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
+              >
+                <option value="">{t("Newest", "Moi nhat")}</option>
+                <option value="popular">{t("Most popular", "Pho bien")}</option>
+                <option value="rating">{t("Top rated", "Danh gia cao")}</option>
+                <option value="price_asc">{t("Price low to high", "Gia tang dan")}</option>
+                <option value="price_desc">{t("Price high to low", "Gia giam dan")}</option>
+              </select>
+            </label>
+            <label className="space-y-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              <span>{t("Page size", "So khoa hoc")}</span>
+              <select
+                name="pageSize"
+                defaultValue={resolvedPageSize.toString()}
+                className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm font-normal normal-case text-emerald-900"
+              >
+                <option value="12">12 / {t("page", "trang")}</option>
+                <option value="24">24 / {t("page", "trang")}</option>
+                <option value="36">36 / {t("page", "trang")}</option>
+                <option value="48">48 / {t("page", "trang")}</option>
+                <option value="60">60 / {t("page", "trang")}</option>
+              </select>
+            </label>
             <button
               type="submit"
               className="rounded-full bg-emerald-700 px-6 py-2 text-sm font-semibold text-white"
             >
-              {t("Search", "Tim")}
+              {t("Apply filters", "Ap dung bo loc")}
             </button>
           </div>
         </form>
 
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href={`/courses${baseParams.toString() ? `?${baseParams}` : ""}`}
-            className={`rounded-full border px-4 py-1 text-xs font-semibold ${
-              category ? "border-emerald-100 text-emerald-800" : "border-emerald-300 bg-emerald-700 text-white"
-            }`}
-          >
-            {t("All", "Tat ca")}
-          </Link>
-          {categories.map((item) => (
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+            {t("Categories", "Danh muc")}
+          </p>
+          <div className="flex flex-wrap gap-3">
             <Link
-              key={item.id}
-              href={`/courses?${(() => {
-                const params = new URLSearchParams(baseParams);
-                params.set("category", item.slug);
-                return params.toString();
-              })()}`}
+              href={`/courses${baseParams.toString() ? `?${baseParams}` : ""}`}
               className={`rounded-full border px-4 py-1 text-xs font-semibold ${
-                category === item.slug
-                  ? "border-emerald-300 bg-emerald-700 text-white"
-                  : "border-emerald-100 text-emerald-800"
+                category ? "border-[color:var(--stroke)] text-emerald-800" : "border-[color:var(--brand)] bg-emerald-700 text-white"
               }`}
             >
-              {item.title}
+              {t("All", "Tat ca")}
             </Link>
-          ))}
-          {(search || category || level || language || minPrice || maxPrice || minRating || sort) && (
-            <Link
-              href="/courses"
-              className="rounded-full border border-emerald-200 px-4 py-1 text-xs font-semibold text-emerald-900"
-            >
-              {t("Reset filters", "Xoa bo loc")}
-            </Link>
-          )}
+            {categories.map((item) => (
+              <Link
+                key={item.id}
+                href={`/courses?${(() => {
+                  const params = new URLSearchParams(baseParams);
+                  params.set("category", item.slug);
+                  return params.toString();
+                })()}`}
+                className={`rounded-full border px-4 py-1 text-xs font-semibold ${
+                  category === item.slug
+                    ? "border-[color:var(--brand)] bg-emerald-700 text-white"
+                    : "border-[color:var(--stroke)] text-emerald-800"
+                }`}
+              >
+                {item.title}
+              </Link>
+            ))}
+            {(search || category || level || language || minPrice || maxPrice || minRating || sort) && (
+              <Link
+                href="/courses"
+                className="rounded-full border border-[color:var(--stroke)] px-4 py-1 text-xs font-semibold text-emerald-900"
+              >
+                {t("Reset filters", "Xoa bo loc")}
+              </Link>
+            )}
+          </div>
         </div>
+
+        {activeFilters.length > 0 && (
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              {t("Active filters", "Bo loc dang dung")}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {activeFilters.map((item) => (
+                <span key={item} className="badge">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {courses.length === 0 ? (
-        <div className="glass-card rounded-3xl p-10 text-center text-sm text-emerald-800/70">
+        <div className="surface-card p-10 text-center text-sm text-emerald-800/70">
           {t("No courses found. Try changing your filters.", "Khong tim thay khoa hoc. Hay thu doi bo loc.")}
         </div>
       ) : (
@@ -320,12 +431,12 @@ export default async function CoursesPage({
                       params.set("page", prevPage.toString());
                       return params.toString();
                     })()}`}
-                    className="rounded-full border border-emerald-200 px-4 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-[color:var(--stroke)] px-4 py-1 text-xs font-semibold text-emerald-900"
                   >
                     {t("Previous", "Truoc")}
                   </Link>
                 ) : (
-                  <span className="rounded-full border border-emerald-100 px-4 py-1 text-xs font-semibold text-emerald-400">
+                  <span className="rounded-full border border-[color:var(--stroke)] px-4 py-1 text-xs font-semibold text-emerald-400">
                     {t("Previous", "Truoc")}
                   </span>
                 )}
@@ -336,12 +447,12 @@ export default async function CoursesPage({
                       params.set("page", nextPage.toString());
                       return params.toString();
                     })()}`}
-                    className="rounded-full border border-emerald-200 px-4 py-1 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-[color:var(--stroke)] px-4 py-1 text-xs font-semibold text-emerald-900"
                   >
                     {t("Next", "Tiep")}
                   </Link>
                 ) : (
-                  <span className="rounded-full border border-emerald-100 px-4 py-1 text-xs font-semibold text-emerald-400">
+                  <span className="rounded-full border border-[color:var(--stroke)] px-4 py-1 text-xs font-semibold text-emerald-400">
                     {t("Next", "Tiep")}
                   </span>
                 )}
@@ -353,3 +464,5 @@ export default async function CoursesPage({
     </div>
   );
 }
+
+

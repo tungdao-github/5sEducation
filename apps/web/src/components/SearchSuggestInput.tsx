@@ -195,7 +195,7 @@ export function SearchSuggestInput({
               }
             }}
             className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-full border px-2 py-1 text-[11px] font-semibold ${
-              listening ? "border-emerald-400 bg-emerald-50 text-emerald-900" : "border-emerald-200 text-emerald-700"
+              listening ? "border-[color:var(--brand)] bg-[color:var(--brand-soft)] text-emerald-900" : "border-[color:var(--stroke)] text-emerald-700"
             }`}
             aria-label={tx("Start voice search", "Bat dau tim kiem bang giong noi")}
           >
@@ -209,7 +209,7 @@ export function SearchSuggestInput({
         </div>
       )}
       {open && (
-        <div className="absolute left-0 right-0 top-full z-40 mt-2 rounded-2xl border border-emerald-100 bg-white p-2 shadow-lg">
+        <div className="absolute left-0 right-0 top-full z-40 mt-2 rounded-2xl border border-[color:var(--stroke)] bg-white p-2 shadow-lg">
           {loading && (
             <div className="px-3 py-2 text-xs text-emerald-700/70">
               {tx("Searching...", "Dang tim...")}
@@ -230,7 +230,7 @@ export function SearchSuggestInput({
               key={`path-${item.slug}`}
               type="button"
               onClick={() => handleSelect(item)}
-              className="flex w-full flex-col gap-1 rounded-xl px-3 py-2 text-left text-xs font-semibold text-emerald-900 hover:bg-emerald-50"
+              className="flex w-full flex-col gap-1 rounded-xl px-3 py-2 text-left text-xs font-semibold text-emerald-900 hover:bg-[color:var(--brand-soft)]"
             >
               <span>{item.title}</span>
               {item.subtitle && <span className="text-[11px] text-emerald-700/70">{item.subtitle}</span>}
@@ -246,7 +246,7 @@ export function SearchSuggestInput({
               key={`course-${item.slug}`}
               type="button"
               onClick={() => handleSelect(item)}
-              className="flex w-full flex-col gap-1 rounded-xl px-3 py-2 text-left text-xs font-semibold text-emerald-900 hover:bg-emerald-50"
+              className="flex w-full flex-col gap-1 rounded-xl px-3 py-2 text-left text-xs font-semibold text-emerald-900 hover:bg-[color:var(--brand-soft)]"
             >
               <span>{item.title}</span>
               {item.subtitle && <span className="text-[11px] text-emerald-700/70">{item.subtitle}</span>}
@@ -257,3 +257,5 @@ export function SearchSuggestInput({
     </div>
   );
 }
+
+

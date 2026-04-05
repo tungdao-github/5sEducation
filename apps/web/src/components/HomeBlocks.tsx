@@ -16,6 +16,20 @@ export type HomePageBlock = {
   sortOrder: number;
 };
 
+type StatItem = {
+  value: string;
+  label: string;
+  subLabel?: string;
+};
+
+type TestimonialItem = {
+  quote: string;
+  name: string;
+  role?: string;
+  company?: string;
+  avatarUrl?: string;
+};
+
 type HomeBlocksProps = {
   blocks: HomePageBlock[];
   locale: "en" | "vi";
@@ -34,6 +48,31 @@ const parseItems = (input: string): string[] => {
   return [];
 };
 
+const parseObjectItems = <T,>(input: string, guard: (item: unknown) => item is T): T[] => {
+  if (!input) return [];
+  try {
+    const data = JSON.parse(input);
+    if (Array.isArray(data)) {
+      return data.filter(guard);
+    }
+  } catch {
+    return [];
+  }
+  return [];
+};
+
+const isStatItem = (item: unknown): item is StatItem => {
+  if (!item || typeof item !== "object") return false;
+  const record = item as Record<string, unknown>;
+  return typeof record.value === "string" && typeof record.label === "string";
+};
+
+const isTestimonialItem = (item: unknown): item is TestimonialItem => {
+  if (!item || typeof item !== "object") return false;
+  const record = item as Record<string, unknown>;
+  return typeof record.quote === "string" && typeof record.name === "string";
+};
+
 export function HomeBlocks({ blocks, locale }: HomeBlocksProps) {
   const t = (en: string, vi: string) => pickLocaleText(locale, en, vi);
 
@@ -42,11 +81,13 @@ export function HomeBlocks({ blocks, locale }: HomeBlocksProps) {
       {blocks.map((block) => {
         const type = block.type.toLowerCase();
         const items = parseItems(block.itemsJson);
+        const stats = parseObjectItems(block.itemsJson, isStatItem);
+        const testimonials = parseObjectItems(block.itemsJson, isTestimonialItem);
 
         if (type === "hero") {
           return (
             <section key={block.id} className="hero-grid fade-in">
-              <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[1.2fr,0.8fr]">
+              <div className="section-shell grid gap-10 py-16 lg:grid-cols-[1.2fr,0.8fr]">
                 <div className="space-y-6">
                   <span className="badge">{t("New season", "Mua hoc moi")}</span>
                   <h1 className="section-title text-4xl font-semibold text-emerald-950 md:text-5xl">
@@ -69,7 +110,7 @@ export function HomeBlocks({ blocks, locale }: HomeBlocksProps) {
                     </Link>
                   )}
                 </div>
-                <div className="glass-card flex flex-col gap-6 rounded-3xl p-6">
+                <div className="surface-card flex flex-col gap-6 rounded-3xl p-6">
                   {block.imageUrl && (
                     <div className="overflow-hidden rounded-2xl bg-emerald-900/5">
                       <img
@@ -110,8 +151,8 @@ export function HomeBlocks({ blocks, locale }: HomeBlocksProps) {
 
         if (type === "cta") {
           return (
-            <section key={block.id} className="mx-auto w-full max-w-6xl px-6">
-              <div className="glass-card grid gap-6 rounded-3xl p-10 lg:grid-cols-[1.2fr,0.8fr]">
+            <section key={block.id} className="section-shell">
+              <div className="surface-card grid gap-6 rounded-3xl p-10 lg:grid-cols-[1.2fr,0.8fr]">
                 <div className="space-y-4">
                   <h2 className="section-title text-3xl font-semibold text-emerald-950">{block.title}</h2>
                   <p className="text-sm text-emerald-800/70">{block.subtitle}</p>
@@ -140,17 +181,84 @@ export function HomeBlocks({ blocks, locale }: HomeBlocksProps) {
 
         if (type === "feature") {
           return (
-            <section key={block.id} className="mx-auto w-full max-w-6xl space-y-6 px-6">
+            <section key={block.id} className="section-shell space-y-6">
               <div>
                 <h2 className="section-title text-3xl font-semibold text-emerald-950">{block.title}</h2>
                 <p className="text-sm text-emerald-800/70">{block.subtitle}</p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((item) => (
-                  <div key={item} className="glass-card rounded-2xl p-6 text-sm text-emerald-900">
+                  <div key={item} className="surface-card rounded-2xl p-6 text-sm text-emerald-900">
                     {item}
                   </div>
                 ))}
+              </div>
+            </section>
+          );
+        }
+
+        if (type === "stats") {
+          return (
+            <section key={block.id} className="section-shell space-y-6">
+              <div>
+                <span className="section-eyebrow">{block.subtitle || t("Highlights", "Noi bat")}</span>
+                <h2 className="section-title mt-3 text-3xl font-semibold text-emerald-950">{block.title}</h2>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {stats.map((stat, index) => (
+                  <div key={`${block.id}-stat-${index}`} className="stat-pill">
+                    <p className="text-lg font-semibold text-emerald-950">{stat.value}</p>
+                    <p>{stat.label}</p>
+                    {stat.subLabel && <p className="text-xs text-emerald-800/70">{stat.subLabel}</p>}
+                  </div>
+                ))}
+                {stats.length === 0 && (
+                  <div className="surface-muted p-4 text-sm text-emerald-800/70">
+                    {t("Add stats in ItemsJson to render this block.", "Them stats trong ItemsJson de hien thi block.")}
+                  </div>
+                )}
+              </div>
+            </section>
+          );
+        }
+
+        if (type === "testimonial") {
+          return (
+            <section key={block.id} className="section-shell space-y-6">
+              <div>
+                <span className="section-eyebrow">{block.subtitle || t("Testimonials", "Danh gia")}</span>
+                <h2 className="section-title mt-3 text-3xl font-semibold text-emerald-950">{block.title}</h2>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {testimonials.map((item, index) => (
+                  <div key={`${block.id}-quote-${index}`} className="surface-card space-y-4 p-6">
+                    <p className="text-sm text-emerald-900">{item.quote}</p>
+                    <div className="flex items-center gap-3">
+                      {item.avatarUrl ? (
+                        <img
+                          src={resolveApiAsset(item.avatarUrl)}
+                          alt={item.name}
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[color:var(--brand-soft)] text-xs font-semibold text-emerald-900">
+                          {item.name.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm font-semibold text-emerald-950">{item.name}</p>
+                        <p className="text-xs text-emerald-800/70">
+                          {[item.role, item.company].filter(Boolean).join(" • ")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {testimonials.length === 0 && (
+                  <div className="surface-muted p-4 text-sm text-emerald-800/70">
+                    {t("Add testimonials in ItemsJson to render this block.", "Them testimonials trong ItemsJson de hien thi block.")}
+                  </div>
+                )}
               </div>
             </section>
           );
@@ -161,3 +269,4 @@ export function HomeBlocks({ blocks, locale }: HomeBlocksProps) {
     </>
   );
 }
+

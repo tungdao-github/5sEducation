@@ -7,4 +7,7 @@ public class ApplicationUser : IdentityUser
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? AvatarUrl { get; set; }
+    public int LoyaltyPoints { get; set; }
+    public string LoyaltyTier { get; set; } = "Bronze";
+    public DateTime? LoyaltyUpdatedAt { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
@@ -560,8 +560,8 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
 
   if (needsAuth) {
     return (
-      <div className="mx-auto w-full max-w-4xl px-6 py-16 fade-in">
-        <div className="glass-card rounded-3xl p-10 text-center">
+      <div className="section-shell py-16 fade-in">
+        <div className="surface-card rounded-3xl p-10 text-center">
           <p className="text-sm text-emerald-800/70">
             {tx("Please sign in to edit courses.", "Vui long dang nhap de sua khoa hoc.")}
           </p>
@@ -577,7 +577,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-10 px-6 py-12 fade-in">
+    <div className="section-shell space-y-10 py-12 fade-in">
       <div className="space-y-2">
         <Link href="/studio" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
           Studio
@@ -590,7 +590,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
         </p>
       </div>
 
-      <form onSubmit={handleUpdate} className="glass-card space-y-6 rounded-3xl p-8">
+      <form onSubmit={handleUpdate} className="surface-card space-y-6 rounded-3xl p-8">
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
             {tx("Title", "Tieu de")}
@@ -599,7 +599,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
             value={title}
             onChange={(e) => setTitle(e.currentTarget.value)}
             required
-            className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+            className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
           />
         </div>
 
@@ -611,7 +611,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             >
               <option value="">{tx("Select category", "Chon danh muc")}</option>
               {categories.map((category) => (
@@ -629,7 +629,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               value={level}
               onChange={(e) => setLevel(e.currentTarget.value)}
               required
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
         </div>
@@ -642,7 +642,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
             value={shortDescription}
             onChange={(e) => setShortDescription(e.currentTarget.value)}
             required
-            className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+            className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
           />
         </div>
 
@@ -655,7 +655,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
             onChange={(e) => setDescription(e.currentTarget.value)}
             required
             rows={4}
-            className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+            className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
           />
         </div>
 
@@ -668,7 +668,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               value={outcome}
               onChange={(e) => setOutcome(e.currentTarget.value)}
               required
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -679,7 +679,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               value={requirements}
               onChange={(e) => setRequirements(e.currentTarget.value)}
               required
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
         </div>
@@ -693,7 +693,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               value={language}
               onChange={(e) => setLanguage(e.currentTarget.value)}
               required
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -707,7 +707,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               value={price}
               onChange={(e) => setPrice(e.currentTarget.value)}
               required
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -720,7 +720,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               step="0.01"
               value={flashSalePrice}
               onChange={(e) => setFlashSalePrice(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -730,7 +730,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
             <input
               value={previewVideoUrl}
               onChange={(e) => setPreviewVideoUrl(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
         </div>
@@ -744,7 +744,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               type="datetime-local"
               value={flashSaleStartsAt}
               onChange={(e) => setFlashSaleStartsAt(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -755,7 +755,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               type="datetime-local"
               value={flashSaleEndsAt}
               onChange={(e) => setFlashSaleEndsAt(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
         </div>
@@ -769,7 +769,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               type="file"
               accept="image/*"
               onChange={(e) => setThumbnail(e.currentTarget.files?.[0] ?? null)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <label className="flex items-center gap-2 text-sm text-emerald-900">
@@ -791,7 +791,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
         </button>
       </form>
 
-      <section className="glass-card space-y-6 rounded-3xl p-8">
+      <section className="surface-card space-y-6 rounded-3xl p-8">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="section-title text-2xl font-semibold text-emerald-950">
@@ -823,7 +823,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               <button
                 type="button"
                 onClick={() => handleDeleteLesson(lesson.id)}
-                className="rounded-full border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-900"
+                className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-xs font-semibold text-emerald-900"
               >
                 {tx("Delete", "Xoa")}
               </button>
@@ -839,7 +839,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
             <input
               value={lessonTitle}
               onChange={(e) => setLessonTitle(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           <div className="space-y-2">
@@ -849,7 +849,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
             <select
               value={lessonContentType}
               onChange={(e) => setLessonContentType(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             >
               <option value="video">{tx("Video", "Video")}</option>
               <option value="exercise">{tx("Exercise", "Bai tap")}</option>
@@ -865,7 +865,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               step="0.5"
               value={lessonDuration}
               onChange={(e) => setLessonDuration(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           {lessonContentType === "video" && (
@@ -877,7 +877,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                 <input
                   value={lessonVideoUrl}
                   onChange={(e) => setLessonVideoUrl(e.currentTarget.value)}
-                  className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+                  className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -894,7 +894,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                     }
                     e.currentTarget.value = "";
                   }}
-                  className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+                  className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
                 />
                 <p className="text-xs text-emerald-800/70">
                   {tx("We will upload the video and fill the lesson URL automatically.", "He thong se tu dong dien link bai hoc sau khi tai xong.")}
@@ -915,7 +915,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               type="number"
               value={lessonSortOrder}
               onChange={(e) => setLessonSortOrder(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
           </div>
           {lessonContentType === "exercise" && (
@@ -930,7 +930,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                   max="100"
                   value={lessonExercisePassingPercent}
                   onChange={(e) => setLessonExercisePassingPercent(e.currentTarget.value)}
-                  className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+                  className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -943,7 +943,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                   max="180"
                   value={lessonExerciseTimeLimitMinutes}
                   onChange={(e) => setLessonExerciseTimeLimitMinutes(e.currentTarget.value)}
-                  className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+                  className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -956,12 +956,12 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                   max="20"
                   value={lessonExerciseMaxTabSwitches}
                   onChange={(e) => setLessonExerciseMaxTabSwitches(e.currentTarget.value)}
-                  className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+                  className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
                 />
               </div>
               <div className="md:col-span-2 space-y-3">
                 {lessonExerciseQuestions.map((question, index) => (
-                  <div key={question.id} className="rounded-2xl border border-emerald-100 bg-white/70 p-4 space-y-3">
+                  <div key={question.id} className="rounded-2xl border border-[color:var(--stroke)] bg-white/70 p-4 space-y-3">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
                         {tx(`Question ${index + 1}`, `Cau hoi ${index + 1}`)}
@@ -969,7 +969,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                       <button
                         type="button"
                         onClick={() => removeExerciseQuestion(question.id)}
-                        className="rounded-full border border-emerald-200 px-3 py-1 text-[11px] font-semibold text-emerald-900"
+                        className="rounded-full border border-[color:var(--stroke)] px-3 py-1 text-[11px] font-semibold text-emerald-900"
                       >
                         {tx("Remove", "Xoa")}
                       </button>
@@ -979,39 +979,39 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                       onChange={(e) => updateExerciseQuestion(question.id, "question", e.currentTarget.value)}
                       rows={2}
                       placeholder={tx("Add a quiz question for this lesson...", "Nhap cau hoi cho bai hoc...")}
-                      className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+                      className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
                     />
                     <div className="grid gap-3 md:grid-cols-2">
                       <input
                         value={question.optionA}
                         onChange={(e) => updateExerciseQuestion(question.id, "optionA", e.currentTarget.value)}
                         placeholder={tx("Option A", "Lua chon A")}
-                        className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+                        className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
                       />
                       <input
                         value={question.optionB}
                         onChange={(e) => updateExerciseQuestion(question.id, "optionB", e.currentTarget.value)}
                         placeholder={tx("Option B", "Lua chon B")}
-                        className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+                        className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
                       />
                       <input
                         value={question.optionC}
                         onChange={(e) => updateExerciseQuestion(question.id, "optionC", e.currentTarget.value)}
                         placeholder={tx("Option C", "Lua chon C")}
-                        className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+                        className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
                       />
                       <input
                         value={question.optionD}
                         onChange={(e) => updateExerciseQuestion(question.id, "optionD", e.currentTarget.value)}
                         placeholder={tx("Option D", "Lua chon D")}
-                        className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+                        className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
                       />
                     </div>
                     <div className="grid gap-3 md:grid-cols-2">
                       <select
                         value={question.correctOption}
                         onChange={(e) => updateExerciseQuestion(question.id, "correctOption", e.currentTarget.value)}
-                        className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+                        className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
                       >
                         <option value="1">{tx("Correct option: A", "Dap an dung: A")}</option>
                         <option value="2">{tx("Correct option: B", "Dap an dung: B")}</option>
@@ -1022,7 +1022,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                         value={question.explanation}
                         onChange={(e) => updateExerciseQuestion(question.id, "explanation", e.currentTarget.value)}
                         placeholder={tx("Explanation (optional)", "Giai thich (tuy chon)")}
-                        className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+                        className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
                       />
                     </div>
                   </div>
@@ -1030,7 +1030,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                 <button
                   type="button"
                   onClick={addExerciseQuestion}
-                  className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+                  className="rounded-full border border-[color:var(--stroke)] px-4 py-2 text-xs font-semibold text-emerald-900"
                 >
                   {tx("Add another question", "Them cau hoi")}
                 </button>
@@ -1042,7 +1042,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
         <button
           type="button"
           onClick={handleAddLesson}
-          className="rounded-full border border-emerald-200 px-6 py-3 text-sm font-semibold text-emerald-900"
+          className="rounded-full border border-[color:var(--stroke)] px-6 py-3 text-sm font-semibold text-emerald-900"
         >
           {tx("Add lesson", "Them bai hoc")}
         </button>
@@ -1050,3 +1050,4 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
     </div>
   );
 }
+

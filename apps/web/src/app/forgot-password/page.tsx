@@ -46,8 +46,8 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-6 py-16 fade-in">
-      <div className="glass-card mx-auto max-w-md rounded-3xl p-8">
+    <div className="section-shell py-16 fade-in">
+      <div className="surface-card mx-auto max-w-md p-8">
         <h1 className="section-title text-3xl font-semibold text-emerald-950">
           {tx("Reset your password", "Dat lai mat khau")}
         </h1>
@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.currentTarget.value)}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm text-emerald-950 focus:outline-none"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm text-emerald-950 focus:outline-none"
             />
           </div>
 
@@ -83,13 +83,13 @@ export default function ForgotPasswordPage() {
         </form>
 
         {message && (
-          <div className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <div className="mt-4 surface-muted px-4 py-3 text-sm text-emerald-800">
             {message}
           </div>
         )}
 
         {resetLink && (
-          <div className="mt-4 space-y-2 rounded-2xl border border-emerald-100 bg-white/80 px-4 py-3 text-xs text-emerald-900">
+          <div className="mt-4 space-y-2 rounded-2xl border border-[color:var(--stroke)] bg-white/80 px-4 py-3 text-xs text-emerald-900">
             <p className="font-semibold">{tx("Dev reset link", "Lien ket dev")}:</p>
             <a href={resetLink} className="break-all text-emerald-700 underline">
               {resetLink}
@@ -106,3 +106,4 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
+

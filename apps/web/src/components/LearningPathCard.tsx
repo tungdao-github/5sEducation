@@ -24,7 +24,7 @@ export function LearningPathCard({ path, locale }: LearningPathCardProps) {
   return (
     <Link
       href={`/paths/${path.slug}`}
-      className="glass-card flex h-full flex-col gap-4 rounded-3xl p-5 transition hover:-translate-y-1"
+      className="surface-card flex h-full flex-col gap-4 p-5 transition hover:-translate-y-1"
     >
       <div className="overflow-hidden rounded-2xl bg-emerald-900/5">
         <img
@@ -38,12 +38,12 @@ export function LearningPathCard({ path, locale }: LearningPathCardProps) {
         <p className="text-sm text-emerald-800/70">{path.description}</p>
       </div>
       <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold text-emerald-800/80">
-        <span className="rounded-full border border-emerald-200 px-3 py-1">{path.level || t("Beginner", "Co ban")}</span>
-        <span className="rounded-full border border-emerald-200 px-3 py-1">
+        <span className="rounded-full border border-[color:var(--stroke)] px-3 py-1">{path.level || t("Beginner", "Co ban")}</span>
+        <span className="rounded-full border border-[color:var(--stroke)] px-3 py-1">
           {path.courseCount} {t("courses", "khoa hoc")}
         </span>
         {path.estimatedHours > 0 && (
-          <span className="rounded-full border border-emerald-200 px-3 py-1">
+          <span className="rounded-full border border-[color:var(--stroke)] px-3 py-1">
             {path.estimatedHours}h
           </span>
         )}
@@ -51,3 +51,4 @@ export function LearningPathCard({ path, locale }: LearningPathCardProps) {
     </Link>
   );
 }
+

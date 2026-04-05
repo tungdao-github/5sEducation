@@ -1,9 +1,8 @@
 const rawApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
-const fallbackApiUrl = "https://fiveseducation.onrender.com";
-export const API_URL = (rawApiUrl && rawApiUrl.length > 0 ? rawApiUrl : fallbackApiUrl).replace(
-  /\/+$/,
-  ""
-);
+const fallbackApiUrl = "http://localhost:5158";
+export const API_URL = (
+  rawApiUrl && rawApiUrl.length > 0 ? rawApiUrl : fallbackApiUrl
+).replace(/\/+$/, "");
 
 export function resolveApiAsset(path?: string | null) {
   if (!path) return "";
@@ -13,7 +12,10 @@ export function resolveApiAsset(path?: string | null) {
   return `${API_URL}${path}`;
 }
 
-export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
+export async function fetchJson<T>(
+  path: string,
+  init?: RequestInit,
+): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
     headers: {

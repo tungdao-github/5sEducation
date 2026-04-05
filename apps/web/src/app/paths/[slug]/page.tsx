@@ -55,7 +55,7 @@ export default async function PathDetailPage({ params }: { params: { slug: strin
 
   if (!path) {
     return (
-      <div className="mx-auto w-full max-w-5xl px-6 py-16 text-center text-sm text-emerald-800/70">
+      <div className="section-shell py-16 text-center text-sm text-emerald-800/70">
         {t("Learning path not found.", "Khong tim thay lo trinh.")}
       </div>
     );
@@ -75,7 +75,7 @@ export default async function PathDetailPage({ params }: { params: { slug: strin
   );
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-10 px-6 py-12 fade-in">
+    <div className="section-shell space-y-10 py-12 fade-in">
       <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
         <div className="flex-1 space-y-4">
           <Link href="/paths" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
@@ -84,12 +84,12 @@ export default async function PathDetailPage({ params }: { params: { slug: strin
           <h1 className="section-title text-4xl font-semibold text-emerald-950">{path.title}</h1>
           <p className="text-sm text-emerald-800/70">{path.description}</p>
           <div className="flex flex-wrap gap-3 text-xs font-semibold text-emerald-900">
-            <span className="rounded-full border border-emerald-200 px-3 py-1">{path.level || t("Beginner", "Co ban")}</span>
-            <span className="rounded-full border border-emerald-200 px-3 py-1">
+            <span className="rounded-full border border-[color:var(--stroke)] px-3 py-1">{path.level || t("Beginner", "Co ban")}</span>
+            <span className="rounded-full border border-[color:var(--stroke)] px-3 py-1">
               {path.courseCount} {t("courses", "khoa hoc")}
             </span>
             {path.estimatedHours > 0 && (
-              <span className="rounded-full border border-emerald-200 px-3 py-1">{path.estimatedHours}h</span>
+              <span className="rounded-full border border-[color:var(--stroke)] px-3 py-1">{path.estimatedHours}h</span>
             )}
           </div>
           {firstCourse && (
@@ -101,7 +101,7 @@ export default async function PathDetailPage({ params }: { params: { slug: strin
             </Link>
           )}
         </div>
-        <div className="glass-card w-full max-w-sm rounded-3xl p-4">
+        <div className="surface-card w-full max-w-sm rounded-3xl p-4">
           <img
             src={resolveApiAsset(path.thumbnailUrl)}
             alt={path.title}
@@ -116,7 +116,7 @@ export default async function PathDetailPage({ params }: { params: { slug: strin
         </h2>
 
         {coursesBySection.map(({ section, items }) => (
-          <div key={section.id} className="glass-card space-y-4 rounded-3xl p-6">
+          <div key={section.id} className="surface-card space-y-4 rounded-3xl p-6">
             <div>
               <h3 className="text-lg font-semibold text-emerald-950">{section.title}</h3>
               {section.description && <p className="text-sm text-emerald-800/70">{section.description}</p>}
@@ -126,7 +126,7 @@ export default async function PathDetailPage({ params }: { params: { slug: strin
                 <Link
                   key={course.id}
                   href={`/courses/${course.courseSlug}`}
-                  className="flex gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-3"
+                  className="flex gap-3 rounded-2xl border border-[color:var(--stroke)] bg-white/70 p-3"
                 >
                   <img
                     src={resolveApiAsset(course.courseThumbnailUrl)}
@@ -144,7 +144,7 @@ export default async function PathDetailPage({ params }: { params: { slug: strin
         ))}
 
         {ungroupedCourses.length > 0 && (
-          <div className="glass-card space-y-4 rounded-3xl p-6">
+          <div className="surface-card space-y-4 rounded-3xl p-6">
             <div>
               <h3 className="text-lg font-semibold text-emerald-950">
                 {t("Additional courses", "Khoa hoc bo sung")}
@@ -155,7 +155,7 @@ export default async function PathDetailPage({ params }: { params: { slug: strin
                 <Link
                   key={course.id}
                   href={`/courses/${course.courseSlug}`}
-                  className="flex gap-3 rounded-2xl border border-emerald-100 bg-white/70 p-3"
+                  className="flex gap-3 rounded-2xl border border-[color:var(--stroke)] bg-white/70 p-3"
                 >
                   <img
                     src={resolveApiAsset(course.courseThumbnailUrl)}
@@ -175,3 +175,4 @@ export default async function PathDetailPage({ params }: { params: { slug: strin
     </div>
   );
 }
+

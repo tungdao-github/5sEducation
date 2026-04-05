@@ -220,8 +220,8 @@ export default function SupportPage() {
 
   if (needsAuth) {
     return (
-      <div className="mx-auto w-full max-w-4xl px-6 py-16 fade-in">
-        <div className="glass-card rounded-3xl p-10 text-center">
+      <div className="section-shell py-16 fade-in">
+        <div className="surface-card p-10 text-center">
           <p className="text-sm text-emerald-800/70">
             {tx("Please sign in to see your support messages.", "Vui long dang nhap de xem ho tro.")}
           </p>
@@ -237,7 +237,7 @@ export default function SupportPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-10 px-6 py-12 fade-in">
+    <div className="section-shell space-y-10 py-12 fade-in">
       <div className="space-y-2">
         <Link href="/" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
           {tx("Home", "Trang chu")}
@@ -251,7 +251,7 @@ export default function SupportPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-        <div className="glass-card space-y-4 rounded-3xl p-6">
+        <div className="surface-card space-y-4 p-6">
           <h2 className="text-sm font-semibold text-emerald-900">{tx("Your requests", "Yeu cau cua ban")}</h2>
           {sortedMessages.length === 0 && (
             <p className="text-xs text-emerald-700/70">{tx("No messages yet.", "Chua co tin nhan.")}</p>
@@ -263,7 +263,9 @@ export default function SupportPage() {
                 type="button"
                 onClick={() => setSelectedId(msg.id)}
                 className={`w-full rounded-2xl border px-3 py-2 text-left text-xs ${
-                  selectedId === msg.id ? "border-emerald-300 bg-emerald-50" : "border-emerald-100 bg-white"
+                  selectedId === msg.id
+                    ? "border-[color:var(--brand)] bg-[color:var(--brand-soft)]"
+                    : "border-[color:var(--stroke)] bg-white"
                 }`}
               >
                 <p className="font-semibold text-emerald-900">
@@ -276,14 +278,14 @@ export default function SupportPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="glass-card space-y-4 rounded-3xl p-6">
+          <div className="surface-card space-y-4 p-6">
             <h2 className="text-sm font-semibold text-emerald-900">{tx("Start a new request", "Gui yeu cau moi")}</h2>
             <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.currentTarget.value)}
               rows={4}
               placeholder={tx("Describe your issue...", "Mo ta van de cua ban...")}
-              className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-sm"
+              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             />
             <button
               type="button"
@@ -294,7 +296,7 @@ export default function SupportPage() {
             </button>
           </div>
 
-          <div className="glass-card space-y-4 rounded-3xl p-6">
+          <div className="surface-card space-y-4 p-6">
             <h2 className="text-sm font-semibold text-emerald-900">{tx("Conversation", "Hoi thoai")}</h2>
             {selectedId ? (
               <>
@@ -307,8 +309,8 @@ export default function SupportPage() {
                       key={reply.id}
                       className={`rounded-2xl px-4 py-3 text-xs ${
                         reply.authorRole === "admin"
-                          ? "bg-emerald-50 text-emerald-900"
-                          : "bg-white text-emerald-900 border border-emerald-100"
+                          ? "bg-[color:var(--brand-soft)] text-emerald-900"
+                          : "bg-white text-emerald-900 border border-[color:var(--stroke)]"
                       }`}
                     >
                       <p className="font-semibold">
@@ -325,12 +327,12 @@ export default function SupportPage() {
                     value={replyDraft}
                     onChange={(e) => setReplyDraft(e.currentTarget.value)}
                     placeholder={tx("Reply...", "Tra loi...")}
-                    className="flex-1 rounded-full border border-emerald-100 bg-white px-4 py-2 text-xs"
+                    className="flex-1 rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-xs"
                   />
                   <button
                     type="button"
                     onClick={handleReply}
-                    className="rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-900"
+                    className="rounded-full border border-[color:var(--stroke)] px-4 py-2 text-xs font-semibold text-emerald-900"
                   >
                     {tx("Send reply", "Gui tra loi")}
                   </button>
@@ -345,3 +347,5 @@ export default function SupportPage() {
     </div>
   );
 }
+
+
