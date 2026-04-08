@@ -31,3 +31,51 @@ export async function fetchJson<T>(
 
   return res.json() as Promise<T>;
 }
+
+const TOKEN_STORAGE_KEY = "token";
+
+export function getStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(TOKEN_STORAGE_KEY);
+}
+
+export function setStoredToken(token: string | null) {
+  if (typeof window === "undefined") return;
+  if (token) {
+    window.localStorage.setItem(TOKEN_STORAGE_KEY, token);
+  } else {
+    window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+  }
+}
+
+export async function fetchJsonWithAuth<T>(
+  path: string,
+  init?: RequestInit,
+): Promise<T> {
+  const token = getStoredToken();
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(init?.headers ?? {}),
+  };
+
+  const res = await fetch(`${API_URL}${path}`, {
+    ...init,
+    headers,
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    let message = `API error ${res.status}`;
+    try {
+      const data = await res.json();
+      if (typeof data === "string") message = data;
+      if (data?.title) message = data.title;
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(message);
+  }
+
+  return res.json() as Promise<T>;
+}

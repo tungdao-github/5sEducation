@@ -109,7 +109,7 @@ public class CartController : ControllerBase
     }
 
     [HttpPost("checkout")]
-    public async Task<ActionResult<OrderDto>> Checkout()
+    public async Task<ActionResult<OrderDto>> Checkout([FromBody] CartCheckoutRequest? request)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (userId is null)
@@ -156,14 +156,36 @@ public class CartController : ControllerBase
         }).ToList();
 
         var subtotal = orderItems.Sum(i => i.LineTotal);
+
+        Coupon? coupon = null;
+        var discountTotal = 0m;
+        var couponCode = request?.CouponCode;
+        if (!string.IsNullOrWhiteSpace(couponCode))
+        {
+            couponCode = couponCode.Trim().ToUpperInvariant();
+            coupon = await _db.Coupons.FirstOrDefaultAsync(c => c.Code == couponCode);
+            if (coupon is null)
+            {
+                return BadRequest("Invalid coupon code.");
+            }
+
+            var validation = ValidateCoupon(coupon, subtotal, now);
+            if (!validation.IsValid)
+            {
+                return BadRequest(validation.Message ?? "Coupon is not valid.");
+            }
+
+            discountTotal = validation.Discount;
+        }
         var order = new Order
         {
             UserId = userId,
             Status = "paid",
             Subtotal = subtotal,
-            DiscountTotal = 0,
-            Total = subtotal,
+            DiscountTotal = discountTotal,
+            Total = Math.Max(0, subtotal - discountTotal),
             Currency = "USD",
+            CouponCode = coupon?.Code,
             CreatedAt = now,
             UpdatedAt = now,
             Items = orderItems
@@ -186,6 +208,11 @@ public class CartController : ControllerBase
         }
 
         _db.CartItems.RemoveRange(items);
+        if (coupon is not null)
+        {
+            coupon.UsedCount += 1;
+            coupon.UpdatedAt = now;
+        }
         var loyaltyUser = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (loyaltyUser != null)
         {
@@ -256,6 +283,42 @@ public class CartController : ControllerBase
         return "Bronze";
     }
 
+    private static (bool IsValid, string? Message, decimal Discount) ValidateCoupon(Coupon coupon, decimal subtotal, DateTime now)
+    {
+        if (!coupon.IsActive)
+        {
+            return (false, "Coupon is disabled.", 0);
+        }
+
+        if (coupon.ExpiresAt.HasValue && coupon.ExpiresAt.Value < now)
+        {
+            return (false, "Coupon has expired.", 0);
+        }
+
+        if (coupon.MaxUses > 0 && coupon.UsedCount >= coupon.MaxUses)
+        {
+            return (false, "Coupon usage limit reached.", 0);
+        }
+
+        if (coupon.MinOrder > 0 && subtotal < coupon.MinOrder)
+        {
+            return (false, "Order total does not meet coupon requirements.", 0);
+        }
+
+        var discount = 0m;
+        if (string.Equals(coupon.Type, "percent", StringComparison.OrdinalIgnoreCase))
+        {
+            discount = Math.Round(subtotal * (coupon.Value / 100m), 2, MidpointRounding.AwayFromZero);
+        }
+        else
+        {
+            discount = coupon.Value;
+        }
+
+        discount = Math.Max(0, Math.Min(discount, subtotal));
+        return (true, null, discount);
+    }
+
     private static OrderDto MapOrder(Order order)
     {
         return new OrderDto
@@ -266,6 +329,7 @@ public class CartController : ControllerBase
             DiscountTotal = order.DiscountTotal,
             Total = order.Total,
             Currency = order.Currency,
+            CouponCode = order.CouponCode,
             CreatedAt = order.CreatedAt,
             Items = order.Items
                 .OrderBy(i => i.Id)

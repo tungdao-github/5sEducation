@@ -7,10 +7,38 @@ import { API_URL } from "@/lib/api";
 import { useI18n } from "@/app/providers";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 
+type UserPayload = {
+  isAdmin?: boolean;
+  IsAdmin?: boolean;
+  roles?: string[];
+  Roles?: string[];
+};
+
+type AuthPayload = {
+  token?: string;
+  Token?: string;
+  user?: UserPayload;
+  User?: UserPayload;
+};
+
+const resolveIsAdmin = (user?: UserPayload | null) => {
+  if (!user) return false;
+  if (typeof user.isAdmin === "boolean") return user.isAdmin;
+  if (typeof user.IsAdmin === "boolean") return user.IsAdmin;
+
+  const roles = Array.isArray(user.roles)
+    ? user.roles
+    : Array.isArray(user.Roles)
+    ? user.Roles
+    : [];
+
+  return roles.some((role) => String(role).toLowerCase() === "admin");
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next") ?? "/dashboard";
+  const nextPath = searchParams.get("next") ?? "/";
   const { tx } = useI18n();
 
   const [email, setEmail] = useState("");
@@ -54,7 +82,7 @@ export default function LoginPage() {
         throw new Error(message);
       }
 
-      const data = await res.json();
+      const data = (await res.json()) as AuthPayload;
       const token = data?.token ?? data?.Token;
       if (!token) {
         throw new Error(tx("Login failed: missing token.", "Dang nhap that bai: thieu token."));
@@ -62,7 +90,10 @@ export default function LoginPage() {
 
       localStorage.setItem("token", token);
       window.dispatchEvent(new Event("auth-changed"));
-      router.push(nextPath);
+
+      const user = data?.user ?? data?.User;
+      const isAdmin = resolveIsAdmin(user);
+      router.push(isAdmin ? "/admin" : "/");
     } catch (err) {
       setError(
         err instanceof Error
@@ -187,7 +218,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-sm text-emerald-800/70">
-          {tx("No account yet?", "Chua co tai khoan?")}{" "}
+          {tx("No account yet?", "Chua co tai khoan?")} {" "}
           <Link href={`/register?next=${encodeURIComponent(nextPath)}`} className="font-semibold text-emerald-900">
             {tx("Create one", "Tao tai khoan")}
           </Link>

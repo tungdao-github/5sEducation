@@ -8,6 +8,7 @@ public class OrderAdminDto
     public decimal DiscountTotal { get; set; }
     public decimal Total { get; set; }
     public string Currency { get; set; } = string.Empty;
+    public string? CouponCode { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public string UserId { get; set; } = string.Empty;

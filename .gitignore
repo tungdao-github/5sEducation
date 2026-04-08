@@ -267,3 +267,13 @@ __pycache__
 
 # Large local docs (keep out of repo)
 aspnet-core-aspnetcore-9.0.pdf
+
+# JS / Next.js artifacts
+node_modules/
+apps/web/.next/
+.codex-logs/
+.dotnet-home/
+
+# .NET build output
+**/bin/
+**/obj/

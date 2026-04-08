@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,11 +7,30 @@ import {
   getGoogleClientId,
   loadGoogleIdentityScript,
   signInWithGoogleIdToken,
+  type AuthPayload,
 } from "@/lib/google-auth";
 
 type GoogleSignInButtonProps = {
   nextPath: string;
   mode?: "signin" | "signup";
+};
+
+type UserPayload = NonNullable<AuthPayload["user"]>;
+
+const resolveIsAdmin = (payload: AuthPayload | null | undefined) => {
+  const user: UserPayload | undefined = payload?.user ?? payload?.User;
+  if (!user) return false;
+
+  if (typeof user.isAdmin === "boolean") return user.isAdmin;
+  if (typeof user.IsAdmin === "boolean") return user.IsAdmin;
+
+  const roles = Array.isArray(user.roles)
+    ? user.roles
+    : Array.isArray(user.Roles)
+    ? user.Roles
+    : [];
+
+  return roles.some((role) => String(role).toLowerCase() === "admin");
 };
 
 export function GoogleSignInButton({
@@ -56,8 +75,9 @@ export function GoogleSignInButton({
             setError("");
 
             try {
-              await signInWithGoogleIdToken(credential);
-              router.push(nextPath);
+              const auth = await signInWithGoogleIdToken(credential);
+              const isAdmin = resolveIsAdmin(auth);
+              router.push(isAdmin ? "/admin" : "/");
             } catch (err) {
               setError(
                 err instanceof Error

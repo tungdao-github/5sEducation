@@ -621,6 +621,10 @@ public static class SeedData
         {
             user.FirstName = firstName;
             user.LastName = lastName;
+            if (user.CreatedAt == default)
+            {
+                user.CreatedAt = DateTime.UtcNow;
+            }
             if (confirmEmail && !user.EmailConfirmed)
             {
                 user.EmailConfirmed = true;
@@ -639,7 +643,8 @@ public static class SeedData
             Email = email,
             FirstName = firstName,
             LastName = lastName,
-            EmailConfirmed = confirmEmail
+            EmailConfirmed = confirmEmail,
+            CreatedAt = DateTime.UtcNow
         };
 
         var result = await userManager.CreateAsync(user, password);

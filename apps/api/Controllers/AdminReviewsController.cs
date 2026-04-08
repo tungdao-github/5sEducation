@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UdemyClone.Api.Data;
@@ -36,8 +36,8 @@ public class AdminReviewsController : ControllerBase
         {
             var q = query.Trim().ToLowerInvariant();
             reviews = reviews.Where(r =>
-                r.Comment.ToLower().Contains(q)
-                || (r.User != null && r.User.Email.ToLower().Contains(q))
+                (r.Comment ?? string.Empty).ToLower().Contains(q)
+                || (r.User != null && (r.User.Email ?? string.Empty).ToLower().Contains(q))
                 || (r.Course != null && r.Course.Title.ToLower().Contains(q)));
         }
 
@@ -54,7 +54,7 @@ public class AdminReviewsController : ControllerBase
                 Rating = r.Rating,
                 Comment = r.Comment,
                 UserId = r.UserId,
-                UserEmail = r.User != null ? r.User.Email : string.Empty,
+                UserEmail = r.User != null ? (r.User.Email ?? string.Empty) : string.Empty,
                 UserName = r.User != null ? $"{r.User.FirstName} {r.User.LastName}".Trim() : string.Empty,
                 CreatedAt = r.CreatedAt
             })
@@ -77,3 +77,5 @@ public class AdminReviewsController : ControllerBase
         return NoContent();
     }
 }
+
+

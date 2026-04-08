@@ -54,7 +54,8 @@ public class AuthController : ControllerBase
             UserName = request.Email,
             Email = request.Email,
             FirstName = request.FirstName,
-            LastName = request.LastName
+            LastName = request.LastName,
+            CreatedAt = DateTime.UtcNow
         };
 
         var result = await _userManager.CreateAsync(user, request.Password);
@@ -192,7 +193,8 @@ public class AuthController : ControllerBase
                 EmailConfirmed = payload.EmailVerified,
                 FirstName = firstName,
                 LastName = lastName,
-                AvatarUrl = payload.Picture
+                AvatarUrl = payload.Picture,
+                CreatedAt = DateTime.UtcNow
             };
 
             var createResult = await _userManager.CreateAsync(user);
@@ -477,10 +479,15 @@ public class AuthController : ControllerBase
             FirstName = user.FirstName ?? string.Empty,
             LastName = user.LastName ?? string.Empty,
             AvatarUrl = user.AvatarUrl,
+            PhoneNumber = user.PhoneNumber,
             IsAdmin = roles.Contains("Admin"),
+            EmailConfirmed = user.EmailConfirmed,
             Roles = roles.ToList(),
             LoyaltyPoints = user.LoyaltyPoints,
-            LoyaltyTier = string.IsNullOrWhiteSpace(user.LoyaltyTier) ? "Bronze" : user.LoyaltyTier
+            LoyaltyTier = string.IsNullOrWhiteSpace(user.LoyaltyTier) ? "Bronze" : user.LoyaltyTier,
+            CourseCount = 0,
+            Status = user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow ? "locked" : "active",
+            CreatedAt = user.CreatedAt
         };
     }
 

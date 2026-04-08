@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UdemyClone.Api.Data;
@@ -76,7 +76,13 @@ public class CoursesController : ControllerBase
                 Course = c,
                 AverageRating = c.Reviews.Select(r => (double?)r.Rating).Average() ?? 0,
                 ReviewCount = c.Reviews.Count,
-                StudentCount = c.Enrollments.Count
+                StudentCount = c.Enrollments.Count,
+                InstructorName = c.Instructor == null
+                    ? string.Empty
+                    : (c.Instructor.FirstName + " " + c.Instructor.LastName).Trim(),
+                InstructorAvatarUrl = c.Instructor == null ? null : c.Instructor.AvatarUrl,
+                TotalLessons = c.Lessons.Count,
+                TotalDurationMinutes = c.Lessons.Sum(l => (int?)l.DurationMinutes) ?? 0
             });
 
         if (minRating.HasValue)
@@ -111,7 +117,17 @@ public class CoursesController : ControllerBase
         var rawCourses = await projected.ToListAsync();
         var now = DateTime.UtcNow;
         var courses = rawCourses
-            .Select(c => MapCourseList(c.Course, c.AverageRating, c.ReviewCount, c.StudentCount, now))
+            .Select(c => MapCourseList(
+                c.Course,
+                c.AverageRating,
+                c.ReviewCount,
+                c.StudentCount,
+                now,
+                c.InstructorName,
+                c.InstructorAvatarUrl,
+                c.TotalLessons,
+                c.TotalDurationMinutes
+            ))
             .ToList();
 
         return Ok(courses);
@@ -140,6 +156,8 @@ public class CoursesController : ControllerBase
 
         var rawCourses = await _db.Courses
             .Include(c => c.Category)
+            .Include(c => c.Instructor)
+            .Include(c => c.Lessons)
             .Include(c => c.Reviews)
             .Include(c => c.Enrollments)
             .Where(c => c.IsPublished && idList.Contains(c.Id))
@@ -161,6 +179,7 @@ public class CoursesController : ControllerBase
                 OriginalPrice = GetOriginalPrice(c, now),
                 IsFlashSaleActive = IsFlashSaleActive(c, now),
                 FlashSalePrice = c.FlashSalePrice,
+                FlashSaleStartsAt = c.FlashSaleStartsAt,
                 FlashSaleEndsAt = c.FlashSaleEndsAt,
                 ThumbnailUrl = c.ThumbnailUrl,
                 Language = c.Language,
@@ -168,6 +187,12 @@ public class CoursesController : ControllerBase
                 AverageRating = c.Reviews.Count > 0 ? c.Reviews.Average(r => r.Rating) : 0,
                 ReviewCount = c.Reviews.Count,
                 StudentCount = c.Enrollments.Count,
+                InstructorName = c.Instructor == null
+                    ? string.Empty
+                    : (c.Instructor.FirstName + " " + c.Instructor.LastName).Trim(),
+                InstructorAvatarUrl = c.Instructor?.AvatarUrl,
+                TotalLessons = c.Lessons.Count,
+                TotalDurationMinutes = (int)Math.Round(c.Lessons.Sum(l => l.DurationMinutes)),
                 Category = c.Category == null ? null : new CategoryDto
                 {
                     Id = c.Category.Id,
@@ -218,7 +243,13 @@ public class CoursesController : ControllerBase
                 Course = c,
                 AverageRating = c.Reviews.Select(r => (double?)r.Rating).Average() ?? 0,
                 ReviewCount = c.Reviews.Count,
-                StudentCount = c.Enrollments.Count
+                StudentCount = c.Enrollments.Count,
+                InstructorName = c.Instructor == null
+                    ? string.Empty
+                    : (c.Instructor.FirstName + " " + c.Instructor.LastName).Trim(),
+                InstructorAvatarUrl = c.Instructor == null ? null : c.Instructor.AvatarUrl,
+                TotalLessons = c.Lessons.Count,
+                TotalDurationMinutes = c.Lessons.Sum(l => (int?)l.DurationMinutes) ?? 0
             })
             .OrderByDescending(c => c.AverageRating)
             .ThenByDescending(c => c.Course.CreatedAt)
@@ -227,7 +258,17 @@ public class CoursesController : ControllerBase
 
         var now = DateTime.UtcNow;
         var results = rawResults
-            .Select(c => MapCourseList(c.Course, c.AverageRating, c.ReviewCount, c.StudentCount, now))
+            .Select(c => MapCourseList(
+                c.Course,
+                c.AverageRating,
+                c.ReviewCount,
+                c.StudentCount,
+                now,
+                c.InstructorName,
+                c.InstructorAvatarUrl,
+                c.TotalLessons,
+                c.TotalDurationMinutes
+            ))
             .ToList();
 
         return Ok(results);
@@ -238,6 +279,7 @@ public class CoursesController : ControllerBase
     {
         var course = await _db.Courses
             .Include(c => c.Category)
+            .Include(c => c.Instructor)
             .Include(c => c.Lessons)
             .ThenInclude(l => l.ExerciseQuestions)
             .Include(c => c.Enrollments)
@@ -289,6 +331,12 @@ public class CoursesController : ControllerBase
             AverageRating = course.Reviews.Count > 0 ? course.Reviews.Average(r => r.Rating) : 0,
             ReviewCount = course.Reviews.Count,
             StudentCount = course.Enrollments.Count,
+            InstructorName = course.Instructor == null
+                ? string.Empty
+                : (course.Instructor.FirstName + " " + course.Instructor.LastName).Trim(),
+            InstructorAvatarUrl = course.Instructor?.AvatarUrl,
+            TotalLessons = course.Lessons.Count,
+            TotalDurationMinutes = (int)Math.Round(course.Lessons.Sum(l => l.DurationMinutes)),
             Description = course.Description,
             Outcome = course.Outcome,
             Requirements = course.Requirements,
@@ -377,6 +425,10 @@ public class CoursesController : ControllerBase
             AverageRating = 0,
             ReviewCount = 0,
             StudentCount = 0,
+            InstructorName = string.Empty,
+            InstructorAvatarUrl = null,
+            TotalLessons = 0,
+            TotalDurationMinutes = 0,
             Description = course.Description,
             Outcome = course.Outcome,
             Requirements = course.Requirements,
@@ -645,7 +697,16 @@ public class CoursesController : ControllerBase
         return "video";
     }
 
-    private static CourseListDto MapCourseList(Course course, double averageRating, int reviewCount, int studentCount, DateTime now)
+    private static CourseListDto MapCourseList(
+        Course course,
+        double averageRating,
+        int reviewCount,
+        int studentCount,
+        DateTime now,
+        string? instructorName,
+        string? instructorAvatarUrl,
+        int totalLessons,
+        int totalDurationMinutes)
     {
         return new CourseListDto
         {
@@ -666,6 +727,10 @@ public class CoursesController : ControllerBase
             AverageRating = averageRating,
             ReviewCount = reviewCount,
             StudentCount = studentCount,
+            InstructorName = string.IsNullOrWhiteSpace(instructorName) ? null : instructorName,
+            InstructorAvatarUrl = instructorAvatarUrl,
+            TotalLessons = totalLessons,
+            TotalDurationMinutes = totalDurationMinutes,
             Category = course.Category == null ? null : new CategoryDto
             {
                 Id = course.Category.Id,
@@ -738,3 +803,5 @@ public class CoursesController : ControllerBase
         return (start, end);
     }
 }
+
+

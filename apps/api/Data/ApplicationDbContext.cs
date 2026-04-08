@@ -30,9 +30,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
     public DbSet<SupportReply> SupportReplies => Set<SupportReply>();
     public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
+    public DbSet<BlogComment> BlogComments => Set<BlogComment>();
+    public DbSet<BlogCommentLike> BlogCommentLikes => Set<BlogCommentLike>();
     public DbSet<AdminAuditLog> AdminAuditLogs => Set<AdminAuditLog>();
     public DbSet<UserAddress> UserAddresses => Set<UserAddress>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
+    public DbSet<Coupon> Coupons => Set<Coupon>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -169,6 +172,32 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        builder.Entity<BlogComment>(entity =>
+        {
+            entity.HasIndex(c => new { c.BlogPostId, c.CreatedAt });
+            entity.HasOne(c => c.BlogPost)
+                .WithMany()
+                .HasForeignKey(c => c.BlogPostId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<BlogCommentLike>(entity =>
+        {
+            entity.HasIndex(l => new { l.BlogCommentId, l.UserId }).IsUnique();
+            entity.HasOne(l => l.BlogComment)
+                .WithMany(c => c.Likes)
+                .HasForeignKey(l => l.BlogCommentId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(l => l.User)
+                .WithMany()
+                .HasForeignKey(l => l.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+        });
+
         builder.Entity<WishlistItem>(entity =>
         {
             entity.HasIndex(w => new { w.UserId, w.CourseId }).IsUnique();
@@ -176,6 +205,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .WithMany()
                 .HasForeignKey(w => w.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Coupon>(entity =>
+        {
+            entity.HasIndex(c => c.Code).IsUnique();
+            entity.Property(c => c.Value).HasPrecision(18, 2);
+            entity.Property(c => c.MinOrder).HasPrecision(18, 2);
         });
 
         builder.Entity<CourseViewHistory>(entity =>

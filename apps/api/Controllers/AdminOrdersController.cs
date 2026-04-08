@@ -44,6 +44,7 @@ public class AdminOrdersController : ControllerBase
             DiscountTotal = o.DiscountTotal,
             Total = o.Total,
             Currency = o.Currency,
+            CouponCode = o.CouponCode,
             CreatedAt = o.CreatedAt,
             UpdatedAt = o.UpdatedAt,
             UserId = o.UserId,

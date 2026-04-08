@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using UdemyClone.Api.Data;
 using UdemyClone.Api.Dtos;
 using UdemyClone.Api.Models;
 
@@ -12,11 +13,16 @@ namespace UdemyClone.Api.Controllers;
 [Authorize(Roles = "Admin")]
 public class UsersController : ControllerBase
 {
+    private readonly ApplicationDbContext _db;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
 
-    public UsersController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+    public UsersController(
+        ApplicationDbContext db,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager)
     {
+        _db = db;
         _userManager = userManager;
         _roleManager = roleManager;
     }
@@ -24,12 +30,27 @@ public class UsersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<UserDto>>> GetAll()
     {
-        var users = _userManager.Users.ToList();
+        var users = await _userManager.Users
+            .AsNoTracking()
+            .OrderByDescending(user => user.CreatedAt)
+            .ToListAsync();
+
+        var courseCounts = await _db.Enrollments
+            .AsNoTracking()
+            .GroupBy(enrollment => enrollment.UserId)
+            .Select(group => new
+            {
+                UserId = group.Key,
+                Count = group.Count()
+            })
+            .ToDictionaryAsync(item => item.UserId, item => item.Count);
+
         var results = new List<UserDto>();
 
         foreach (var user in users)
         {
             var roles = await _userManager.GetRolesAsync(user);
+            var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow;
             results.Add(new UserDto
             {
                 Id = user.Id,
@@ -37,10 +58,15 @@ public class UsersController : ControllerBase
                 FirstName = user.FirstName ?? string.Empty,
                 LastName = user.LastName ?? string.Empty,
                 AvatarUrl = user.AvatarUrl,
+                PhoneNumber = user.PhoneNumber,
                 IsAdmin = roles.Contains("Admin"),
+                EmailConfirmed = user.EmailConfirmed,
                 Roles = roles.ToList(),
                 LoyaltyPoints = user.LoyaltyPoints,
-                LoyaltyTier = string.IsNullOrWhiteSpace(user.LoyaltyTier) ? "Bronze" : user.LoyaltyTier
+                LoyaltyTier = string.IsNullOrWhiteSpace(user.LoyaltyTier) ? "Bronze" : user.LoyaltyTier,
+                CourseCount = courseCounts.TryGetValue(user.Id, out var count) ? count : 0,
+                Status = isLocked ? "locked" : "active",
+                CreatedAt = user.CreatedAt
             });
         }
 
@@ -120,6 +146,40 @@ public class UsersController : ControllerBase
             {
                 return BadRequest(addResult.Errors);
             }
+        }
+
+        return NoContent();
+    }
+
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> UpdateStatus(string id, UserStatusUpdateRequest request)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user is null)
+        {
+            return NotFound();
+        }
+
+        var currentUserId = _userManager.GetUserId(User);
+        if (request.IsLocked && string.Equals(currentUserId, user.Id, StringComparison.Ordinal))
+        {
+            return BadRequest("You cannot lock your own account.");
+        }
+
+        user.LockoutEnabled = true;
+        var lockoutEnd = request.IsLocked
+            ? DateTimeOffset.UtcNow.AddYears(100)
+            : (DateTimeOffset?)null;
+
+        var lockResult = await _userManager.SetLockoutEndDateAsync(user, lockoutEnd);
+        if (!lockResult.Succeeded)
+        {
+            return BadRequest(lockResult.Errors);
+        }
+
+        if (!request.IsLocked)
+        {
+            await _userManager.ResetAccessFailedCountAsync(user);
         }
 
         return NoContent();

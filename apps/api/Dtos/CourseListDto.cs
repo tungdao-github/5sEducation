@@ -20,4 +20,8 @@ public class CourseListDto
     public int ReviewCount { get; set; }
     public int StudentCount { get; set; }
     public CategoryDto? Category { get; set; }
+    public string? InstructorName { get; set; }
+    public string? InstructorAvatarUrl { get; set; }
+    public int TotalLessons { get; set; }
+    public int TotalDurationMinutes { get; set; }
 }

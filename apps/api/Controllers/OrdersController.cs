@@ -42,6 +42,7 @@ public class OrdersController : ControllerBase
             DiscountTotal = o.DiscountTotal,
             Total = o.Total,
             Currency = o.Currency,
+            CouponCode = o.CouponCode,
             CreatedAt = o.CreatedAt,
             Items = o.Items
                 .OrderBy(i => i.Id)

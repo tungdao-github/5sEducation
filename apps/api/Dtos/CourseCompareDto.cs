@@ -1,4 +1,4 @@
-namespace UdemyClone.Api.Dtos;
+﻿namespace UdemyClone.Api.Dtos;
 
 public class CourseCompareDto
 {
@@ -14,6 +14,7 @@ public class CourseCompareDto
     public decimal? OriginalPrice { get; set; }
     public bool IsFlashSaleActive { get; set; }
     public decimal? FlashSalePrice { get; set; }
+    public DateTime? FlashSaleStartsAt { get; set; }
     public DateTime? FlashSaleEndsAt { get; set; }
     public string ThumbnailUrl { get; set; } = string.Empty;
     public string Language { get; set; } = string.Empty;
@@ -22,4 +23,8 @@ public class CourseCompareDto
     public int ReviewCount { get; set; }
     public int StudentCount { get; set; }
     public CategoryDto? Category { get; set; }
+    public string? InstructorName { get; set; }
+    public string? InstructorAvatarUrl { get; set; }
+    public int TotalLessons { get; set; }
+    public int TotalDurationMinutes { get; set; }
 }

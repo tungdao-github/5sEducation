@@ -17,6 +17,9 @@ public class Order
     public decimal DiscountTotal { get; set; }
     public decimal Total { get; set; }
 
+    [MaxLength(50)]
+    public string? CouponCode { get; set; }
+
     [Required]
     public string Currency { get; set; } = "USD";
 

@@ -1,25 +1,13 @@
 import "./globals.css";
 
 import type { Metadata } from "next";
-import { Manrope, Space_Grotesk } from "next/font/google";
 import { Providers } from "./providers";
-import { SiteHeader } from "@/components/SiteHeader";
-import { SiteFooter } from "@/components/SiteFooter";
 import { GoogleOneTap } from "@/components/GoogleOneTap";
-import { SupportChatWidget } from "@/components/SupportChatWidget";
+import Header from "@/figma/components/Header";
+import Footer from "@/figma/components/Footer";
+import AuthModal from "@/figma/components/AuthModal";
+import ChatWidget from "@/figma/components/ChatWidget";
 import { getServerLocale } from "@/lib/server-locale";
-
-const bodyFont = Manrope({
-  subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
-});
-
-const displayFont = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -56,15 +44,21 @@ export default async function RootLayout({
     <html
       lang={locale}
       suppressHydrationWarning
-      className={`${bodyFont.variable} ${displayFont.variable}`}
+      style={{
+        ["--font-body" as string]:
+          '"Manrope", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+        ["--font-display" as string]:
+          '"Space Grotesk", "Trebuchet MS", "Helvetica Neue", Arial, sans-serif',
+      }}
     >
       <body className="page-shell">
         <Providers>
           <GoogleOneTap />
-          <SiteHeader />
+          <Header />
           <main className="flex-1">{children}</main>
-          <SiteFooter />
-          <SupportChatWidget />
+          <Footer />
+          <AuthModal />
+          <ChatWidget />
         </Providers>
       </body>
     </html>

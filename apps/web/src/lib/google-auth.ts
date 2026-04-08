@@ -1,4 +1,4 @@
-import { API_URL } from "@/lib/api";
+﻿import { API_URL } from "@/lib/api";
 
 type GoogleCredentialResponse = {
   credential?: string;
@@ -11,6 +11,7 @@ type GoogleAccountsId = {
     context?: "signin" | "signup";
     auto_select?: boolean;
     cancel_on_tap_outside?: boolean;
+    use_fedcm_for_prompt?: boolean;
   }) => void;
   renderButton: (
     parent: HTMLElement,
@@ -23,7 +24,7 @@ type GoogleAccountsId = {
       locale?: string;
     }
   ) => void;
-  prompt: () => void;
+  prompt: (callback?: () => void) => void;
   cancel: () => void;
 };
 
@@ -36,6 +37,23 @@ declare global {
     };
   }
 }
+
+export type AuthPayload = {
+  token?: string;
+  Token?: string;
+  user?: {
+    isAdmin?: boolean;
+    IsAdmin?: boolean;
+    roles?: string[];
+    Roles?: string[];
+  };
+  User?: {
+    isAdmin?: boolean;
+    IsAdmin?: boolean;
+    roles?: string[];
+    Roles?: string[];
+  };
+};
 
 let googleScriptPromise: Promise<void> | null = null;
 
@@ -152,7 +170,7 @@ export async function signInWithGoogleIdToken(idToken: string) {
     throw new Error(getErrorMessage(payload || rawText, "Google sign-in failed."));
   }
 
-  const data = await res.json();
+  const data = (await res.json()) as AuthPayload;
   const token = data?.token ?? data?.Token;
   if (!token) {
     throw new Error("Google sign-in failed: missing token.");
@@ -160,5 +178,6 @@ export async function signInWithGoogleIdToken(idToken: string) {
 
   localStorage.setItem("token", token);
   window.dispatchEvent(new Event("auth-changed"));
-  return token as string;
+  return data;
 }
+

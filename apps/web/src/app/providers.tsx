@@ -2,6 +2,11 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { normalizeLocale, type AppLocale } from "@/lib/i18n";
+import { AuthProvider } from "@/figma/contexts/AuthContext";
+import { CartProvider } from "@/figma/contexts/CartContext";
+import { WishlistProvider } from "@/figma/contexts/WishlistContext";
+import { LanguageProvider } from "@/figma/contexts/LanguageContext";
+import { ReviewProvider } from "@/figma/contexts/ReviewContext";
 
 export type { AppLocale } from "@/lib/i18n";
 
@@ -49,7 +54,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
     [locale]
   );
 
-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+  return (
+    <I18nContext.Provider value={value}>
+      <LanguageProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <ReviewProvider>{children}</ReviewProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </I18nContext.Provider>
+  );
 }
 
 export function useI18n() {
