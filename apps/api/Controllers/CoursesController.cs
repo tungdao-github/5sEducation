@@ -35,7 +35,6 @@ public class CoursesController : ControllerBase
         [FromQuery] int? pageSize)
     {
         var query = _db.Courses
-            .Include(c => c.Category)
             .Where(c => c.IsPublished)
             .AsNoTracking()
             .AsQueryable();
@@ -73,7 +72,21 @@ public class CoursesController : ControllerBase
         var projected = query
             .Select(c => new
             {
-                Course = c,
+                c.Id,
+                c.Title,
+                c.Slug,
+                c.ShortDescription,
+                c.Price,
+                c.FlashSalePrice,
+                c.FlashSaleStartsAt,
+                c.FlashSaleEndsAt,
+                c.ThumbnailUrl,
+                c.Language,
+                c.Level,
+                c.CreatedAt,
+                CategoryId = c.CategoryId,
+                CategoryTitle = c.Category == null ? null : c.Category.Title,
+                CategorySlug = c.Category == null ? null : c.Category.Slug,
                 AverageRating = c.Reviews.Select(r => (double?)r.Rating).Average() ?? 0,
                 ReviewCount = c.Reviews.Count,
                 StudentCount = c.Enrollments.Count,
@@ -93,10 +106,10 @@ public class CoursesController : ControllerBase
         projected = (sort ?? string.Empty).ToLowerInvariant() switch
         {
             "rating" => projected.OrderByDescending(c => c.AverageRating),
-            "price_asc" => projected.OrderBy(c => c.Course.Price),
-            "price_desc" => projected.OrderByDescending(c => c.Course.Price),
+            "price_asc" => projected.OrderBy(c => c.Price),
+            "price_desc" => projected.OrderByDescending(c => c.Price),
             "popular" => projected.OrderByDescending(c => c.StudentCount),
-            _ => projected.OrderByDescending(c => c.Course.CreatedAt)
+            _ => projected.OrderByDescending(c => c.CreatedAt)
         };
 
         var resolvedPageSize = pageSize ?? 0;
@@ -118,7 +131,21 @@ public class CoursesController : ControllerBase
         var now = DateTime.UtcNow;
         var courses = rawCourses
             .Select(c => MapCourseList(
-                c.Course,
+                new Course
+                {
+                    Id = c.Id,
+                    Title = c.Title,
+                    Slug = c.Slug,
+                    ShortDescription = c.ShortDescription,
+                    Price = c.Price,
+                    FlashSalePrice = c.FlashSalePrice,
+                    FlashSaleStartsAt = c.FlashSaleStartsAt,
+                    FlashSaleEndsAt = c.FlashSaleEndsAt,
+                    ThumbnailUrl = c.ThumbnailUrl,
+                    Language = c.Language,
+                    Level = c.Level,
+                    CreatedAt = c.CreatedAt
+                },
                 c.AverageRating,
                 c.ReviewCount,
                 c.StudentCount,
@@ -126,7 +153,10 @@ public class CoursesController : ControllerBase
                 c.InstructorName,
                 c.InstructorAvatarUrl,
                 c.TotalLessons,
-                c.TotalDurationMinutes
+                c.TotalDurationMinutes,
+                c.CategoryId,
+                c.CategoryTitle,
+                c.CategorySlug
             ))
             .ToList();
 
@@ -155,12 +185,37 @@ public class CoursesController : ControllerBase
         }
 
         var rawCourses = await _db.Courses
-            .Include(c => c.Category)
-            .Include(c => c.Instructor)
-            .Include(c => c.Lessons)
-            .Include(c => c.Reviews)
-            .Include(c => c.Enrollments)
+            .AsNoTracking()
             .Where(c => c.IsPublished && idList.Contains(c.Id))
+            .Select(c => new
+            {
+                c.Id,
+                c.Title,
+                c.Slug,
+                c.ShortDescription,
+                c.Description,
+                c.Outcome,
+                c.Requirements,
+                c.Price,
+                c.FlashSalePrice,
+                c.FlashSaleStartsAt,
+                c.FlashSaleEndsAt,
+                c.ThumbnailUrl,
+                c.Language,
+                c.Level,
+                AverageRating = c.Reviews.Select(r => (double?)r.Rating).Average() ?? 0,
+                ReviewCount = c.Reviews.Count,
+                StudentCount = c.Enrollments.Count,
+                InstructorName = c.Instructor == null
+                    ? string.Empty
+                    : (c.Instructor.FirstName + " " + c.Instructor.LastName).Trim(),
+                InstructorAvatarUrl = c.Instructor == null ? null : c.Instructor.AvatarUrl,
+                TotalLessons = c.Lessons.Count,
+                TotalDurationMinutes = c.Lessons.Sum(l => (int?)l.DurationMinutes) ?? 0,
+                CategoryId = c.CategoryId,
+                CategoryTitle = c.Category == null ? null : c.Category.Title,
+                CategorySlug = c.Category == null ? null : c.Category.Slug
+            })
             .ToListAsync();
 
         var now = DateTime.UtcNow;
@@ -175,29 +230,47 @@ public class CoursesController : ControllerBase
                 Outcome = c.Outcome,
                 Requirements = c.Requirements,
                 Price = c.Price,
-                EffectivePrice = GetEffectivePrice(c, now),
-                OriginalPrice = GetOriginalPrice(c, now),
-                IsFlashSaleActive = IsFlashSaleActive(c, now),
+                EffectivePrice = GetEffectivePrice(new Course
+                {
+                    Price = c.Price,
+                    FlashSalePrice = c.FlashSalePrice,
+                    FlashSaleStartsAt = c.FlashSaleStartsAt,
+                    FlashSaleEndsAt = c.FlashSaleEndsAt
+                }, now),
+                OriginalPrice = GetOriginalPrice(new Course
+                {
+                    Price = c.Price,
+                    FlashSalePrice = c.FlashSalePrice,
+                    FlashSaleStartsAt = c.FlashSaleStartsAt,
+                    FlashSaleEndsAt = c.FlashSaleEndsAt
+                }, now),
+                IsFlashSaleActive = IsFlashSaleActive(new Course
+                {
+                    Price = c.Price,
+                    FlashSalePrice = c.FlashSalePrice,
+                    FlashSaleStartsAt = c.FlashSaleStartsAt,
+                    FlashSaleEndsAt = c.FlashSaleEndsAt
+                }, now),
                 FlashSalePrice = c.FlashSalePrice,
                 FlashSaleStartsAt = c.FlashSaleStartsAt,
                 FlashSaleEndsAt = c.FlashSaleEndsAt,
                 ThumbnailUrl = c.ThumbnailUrl,
                 Language = c.Language,
                 Level = c.Level,
-                AverageRating = c.Reviews.Count > 0 ? c.Reviews.Average(r => r.Rating) : 0,
-                ReviewCount = c.Reviews.Count,
-                StudentCount = c.Enrollments.Count,
-                InstructorName = c.Instructor == null
-                    ? string.Empty
-                    : (c.Instructor.FirstName + " " + c.Instructor.LastName).Trim(),
-                InstructorAvatarUrl = c.Instructor?.AvatarUrl,
-                TotalLessons = c.Lessons.Count,
-                TotalDurationMinutes = (int)Math.Round(c.Lessons.Sum(l => l.DurationMinutes)),
-                Category = c.Category == null ? null : new CategoryDto
+                AverageRating = c.AverageRating,
+                ReviewCount = c.ReviewCount,
+                StudentCount = c.StudentCount,
+                InstructorName = c.InstructorName,
+                InstructorAvatarUrl = c.InstructorAvatarUrl,
+                TotalLessons = c.TotalLessons,
+                TotalDurationMinutes = c.TotalDurationMinutes,
+                Category = !c.CategoryId.HasValue || c.CategoryId.Value <= 0 || string.IsNullOrWhiteSpace(c.CategoryTitle) || string.IsNullOrWhiteSpace(c.CategorySlug)
+                    ? null
+                    : new CategoryDto
                 {
-                    Id = c.Category.Id,
-                    Title = c.Category.Title,
-                    Slug = c.Category.Slug
+                    Id = c.CategoryId.Value,
+                    Title = c.CategoryTitle!,
+                    Slug = c.CategorySlug!
                 }
             })
             .ToList();
@@ -223,7 +296,6 @@ public class CoursesController : ControllerBase
         var limit = Math.Clamp(take ?? 6, 1, 12);
 
         var query = _db.Courses
-            .Include(c => c.Category)
             .Where(c => c.IsPublished && c.Id != course.Id)
             .AsNoTracking()
             .AsQueryable();
@@ -240,7 +312,17 @@ public class CoursesController : ControllerBase
         var rawResults = await query
             .Select(c => new
             {
-                Course = c,
+                c.Id,
+                c.Title,
+                c.Slug,
+                c.ShortDescription,
+                c.Price,
+                c.FlashSalePrice,
+                c.FlashSaleStartsAt,
+                c.FlashSaleEndsAt,
+                c.ThumbnailUrl,
+                c.Language,
+                c.Level,
                 AverageRating = c.Reviews.Select(r => (double?)r.Rating).Average() ?? 0,
                 ReviewCount = c.Reviews.Count,
                 StudentCount = c.Enrollments.Count,
@@ -249,17 +331,36 @@ public class CoursesController : ControllerBase
                     : (c.Instructor.FirstName + " " + c.Instructor.LastName).Trim(),
                 InstructorAvatarUrl = c.Instructor == null ? null : c.Instructor.AvatarUrl,
                 TotalLessons = c.Lessons.Count,
-                TotalDurationMinutes = c.Lessons.Sum(l => (int?)l.DurationMinutes) ?? 0
+                TotalDurationMinutes = c.Lessons.Sum(l => (int?)l.DurationMinutes) ?? 0,
+                c.CreatedAt,
+                CategoryId = c.CategoryId,
+                CategoryTitle = c.Category == null ? null : c.Category.Title,
+                CategorySlug = c.Category == null ? null : c.Category.Slug
             })
             .OrderByDescending(c => c.AverageRating)
-            .ThenByDescending(c => c.Course.CreatedAt)
+            .ThenByDescending(c => c.CreatedAt)
             .Take(limit)
             .ToListAsync();
 
         var now = DateTime.UtcNow;
         var results = rawResults
             .Select(c => MapCourseList(
-                c.Course,
+                new Course
+                {
+                    Id = c.Id,
+                    Title = c.Title,
+                    Slug = c.Slug,
+                    ShortDescription = c.ShortDescription,
+                    Price = c.Price,
+                    FlashSalePrice = c.FlashSalePrice,
+                    FlashSaleStartsAt = c.FlashSaleStartsAt,
+                    FlashSaleEndsAt = c.FlashSaleEndsAt,
+                    ThumbnailUrl = c.ThumbnailUrl,
+                    Language = c.Language,
+                    Level = c.Level,
+                    CreatedAt = c.CreatedAt,
+                    CategoryId = c.CategoryId
+                },
                 c.AverageRating,
                 c.ReviewCount,
                 c.StudentCount,
@@ -267,7 +368,10 @@ public class CoursesController : ControllerBase
                 c.InstructorName,
                 c.InstructorAvatarUrl,
                 c.TotalLessons,
-                c.TotalDurationMinutes
+                c.TotalDurationMinutes,
+                c.CategoryId,
+                c.CategoryTitle,
+                c.CategorySlug
             ))
             .ToList();
 
@@ -278,6 +382,8 @@ public class CoursesController : ControllerBase
     public async Task<ActionResult<CourseDetailDto>> GetBySlug(string slug)
     {
         var course = await _db.Courses
+            .AsNoTracking()
+            .AsSplitQuery()
             .Include(c => c.Category)
             .Include(c => c.Instructor)
             .Include(c => c.Lessons)
@@ -359,6 +465,18 @@ public class CoursesController : ControllerBase
         return Ok(dto);
     }
 
+    [HttpGet("by-id/{id:int}")]
+    public async Task<ActionResult<CourseDetailDto>> GetById(int id)
+    {
+        var course = await _db.Courses.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+        if (course is null)
+        {
+            return NotFound();
+        }
+
+        return await GetBySlug(course.Slug);
+    }
+
     [Authorize(Roles = "Admin,Instructor")]
     [HttpPost]
     public async Task<ActionResult<CourseDetailDto>> Create([FromForm] CourseCreateRequest request)
@@ -375,6 +493,9 @@ public class CoursesController : ControllerBase
         {
             return BadRequest(thumbnailError);
         }
+        var normalizedThumbnailUrl = !string.IsNullOrWhiteSpace(thumbnailUrl)
+            ? thumbnailUrl
+            : (request.ThumbnailUrl ?? string.Empty).Trim();
 
         var flashSalePrice = NormalizeFlashSalePrice(request.Price, request.FlashSalePrice);
         var (flashStart, flashEnd) = NormalizeFlashSaleWindow(request.FlashSaleStartsAt, request.FlashSaleEndsAt);
@@ -396,7 +517,7 @@ public class CoursesController : ControllerBase
             FlashSaleEndsAt = flashEnd,
             Level = request.Level,
             PreviewVideoUrl = request.PreviewVideoUrl,
-            ThumbnailUrl = thumbnailUrl ?? string.Empty,
+            ThumbnailUrl = normalizedThumbnailUrl,
             IsPublished = request.IsPublished,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -483,6 +604,10 @@ public class CoursesController : ControllerBase
         if (!string.IsNullOrWhiteSpace(thumbnailUrl))
         {
             course.ThumbnailUrl = thumbnailUrl;
+        }
+        else if (!string.IsNullOrWhiteSpace(request.ThumbnailUrl))
+        {
+            course.ThumbnailUrl = request.ThumbnailUrl.Trim();
         }
 
         await _db.SaveChangesAsync();
@@ -706,7 +831,10 @@ public class CoursesController : ControllerBase
         string? instructorName,
         string? instructorAvatarUrl,
         int totalLessons,
-        int totalDurationMinutes)
+        int totalDurationMinutes,
+        int? categoryId,
+        string? categoryTitle,
+        string? categorySlug)
     {
         return new CourseListDto
         {
@@ -731,11 +859,13 @@ public class CoursesController : ControllerBase
             InstructorAvatarUrl = instructorAvatarUrl,
             TotalLessons = totalLessons,
             TotalDurationMinutes = totalDurationMinutes,
-            Category = course.Category == null ? null : new CategoryDto
+            Category = !categoryId.HasValue || categoryId.Value <= 0 || string.IsNullOrWhiteSpace(categoryTitle) || string.IsNullOrWhiteSpace(categorySlug)
+                ? null
+                : new CategoryDto
             {
-                Id = course.Category.Id,
-                Title = course.Category.Title,
-                Slug = course.Category.Slug
+                Id = categoryId.Value,
+                Title = categoryTitle!,
+                Slug = categorySlug!
             }
         };
     }

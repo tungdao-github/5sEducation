@@ -32,15 +32,17 @@ public class AdminStatsController : ControllerBase
         var totalLessonsTask = _db.Lessons.CountAsync();
         var totalEnrollmentsTask = _db.Enrollments.CountAsync();
         var openSupportTask = _db.SupportMessages.CountAsync(m => m.Status == "open");
-        var averageRatingTask = _db.Reviews.Select(r => (double?)r.Rating).AverageAsync();
+        var averageRatingTask = _db.Reviews.AsNoTracking().Select(r => (double?)r.Rating).AverageAsync();
 
         var revenueTask = _db.Orders
             .Where(o => o.Status == "paid")
+            .AsNoTracking()
             .Select(o => o.Total)
             .SumAsync();
 
         var activeStudentsTask = _db.Enrollments
             .Where(e => e.CreatedAt >= since30d)
+            .AsNoTracking()
             .Select(e => e.UserId)
             .Distinct()
             .CountAsync();
@@ -48,6 +50,7 @@ public class AdminStatsController : ControllerBase
         var dailyRawTask = _db.Enrollments
             .Where(e => e.CreatedAt >= startDate)
             .GroupBy(e => e.CreatedAt.Date)
+            .AsNoTracking()
             .Select(group => new
             {
                 Date = group.Key,
@@ -58,6 +61,7 @@ public class AdminStatsController : ControllerBase
         var revenueDailyTask = _db.Orders
             .Where(o => o.Status == "paid" && o.CreatedAt >= revenueStart)
             .GroupBy(o => o.CreatedAt.Date)
+            .AsNoTracking()
             .Select(group => new
             {
                 Date = group.Key,
@@ -67,6 +71,7 @@ public class AdminStatsController : ControllerBase
 
         var ordersByStatusTask = _db.Orders
             .GroupBy(o => o.Status)
+            .AsNoTracking()
             .Select(group => new StatusCountDto
             {
                 Status = group.Key,
@@ -77,6 +82,7 @@ public class AdminStatsController : ControllerBase
         var topCoursesTask = _db.OrderItems
             .Where(item => item.Order != null && item.Order.Status == "paid")
             .GroupBy(item => new { item.CourseId, item.CourseTitle })
+            .AsNoTracking()
             .Select(group => new TopCourseRevenueDto
             {
                 CourseId = group.Key.CourseId,

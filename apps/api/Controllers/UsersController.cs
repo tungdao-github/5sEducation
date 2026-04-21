@@ -33,6 +33,20 @@ public class UsersController : ControllerBase
         var users = await _userManager.Users
             .AsNoTracking()
             .OrderByDescending(user => user.CreatedAt)
+            .Select(user => new
+            {
+                user.Id,
+                user.Email,
+                user.FirstName,
+                user.LastName,
+                user.AvatarUrl,
+                user.PhoneNumber,
+                user.EmailConfirmed,
+                user.LoyaltyPoints,
+                user.LoyaltyTier,
+                user.LockoutEnd,
+                user.CreatedAt
+            })
             .ToListAsync();
 
         var courseCounts = await _db.Enrollments
@@ -45,30 +59,54 @@ public class UsersController : ControllerBase
             })
             .ToDictionaryAsync(item => item.UserId, item => item.Count);
 
-        var results = new List<UserDto>();
-
-        foreach (var user in users)
-        {
-            var roles = await _userManager.GetRolesAsync(user);
-            var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow;
-            results.Add(new UserDto
+        var roleEntries = await (
+            from userRole in _db.UserRoles.AsNoTracking()
+            join role in _db.Roles.AsNoTracking() on userRole.RoleId equals role.Id
+            select new
             {
-                Id = user.Id,
-                Email = user.Email ?? string.Empty,
-                FirstName = user.FirstName ?? string.Empty,
-                LastName = user.LastName ?? string.Empty,
-                AvatarUrl = user.AvatarUrl,
-                PhoneNumber = user.PhoneNumber,
-                IsAdmin = roles.Contains("Admin"),
-                EmailConfirmed = user.EmailConfirmed,
-                Roles = roles.ToList(),
-                LoyaltyPoints = user.LoyaltyPoints,
-                LoyaltyTier = string.IsNullOrWhiteSpace(user.LoyaltyTier) ? "Bronze" : user.LoyaltyTier,
-                CourseCount = courseCounts.TryGetValue(user.Id, out var count) ? count : 0,
-                Status = isLocked ? "locked" : "active",
-                CreatedAt = user.CreatedAt
-            });
-        }
+                userRole.UserId,
+                RoleName = role.Name
+            })
+            .Where(item => !string.IsNullOrWhiteSpace(item.RoleName))
+            .ToListAsync();
+
+        var rolesByUserId = roleEntries
+            .GroupBy(item => item.UserId)
+            .ToDictionary(
+                group => group.Key,
+                group => group
+                    .Select(item => item.RoleName!)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(name => name)
+                    .ToList());
+
+        var results = users
+            .Select(user =>
+            {
+                var roles = rolesByUserId.TryGetValue(user.Id, out var roleList)
+                    ? roleList
+                    : ["User"];
+                var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow;
+
+                return new UserDto
+                {
+                    Id = user.Id,
+                    Email = user.Email ?? string.Empty,
+                    FirstName = user.FirstName ?? string.Empty,
+                    LastName = user.LastName ?? string.Empty,
+                    AvatarUrl = user.AvatarUrl,
+                    PhoneNumber = user.PhoneNumber,
+                    IsAdmin = roles.Contains("Admin", StringComparer.OrdinalIgnoreCase),
+                    EmailConfirmed = user.EmailConfirmed,
+                    Roles = roles,
+                    LoyaltyPoints = user.LoyaltyPoints,
+                    LoyaltyTier = string.IsNullOrWhiteSpace(user.LoyaltyTier) ? "Bronze" : user.LoyaltyTier,
+                    CourseCount = courseCounts.TryGetValue(user.Id, out var count) ? count : 0,
+                    Status = isLocked ? "locked" : "active",
+                    CreatedAt = user.CreatedAt
+                };
+            })
+            .ToList();
 
         return Ok(results);
     }

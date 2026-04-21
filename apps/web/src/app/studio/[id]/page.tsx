@@ -566,7 +566,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
             {tx("Please sign in to edit courses.", "Vui long dang nhap de sua khoa hoc.")}
           </p>
           <Link
-            href={`/login?next=/studio/${courseId}`}
+            href={`/?auth=login&next=${encodeURIComponent(`/studio/${courseId}`)}`}
             className="mt-4 inline-flex rounded-full bg-emerald-700 px-6 py-2 text-sm font-semibold text-white"
           >
             {tx("Sign in", "Dang nhap")}

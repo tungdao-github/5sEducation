@@ -179,7 +179,7 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddCors(options =>
 {
     var origins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>()
-        ?? ["http://localhost:3000", "http://localhost:3001"];
+        ?? ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173", "http://localhost:5174"];
 
     options.AddPolicy("web", policy =>
         policy.WithOrigins(origins)
@@ -191,8 +191,10 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<TokenService>();
 builder.Services.Configure<CloudflareStreamOptions>(builder.Configuration.GetSection("CloudflareStream"));
 builder.Services.Configure<GoogleAuthOptions>(builder.Configuration.GetSection("GoogleAuth"));
+builder.Services.Configure<FacebookAuthOptions>(builder.Configuration.GetSection("FacebookAuth"));
 builder.Services.Configure<FrontendOptions>(builder.Configuration.GetSection("Frontend"));
 builder.Services.AddHttpClient<CloudflareStreamService>();
+builder.Services.AddHttpClient("social-auth");
 builder.Services.AddSingleton<IEmailSender, ConsoleEmailSender>();
 
 var app = builder.Build();

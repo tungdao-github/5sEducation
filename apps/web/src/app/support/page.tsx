@@ -226,7 +226,7 @@ export default function SupportPage() {
             {tx("Please sign in to see your support messages.", "Vui long dang nhap de xem ho tro.")}
           </p>
           <Link
-            href="/login?next=/support"
+            href="/?auth=login&next=%2Fsupport"
             className="mt-4 inline-flex rounded-full bg-emerald-700 px-6 py-2 text-sm font-semibold text-white"
           >
             {tx("Sign in", "Dang nhap")}

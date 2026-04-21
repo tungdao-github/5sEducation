@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { pickLocaleText } from "@/lib/i18n";
 import { resolveApiAsset } from "@/lib/api";
+import type { AppLocale } from "@/lib/i18n";
 
 export type HomePageBlock = {
   id: number;
@@ -32,7 +33,7 @@ type TestimonialItem = {
 
 type HomeBlocksProps = {
   blocks: HomePageBlock[];
-  locale: "en" | "vi";
+  locale: AppLocale;
 };
 
 const parseItems = (input: string): string[] => {
@@ -168,7 +169,7 @@ export function HomeBlocks({ blocks, locale }: HomeBlocksProps) {
                 </div>
                 <div className="flex items-center justify-center">
                   <Link
-                    href={block.ctaUrl || "/register"}
+                    href={block.ctaUrl || "/?auth=register&next=%2Fmy-learning"}
                     className="rounded-full bg-emerald-700 px-6 py-3 text-sm font-semibold text-white"
                   >
                     {block.ctaText || t("Start", "Bat dau")}

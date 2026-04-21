@@ -1,7 +1,7 @@
 ﻿import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from "react";
 import { fetchCartItems, fetchCoursesByIds, mapCourseCompare } from "../data/api";
 import type { CartItemDto, OrderDto } from "../data/api";
-import { fetchJsonWithAuth, resolveApiAsset } from "@/lib/api";
+import { fetchJsonWithAuth, getStoredToken, resolveApiAsset } from "@/lib/api";
 import { useAuth } from "./AuthContext";
 import { useLanguage } from "./LanguageContext";
 
@@ -123,6 +123,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       setCartItems(mapped);
     } catch (error) {
+      if (!getStoredToken()) {
+        setCartItems(readGuestCart());
+        return;
+      }
       console.error("Failed to load cart", error);
       setCartItems([]);
     }

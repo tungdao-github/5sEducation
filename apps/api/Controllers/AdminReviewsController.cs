@@ -22,8 +22,6 @@ public class AdminReviewsController : ControllerBase
     public async Task<ActionResult<List<AdminReviewDto>>> GetAll([FromQuery] int? courseId, [FromQuery] string? query, [FromQuery] int? take)
     {
         var reviews = _db.Reviews
-            .Include(r => r.Course)
-            .Include(r => r.User)
             .AsNoTracking()
             .AsQueryable();
 
@@ -34,11 +32,11 @@ public class AdminReviewsController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(query))
         {
-            var q = query.Trim().ToLowerInvariant();
+            var q = $"%{query.Trim()}%";
             reviews = reviews.Where(r =>
-                (r.Comment ?? string.Empty).ToLower().Contains(q)
-                || (r.User != null && (r.User.Email ?? string.Empty).ToLower().Contains(q))
-                || (r.Course != null && r.Course.Title.ToLower().Contains(q)));
+                (r.Comment != null && EF.Functions.Like(r.Comment, q))
+                || (r.User != null && r.User.Email != null && EF.Functions.Like(r.User.Email, q))
+                || (r.Course != null && EF.Functions.Like(r.Course.Title, q)));
         }
 
         var limit = Math.Clamp(take ?? 120, 20, 500);

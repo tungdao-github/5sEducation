@@ -6,7 +6,6 @@ import { Course } from "../contexts/CartContext";
 import { useCart } from "../contexts/CartContext";
 import { useWishlist } from "../contexts/WishlistContext";
 import { toast } from "@/figma/compat/sonner";
-import { formatPrice } from "../data/api";
 
 interface CourseCardProps {
   course: Course;
@@ -45,10 +44,10 @@ export default function CourseCard({ course }: CourseCardProps) {
   return (
     <Link
       to={`/course/${course.slug ?? course.id}`}
-      className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 flex flex-col"
+      className="group flex w-full max-w-full min-w-0 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md transition-all duration-300 hover:shadow-xl"
     >
       {/* Image */}
-      <div className="relative overflow-hidden aspect-video flex-shrink-0">
+      <div className="max-w-40 relative aspect-video flex-shrink-0 overflow-hidden">
         <img
           src={course.image}
           alt={course.title}
@@ -73,28 +72,28 @@ export default function CourseCard({ course }: CourseCardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-4 flex flex-col flex-1">
+      <div className="flex min-w-0 flex-1 flex-col p-4">
         {/* Category */}
         <div className="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-1.5">
           {course.category}
         </div>
 
         {/* Title */}
-        <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors flex-1">
+        <h3 className="mb-2 flex-1 text-sm font-semibold text-gray-900 line-clamp-2 transition-colors group-hover:text-blue-600">
           {course.title}
         </h3>
 
         {/* Instructor */}
-        <p className="text-xs text-gray-500 mb-2">
+        <p className="mb-2 text-xs text-gray-500">
           Giảng viên: <span className="text-gray-700 font-medium">{course.instructor}</span>
         </p>
 
         {/* Stats row */}
-        <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+        <div className="mb-3 flex items-center gap-3 text-xs text-gray-500">
           <div className="flex items-center gap-1">
             <Star className="size-3.5 fill-yellow-400 text-yellow-400" />
             <span className="font-semibold text-gray-800">{course.rating}</span>
-            <span>({course.students.toLocaleString()})</span>
+            <span className="whitespace-nowrap">({course.students.toLocaleString()})</span>
           </div>
           <div className="flex items-center gap-1">
             <Clock className="size-3.5" />
@@ -102,17 +101,19 @@ export default function CourseCard({ course }: CourseCardProps) {
           </div>
           <div className="flex items-center gap-1">
             <BarChart3 className="size-3.5" />
-            <span className="truncate max-w-[80px]">{course.level}</span>
+            <span className="truncate max-w-[60px]">{course.level.split(" ")[0]}</span>
           </div>
         </div>
 
         {/* Price and Action */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+        <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-blue-600">{formatPrice(course.price)}</span>
+            <span className="text-lg font-bold text-blue-600">
+              {(course.price * 1000).toLocaleString("vi-VN")}đ
+            </span>
             {course.originalPrice && (
               <span className="text-xs text-gray-400 line-through">
-                {formatPrice(course.originalPrice)}
+                {(course.originalPrice * 1000).toLocaleString("vi-VN")}đ
               </span>
             )}
           </div>

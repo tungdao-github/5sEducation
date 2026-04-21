@@ -24,6 +24,7 @@ public class AdminLearningPathsController : ControllerBase
     public async Task<ActionResult<List<LearningPathListDto>>> GetAll()
     {
         var paths = await _db.LearningPaths
+            .AsNoTracking()
             .OrderByDescending(p => p.UpdatedAt)
             .Select(p => new LearningPathListDto
             {
@@ -46,6 +47,8 @@ public class AdminLearningPathsController : ControllerBase
     public async Task<ActionResult<LearningPathDetailDto>> GetById(int id)
     {
         var path = await _db.LearningPaths
+            .AsNoTracking()
+            .AsSplitQuery()
             .Include(p => p.Sections)
             .Include(p => p.Courses)
             .ThenInclude(pc => pc.Course)
@@ -177,26 +180,37 @@ public class AdminLearningPathsController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var path = await _db.LearningPaths
-            .Include(p => p.Sections)
-            .Include(p => p.Courses)
-            .FirstOrDefaultAsync(p => p.Id == id);
-        if (path is null)
+        var hasPath = await _db.LearningPaths
+            .AsNoTracking()
+            .AnyAsync(p => p.Id == id);
+        if (!hasPath)
         {
             return NotFound();
         }
 
-        if (path.Courses.Count > 0)
+        var courseLinkIds = await _db.LearningPathCourses
+            .AsNoTracking()
+            .Where(pc => pc.LearningPathId == id)
+            .Select(pc => pc.Id)
+            .ToListAsync();
+
+        var sectionIds = await _db.LearningPathSections
+            .AsNoTracking()
+            .Where(ps => ps.LearningPathId == id)
+            .Select(ps => ps.Id)
+            .ToListAsync();
+
+        if (courseLinkIds.Count > 0)
         {
-            _db.LearningPathCourses.RemoveRange(path.Courses);
+            _db.LearningPathCourses.RemoveRange(courseLinkIds.Select(courseLinkId => new LearningPathCourse { Id = courseLinkId }));
         }
 
-        if (path.Sections.Count > 0)
+        if (sectionIds.Count > 0)
         {
-            _db.LearningPathSections.RemoveRange(path.Sections);
+            _db.LearningPathSections.RemoveRange(sectionIds.Select(sectionId => new LearningPathSection { Id = sectionId }));
         }
 
-        _db.LearningPaths.Remove(path);
+        _db.LearningPaths.Remove(new LearningPath { Id = id });
         await _db.SaveChangesAsync();
         return NoContent();
     }

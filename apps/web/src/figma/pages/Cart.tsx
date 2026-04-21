@@ -2,27 +2,32 @@
 
 import { Link } from '@/figma/compat/router';
 import { useCart } from '../contexts/CartContext';
-import { Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowRight, ShieldCheck } from 'lucide-react';
 import { formatPrice } from '../data/api';
+
+const IMAGE_FALLBACK = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+    <rect width="100%" height="100%" fill="#f8fafc"/>
+    <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle" fill="#94a3b8" font-family="Arial, Helvetica, sans-serif" font-size="42">EduCourse</text>
+  </svg>`
+)}`;
+
+function safeImage(src?: string | null) {
+  return src && src.trim().length > 0 ? src : IMAGE_FALLBACK;
+}
 
 export default function Cart() {
   const { cartItems, removeFromCart, totalPrice } = useCart();
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center bg-gray-50">
-        <div className="text-center max-w-md px-4">
-          <ShoppingBag className="size-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Giỏ hàng trống</h2>
-          <p className="text-gray-600 mb-6">
-            Bạn chưa thêm khóa học nào vào giỏ hàng. Hãy khám phá các khóa học tuyệt vời của chúng tôi!
-          </p>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-          >
-            Khám phá khóa học
-            <ArrowRight className="size-5" />
+      <div className="min-h-[60vh] flex items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] px-4">
+        <div className="max-w-md rounded-[28px] border border-slate-200 bg-white px-6 py-10 text-center shadow-[0_20px_70px_rgba(15,23,42,0.12)]">
+          <ShoppingBag className="mx-auto mb-4 size-16 text-slate-300" />
+          <h2 className="mb-2 text-2xl font-semibold text-slate-950">Giỏ hàng trống</h2>
+          <p className="mb-6 text-slate-600">Bạn chưa thêm khóa học nào vào giỏ hàng. Hãy khám phá các khóa học tuyệt vời của chúng tôi!</p>
+          <Link to="/" className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 font-semibold text-white transition hover:bg-slate-700">
+            Khám phá khóa học <ArrowRight className="size-5" />
           </Link>
         </div>
       </div>
@@ -30,55 +35,43 @@ export default function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Giỏ hàng của bạn</h1>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] py-10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 flex items-center gap-3">
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+            <ShoppingBag className="size-5" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-semibold tracking-[-0.03em] text-slate-950">Giỏ hàng của bạn</h1>
+            <p className="text-sm text-slate-500">{cartItems.length} khóa học sẵn sàng để thanh toán</p>
+          </div>
+        </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
+        <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+          <div className="space-y-4">
             {cartItems.map((course) => (
-              <div
-                key={course.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-              >
-                <div className="flex flex-col sm:flex-row gap-4 p-4">
-                  {/* Image */}
-                  <Link to={`/course/${course.slug ?? course.id}`} className="flex-shrink-0">
-                    <img
-                      src={course.image}
-                      alt={course.title}
-                      className="w-full sm:w-48 aspect-video object-cover rounded-lg"
-                    />
+              <div key={course.id} className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
+                <div className="flex flex-col gap-4 p-4 sm:flex-row">
+                  <Link to={`/course/${course.slug ?? course.id}`} className="shrink-0">
+                    <img src={safeImage(course.image)} alt={course.title} className="h-32 w-full rounded-2xl object-cover sm:w-48" />
                   </Link>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <Link to={`/course/${course.slug ?? course.id}`}>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors">
-                        {course.title}
-                      </h3>
+                      <h3 className="mb-2 text-lg font-semibold text-slate-950 transition-colors hover:text-blue-600">{course.title}</h3>
                     </Link>
-                    <p className="text-sm text-gray-600 mb-2">Giảng viên: {course.instructor}</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                    <p className="mb-2 text-sm text-slate-500">Giảng viên: {course.instructor}</p>
+                    <div className="mb-3 flex items-center gap-3 text-sm text-slate-500">
                       <span>{course.duration}</span>
                       <span>•</span>
                       <span>{course.level}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      {course.originalPrice && (
-                        <span className="text-sm text-gray-400 line-through">{formatPrice(course.originalPrice)}</span>
-                      )}
-                      <span className="text-xl font-bold text-blue-600">{formatPrice(course.price)}</span>
+                      {course.originalPrice && <span className="text-sm text-slate-400 line-through">{formatPrice(course.originalPrice)}</span>}
+                      <span className="text-2xl font-black text-blue-600">{formatPrice(course.price)}</span>
                     </div>
                   </div>
-
-                  {/* Remove Button */}
-                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start">
-                    <button
-                      onClick={() => removeFromCart(course.id)}
-                      className="text-red-600 hover:text-red-700 transition-colors p-2"
-                    >
+                  <div className="flex items-center justify-between sm:flex-col sm:items-end sm:justify-start">
+                    <button onClick={() => removeFromCart(course.id)} className="rounded-2xl border border-rose-200 p-2 text-rose-600 transition-colors hover:bg-rose-50">
                       <Trash2 className="size-5" />
                     </button>
                   </div>
@@ -87,63 +80,26 @@ export default function Cart() {
             ))}
           </div>
 
-          {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-20">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Tổng quan đơn hàng</h2>
-
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-gray-700">
-                  <span>Tổng phụ:</span>
-                  <span>{formatPrice(totalPrice)}</span>
-                </div>
-                <div className="flex justify-between text-gray-700">
-                  <span>Thuế:</span>
-                  <span>{formatPrice(0)}</span>
-                </div>
-                <div className="border-t pt-3 flex justify-between text-lg font-bold text-gray-900">
-                  <span>Tổng cộng:</span>
-                  <span className="text-blue-600">{formatPrice(totalPrice)}</span>
-                </div>
+          <aside className="lg:sticky lg:top-24 h-fit">
+            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
+              <h2 className="mb-6 text-xl font-bold text-slate-950">Tổng quan đơn hàng</h2>
+              <div className="space-y-3 mb-6 text-slate-700">
+                <div className="flex justify-between"><span>Tổng phụ:</span><span>{formatPrice(totalPrice)}</span></div>
+                <div className="flex justify-between"><span>Thuế:</span><span>{formatPrice(0)}</span></div>
+                <div className="flex justify-between border-t border-slate-200 pt-3 text-lg font-bold text-slate-950"><span>Tổng cộng:</span><span className="text-blue-600">{formatPrice(totalPrice)}</span></div>
               </div>
-
-              <Link
-                to="/checkout"
-                className="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors mb-3"
-              >
-                Tiến hành thanh toán
-              </Link>
-
-              <Link
-                to="/"
-                className="block w-full bg-gray-100 text-gray-700 text-center py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-              >
-                Tiếp tục mua sắm
-              </Link>
-
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <h3 className="font-semibold text-gray-900 mb-3">Quyền lợi của bạn:</h3>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-600">✓</span>
-                    <span>Truy cập trọn đời</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-600">✓</span>
-                    <span>Chứng chỉ hoàn thành</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-600">✓</span>
-                    <span>Cập nhật miễn phí</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-600">✓</span>
-                    <span>Hoàn tiền trong 30 ngày</span>
-                  </li>
+              <Link to="/checkout" className="mb-3 block rounded-2xl bg-slate-900 py-3 text-center font-semibold text-white transition hover:bg-slate-700">Tiến hành thanh toán</Link>
+              <Link to="/" className="block rounded-2xl bg-slate-100 py-3 text-center font-medium text-slate-700 transition hover:bg-slate-200">Tiếp tục mua sắm</Link>
+              <div className="mt-6 border-t border-slate-200 pt-6">
+                <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900"><ShieldCheck className="size-4 text-emerald-600" />Quyền lợi của bạn</div>
+                <ul className="space-y-2 text-sm text-slate-600">
+                  {['Truy cập trọn đời', 'Chứng chỉ hoàn thành', 'Cập nhật miễn phí', 'Hoàn tiền trong 30 ngày'].map((item) => (
+                    <li key={item} className="flex items-start gap-2"><span className="mt-0.5 text-emerald-600">✓</span><span>{item}</span></li>
+                  ))}
                 </ul>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </div>

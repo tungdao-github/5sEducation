@@ -29,7 +29,9 @@ public class InstructorCoursesController : ControllerBase
         }
 
         var isAdmin = User.IsInRole("Admin");
-        var query = _db.Courses.Include(c => c.Category).AsQueryable();
+        var query = _db.Courses
+            .AsNoTracking()
+            .AsQueryable();
 
         if (!isAdmin)
         {
@@ -51,6 +53,14 @@ public class InstructorCoursesController : ControllerBase
                 Level = c.Level,
                 Language = c.Language,
                 IsPublished = c.IsPublished,
+                StudentCount = c.Enrollments.Count,
+                AverageRating = c.Reviews.Select(r => (double?)r.Rating).Average() ?? 0,
+                ReviewCount = c.Reviews.Count,
+                Revenue = _db.OrderItems
+                    .Where(oi => oi.CourseId == c.Id && oi.Order != null && oi.Order.Status == "paid")
+                    .Select(oi => (decimal?)oi.LineTotal)
+                    .Sum() ?? 0,
+                TotalLessons = c.Lessons.Count,
                 UpdatedAt = c.UpdatedAt,
                 Category = c.Category == null
                     ? null
@@ -59,7 +69,11 @@ public class InstructorCoursesController : ControllerBase
                         Id = c.Category.Id,
                         Title = c.Category.Title,
                         Slug = c.Category.Slug
-                    }
+                    },
+                InstructorName = c.Instructor == null
+                    ? null
+                    : (c.Instructor.FirstName + " " + c.Instructor.LastName).Trim(),
+                InstructorAvatarUrl = c.Instructor == null ? null : c.Instructor.AvatarUrl
             })
             .ToListAsync();
 
@@ -76,6 +90,8 @@ public class InstructorCoursesController : ControllerBase
         }
 
         var course = await _db.Courses
+            .AsNoTracking()
+            .AsSplitQuery()
             .Include(c => c.Category)
             .Include(c => c.Lessons)
             .ThenInclude(l => l.ExerciseQuestions)

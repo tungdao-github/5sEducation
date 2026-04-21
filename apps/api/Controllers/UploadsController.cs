@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using UdemyClone.Api.Data;
 using UdemyClone.Api.Dtos;
@@ -10,6 +11,7 @@ namespace UdemyClone.Api.Controllers;
 [ApiController]
 [Route("api/uploads")]
 [Authorize(Roles = "Admin,Instructor")]
+[EnableRateLimiting("auth")]
 public class UploadsController : ControllerBase
 {
     private readonly ApplicationDbContext _db;

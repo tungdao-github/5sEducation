@@ -49,6 +49,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Course>(entity =>
         {
             entity.HasIndex(c => c.Slug).IsUnique();
+            entity.HasIndex(c => new { c.IsPublished, c.CreatedAt });
+            entity.HasIndex(c => new { c.IsPublished, c.UpdatedAt });
+            entity.HasIndex(c => new { c.IsPublished, c.Level });
+            entity.HasIndex(c => new { c.IsPublished, c.Language });
+            entity.HasIndex(c => new { c.CategoryId, c.IsPublished });
             entity.HasOne(c => c.Instructor)
                 .WithMany()
                 .HasForeignKey(c => c.InstructorId)
@@ -73,6 +78,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .WithMany(c => c.Lessons)
                 .HasForeignKey(l => l.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(l => new { l.CourseId, l.SortOrder });
         });
 
         builder.Entity<LessonExerciseQuestion>(entity =>
@@ -87,6 +93,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Enrollment>(entity =>
         {
             entity.HasIndex(e => new { e.UserId, e.CourseId }).IsUnique();
+            entity.HasIndex(e => e.CourseId);
             entity.HasOne(e => e.Course)
                 .WithMany(c => c.Enrollments)
                 .HasForeignKey(e => e.CourseId)
@@ -140,6 +147,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasMaxLength(10)
                 .HasDefaultValue("USD");
             entity.HasIndex(o => new { o.UserId, o.CreatedAt });
+            entity.HasIndex(o => new { o.Status, o.CreatedAt });
             entity.HasOne(o => o.User)
                 .WithMany()
                 .HasForeignKey(o => o.UserId)
@@ -153,6 +161,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(i => i.LineTotal)
                 .HasPrecision(18, 2);
             entity.HasIndex(i => new { i.OrderId, i.CourseId });
+            entity.HasIndex(i => i.CourseId);
             entity.HasOne(i => i.Order)
                 .WithMany(o => o.Items)
                 .HasForeignKey(i => i.OrderId)
@@ -162,6 +171,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Review>(entity =>
         {
             entity.HasIndex(r => new { r.UserId, r.CourseId }).IsUnique();
+            entity.HasIndex(r => r.CourseId);
             entity.HasOne(r => r.Course)
                 .WithMany(c => c.Reviews)
                 .HasForeignKey(r => r.CourseId)
@@ -231,6 +241,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<LearningPath>(entity =>
         {
             entity.HasIndex(p => p.Slug).IsUnique();
+            entity.HasIndex(p => new { p.IsPublished, p.UpdatedAt });
         });
 
         builder.Entity<LearningPathSection>(entity =>
@@ -244,7 +255,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<LearningPathCourse>(entity =>
         {
+            entity.HasIndex(pc => new { pc.LearningPathId, pc.CourseId }).IsUnique();
             entity.HasIndex(pc => new { pc.LearningPathId, pc.SortOrder });
+            entity.HasIndex(pc => pc.CourseId);
             entity.HasOne(pc => pc.LearningPath)
                 .WithMany(p => p.Courses)
                 .HasForeignKey(pc => pc.LearningPathId)
@@ -261,7 +274,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<HomePageBlock>(entity =>
         {
-            entity.HasIndex(b => b.Key);
+            entity.HasIndex(b => b.Key).IsUnique();
             entity.HasIndex(b => new { b.Locale, b.SortOrder });
         });
 
@@ -277,6 +290,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.HasIndex(m => m.Status);
             entity.HasIndex(m => m.CreatedAt);
             entity.HasIndex(m => m.UserId);
+            entity.HasIndex(m => new { m.Status, m.CreatedAt });
+            entity.HasIndex(m => new { m.UserId, m.CreatedAt });
             entity.HasOne(m => m.User)
                 .WithMany()
                 .HasForeignKey(m => m.UserId)
@@ -318,6 +333,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.HasIndex(p => p.Slug)
                 .IsUnique();
             entity.HasIndex(p => new { p.Locale, p.IsPublished });
+            entity.HasIndex(p => new { p.Locale, p.IsPublished, p.PublishedAt });
             entity.HasIndex(p => p.PublishedAt);
         });
 

@@ -9,10 +9,15 @@ interface BlogSlug {
   slug: string;
 }
 
+interface PathSlug {
+  slug: string;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   let courses: CourseSlug[] = [];
   let posts: BlogSlug[] = [];
+  let paths: PathSlug[] = [];
 
   try {
     const res = await fetch(`${API_URL}/api/courses`, { cache: "no-store" });
@@ -32,6 +37,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     posts = [];
   }
 
+  try {
+    const res = await fetch(`${API_URL}/api/learning-paths`, { cache: "no-store" });
+    if (res.ok) {
+      paths = await res.json();
+    }
+  } catch {
+    paths = [];
+  }
+
   const now = new Date();
 
   return [
@@ -45,6 +59,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${baseUrl}/blog`,
+      lastModified: now,
+    },
+    {
+      url: `${baseUrl}/paths`,
       lastModified: now,
     },
     {
@@ -69,6 +87,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     ...posts.map((post) => ({
       url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: now,
+    })),
+    ...paths.map((path) => ({
+      url: `${baseUrl}/paths/${path.slug}`,
       lastModified: now,
     })),
   ];

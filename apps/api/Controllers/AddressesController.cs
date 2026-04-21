@@ -33,10 +33,25 @@ public class AddressesController : ControllerBase
             .Where(a => a.UserId == userId)
             .OrderByDescending(a => a.IsDefault)
             .ThenByDescending(a => a.UpdatedAt)
+            .Select(a => new UserAddressDto
+            {
+                Id = a.Id,
+                Label = a.Label,
+                RecipientName = a.RecipientName,
+                Phone = a.Phone,
+                Line1 = a.Line1,
+                Line2 = a.Line2,
+                City = a.City,
+                State = a.State,
+                PostalCode = a.PostalCode,
+                Country = a.Country,
+                IsDefault = a.IsDefault,
+                CreatedAt = a.CreatedAt,
+                UpdatedAt = a.UpdatedAt
+            })
             .ToListAsync();
 
-        var results = addresses.Select(MapAddress).ToList();
-        return Ok(results);
+        return Ok(addresses);
     }
 
     [HttpPost]

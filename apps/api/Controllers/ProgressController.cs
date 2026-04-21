@@ -28,18 +28,34 @@ public class ProgressController : ControllerBase
             return Unauthorized();
         }
 
-        var enrollment = await _db.Enrollments
-            .Include(e => e.Course)
-                .ThenInclude(c => c!.Lessons)
-            .Include(e => e.LessonProgresses)
-            .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId);
+        var snapshot = await _db.Enrollments
+            .AsNoTracking()
+            .Where(e => e.UserId == userId && e.CourseId == courseId)
+            .Select(e => new
+            {
+                e.Id,
+                e.CourseId,
+                e.LastLessonId
+            })
+            .FirstOrDefaultAsync();
 
-        if (enrollment is null)
+        if (snapshot is null)
         {
             return Forbid();
         }
 
-        return Ok(BuildSnapshot(enrollment));
+        var completedLessonIds = await _db.LessonProgresses
+            .AsNoTracking()
+            .Where(lp => lp.EnrollmentId == snapshot.Id)
+            .Select(lp => lp.LessonId)
+            .Distinct()
+            .ToListAsync();
+
+        var totalLessons = await _db.Lessons
+            .AsNoTracking()
+            .CountAsync(l => l.CourseId == snapshot.CourseId);
+
+        return Ok(BuildSnapshot(snapshot.CourseId, snapshot.LastLessonId, totalLessons, completedLessonIds));
     }
 
     [HttpPost]
@@ -52,8 +68,6 @@ public class ProgressController : ControllerBase
         }
 
         var enrollment = await _db.Enrollments
-            .Include(e => e.Course)
-                .ThenInclude(c => c!.Lessons)
             .Include(e => e.LessonProgresses)
             .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == request.CourseId);
 
@@ -62,7 +76,11 @@ public class ProgressController : ControllerBase
             return Forbid();
         }
 
-        if (enrollment.Course is null || !enrollment.Course.Lessons.Any(l => l.Id == request.LessonId))
+        var lessonBelongsToCourse = await _db.Lessons
+            .AsNoTracking()
+            .AnyAsync(l => l.Id == request.LessonId && l.CourseId == request.CourseId);
+
+        if (!lessonBelongsToCourse)
         {
             return BadRequest("Lesson does not belong to this course.");
         }
@@ -103,27 +121,55 @@ public class ProgressController : ControllerBase
         }
 
         await _db.SaveChangesAsync();
-        return Ok(BuildSnapshot(enrollment));
+        return Ok(await BuildSnapshotAsync(enrollment.Id));
     }
 
-    private static ProgressSnapshotDto BuildSnapshot(Enrollment enrollment)
+    private async Task<ProgressSnapshotDto> BuildSnapshotAsync(int enrollmentId)
     {
-        var totalLessons = enrollment.Course?.Lessons.Count ?? 0;
-        var completedLessonIds = enrollment.LessonProgresses
+        var snapshot = await _db.Enrollments
+            .AsNoTracking()
+            .Where(e => e.Id == enrollmentId)
+            .Select(e => new
+            {
+                e.CourseId,
+                e.LastLessonId
+            })
+            .FirstAsync();
+
+        var completedLessonIds = await _db.LessonProgresses
+            .AsNoTracking()
+            .Where(lp => lp.EnrollmentId == enrollmentId)
             .Select(lp => lp.LessonId)
             .Distinct()
-            .ToList();
-        var completedLessons = completedLessonIds.Count;
+            .ToListAsync();
+
+        var totalLessons = await _db.Lessons
+            .AsNoTracking()
+            .CountAsync(l => l.CourseId == snapshot.CourseId);
+
+        return BuildSnapshot(
+            snapshot.CourseId,
+            snapshot.LastLessonId,
+            totalLessons,
+            completedLessonIds);
+    }
+
+    private static ProgressSnapshotDto BuildSnapshot(
+        int courseId,
+        int? lastLessonId,
+        int totalLessons,
+        List<int> completedLessonIds)
+    {
         var progressPercent = totalLessons == 0
             ? 0
-            : Math.Round(completedLessons * 100d / totalLessons, 1);
+            : Math.Round(completedLessonIds.Count * 100d / totalLessons, 1);
 
         return new ProgressSnapshotDto
         {
-            CourseId = enrollment.CourseId,
-            LastLessonId = enrollment.LastLessonId,
+            CourseId = courseId,
+            LastLessonId = lastLessonId,
             TotalLessons = totalLessons,
-            CompletedLessons = completedLessons,
+            CompletedLessons = completedLessonIds.Count,
             ProgressPercent = progressPercent,
             CompletedLessonIds = completedLessonIds
         };

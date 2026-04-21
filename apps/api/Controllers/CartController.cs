@@ -32,16 +32,16 @@ public class CartController : ControllerBase
         }
 
         var items = await _db.CartItems
-            .Include(c => c.Course)
+            .AsNoTracking()
             .Where(c => c.UserId == userId)
             .Select(c => new CartItemDto
             {
                 Id = c.Id,
                 CourseId = c.CourseId,
-                CourseTitle = c.Course!.Title,
-                CourseSlug = c.Course.Slug,
-                ThumbnailUrl = c.Course.ThumbnailUrl,
-                Price = GetEffectivePrice(c.Course, DateTime.UtcNow),
+                CourseTitle = c.Course != null ? c.Course.Title : string.Empty,
+                CourseSlug = c.Course != null ? c.Course.Slug : string.Empty,
+                ThumbnailUrl = c.Course != null ? c.Course.ThumbnailUrl : string.Empty,
+                Price = c.Course != null ? GetEffectivePrice(c.Course, DateTime.UtcNow) : 0,
                 Quantity = c.Quantity
             })
             .ToListAsync();
@@ -118,8 +118,21 @@ public class CartController : ControllerBase
         }
 
         var items = await _db.CartItems
-            .Include(c => c.Course)
+            .AsNoTracking()
             .Where(c => c.UserId == userId)
+            .Select(c => new
+            {
+                c.Id,
+                c.CourseId,
+                CourseTitle = c.Course != null ? c.Course.Title : string.Empty,
+                CourseSlug = c.Course != null ? c.Course.Slug : string.Empty,
+                CoursePrice = c.Course != null ? c.Course.Price : 0m,
+                CourseFlashSalePrice = c.Course != null ? c.Course.FlashSalePrice : null,
+                CourseFlashSaleStartsAt = c.Course != null ? c.Course.FlashSaleStartsAt : null,
+                CourseFlashSaleEndsAt = c.Course != null ? c.Course.FlashSaleEndsAt : null,
+                CourseIsPublished = c.Course != null && c.Course.IsPublished,
+                c.Quantity
+            })
             .ToListAsync();
 
         if (items.Count == 0)
@@ -128,13 +141,14 @@ public class CartController : ControllerBase
         }
 
         var now = DateTime.UtcNow;
-        var unavailable = items.FirstOrDefault(i => i.Course is null || !i.Course.IsPublished);
+        var unavailable = items.FirstOrDefault(i => !i.CourseIsPublished);
         if (unavailable is not null)
         {
             return BadRequest("Some courses are no longer available.");
         }
 
         var existingCourseIds = await _db.Enrollments
+            .AsNoTracking()
             .Where(e => e.UserId == userId)
             .Select(e => e.CourseId)
             .ToListAsync();
@@ -142,13 +156,20 @@ public class CartController : ControllerBase
 
         var orderItems = items.Select(item =>
         {
-            var unitPrice = GetEffectivePrice(item.Course!, now);
+            var course = new Course
+            {
+                Price = item.CoursePrice,
+                FlashSalePrice = item.CourseFlashSalePrice,
+                FlashSaleStartsAt = item.CourseFlashSaleStartsAt,
+                FlashSaleEndsAt = item.CourseFlashSaleEndsAt
+            };
+            var unitPrice = GetEffectivePrice(course, now);
             var quantity = Math.Max(1, item.Quantity);
             return new OrderItem
             {
                 CourseId = item.CourseId,
-                CourseTitle = item.Course?.Title ?? string.Empty,
-                CourseSlug = item.Course?.Slug ?? string.Empty,
+                CourseTitle = item.CourseTitle,
+                CourseSlug = item.CourseSlug,
                 UnitPrice = unitPrice,
                 Quantity = quantity,
                 LineTotal = unitPrice * quantity
@@ -207,7 +228,7 @@ public class CartController : ControllerBase
             }
         }
 
-        _db.CartItems.RemoveRange(items);
+        _db.CartItems.RemoveRange(items.Select(item => new CartItem { Id = item.Id }));
         if (coupon is not null)
         {
             coupon.UsedCount += 1;
@@ -231,7 +252,7 @@ public class CartController : ControllerBase
             if (user != null && !string.IsNullOrWhiteSpace(user.Email))
             {
                 var courseLines = items
-                    .Select(item => item.Course?.Title)
+                    .Select(item => item.CourseTitle)
                     .Where(title => !string.IsNullOrWhiteSpace(title))
                     .Select(title => $"- {title}")
                     .ToList();

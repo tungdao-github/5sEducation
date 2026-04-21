@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import { getServerLocale } from "@/lib/server-locale";
 import { pickLocaleText } from "@/lib/i18n";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Dieu khoan dich vu",
+  description: "Dieu khoan su dung va quyen truy cap khoa hoc tren EduCourse.",
+  path: "/policy/terms",
+  type: "website",
+  keywords: ["terms", "dieu khoan", "EduCourse"],
+});
 
 export default async function TermsPage() {
   const locale = await getServerLocale();

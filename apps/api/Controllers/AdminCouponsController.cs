@@ -26,15 +26,32 @@ public class AdminCouponsController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var q = search.Trim().ToLowerInvariant();
-            query = query.Where(c => c.Code.ToLower().Contains(q) || (c.Description ?? string.Empty).ToLower().Contains(q));
+            var q = $"%{search.Trim()}%";
+            query = query.Where(c =>
+                EF.Functions.Like(c.Code, q)
+                || (c.Description != null && EF.Functions.Like(c.Description, q)));
         }
 
         var coupons = await query
             .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new CouponDto
+            {
+                Id = c.Id,
+                Code = c.Code,
+                Type = c.Type,
+                Value = c.Value,
+                MinOrder = c.MinOrder,
+                MaxUses = c.MaxUses,
+                UsedCount = c.UsedCount,
+                ExpiresAt = c.ExpiresAt,
+                IsActive = c.IsActive,
+                Description = c.Description,
+                CreatedAt = c.CreatedAt,
+                UpdatedAt = c.UpdatedAt
+            })
             .ToListAsync();
 
-        return Ok(coupons.Select(MapCoupon).ToList());
+        return Ok(coupons);
     }
 
     [HttpPost]

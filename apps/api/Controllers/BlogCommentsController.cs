@@ -35,8 +35,6 @@ public class BlogCommentsController : ControllerBase
 
         var comments = await _db.BlogComments
             .AsNoTracking()
-            .Include(c => c.User)
-            .Include(c => c.Likes)
             .Where(c => c.BlogPostId == post.Id)
             .OrderByDescending(c => c.CreatedAt)
             .Select(c => new BlogCommentDto
@@ -116,7 +114,6 @@ public class BlogCommentsController : ControllerBase
         }
 
         var comment = await _db.BlogComments
-            .Include(c => c.Likes)
             .FirstOrDefaultAsync(c => c.Id == id);
 
         if (comment is null)

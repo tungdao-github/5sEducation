@@ -29,37 +29,27 @@ public class EnrollmentsController : ControllerBase
         }
 
         var enrolls = await _db.Enrollments
-            .Include(e => e.Course)
-                .ThenInclude(c => c!.Lessons)
-            .Include(e => e.LessonProgresses)
+            .AsNoTracking()
             .Where(e => e.UserId == userId)
             .OrderByDescending(e => e.CreatedAt)
-            .ToListAsync();
-
-        var results = enrolls.Select(e =>
-        {
-            var totalLessons = e.Course?.Lessons.Count ?? 0;
-            var completedLessons = e.LessonProgresses.Count;
-            var progressPercent = totalLessons == 0
-                ? 0
-                : Math.Round(completedLessons * 100d / totalLessons, 1);
-
-            return new EnrollmentDto
+            .Select(e => new EnrollmentDto
             {
                 Id = e.Id,
                 CourseId = e.CourseId,
-                CourseTitle = e.Course?.Title ?? string.Empty,
-                CourseSlug = e.Course?.Slug ?? string.Empty,
-                ThumbnailUrl = e.Course?.ThumbnailUrl ?? string.Empty,
+                CourseTitle = e.Course != null ? e.Course.Title : string.Empty,
+                CourseSlug = e.Course != null ? e.Course.Slug : string.Empty,
+                ThumbnailUrl = e.Course != null ? e.Course.ThumbnailUrl : string.Empty,
                 CreatedAt = e.CreatedAt,
                 LastLessonId = e.LastLessonId,
-                TotalLessons = totalLessons,
-                CompletedLessons = completedLessons,
-                ProgressPercent = progressPercent
-            };
-        }).ToList();
+                TotalLessons = e.Course != null ? e.Course.Lessons.Count : 0,
+                CompletedLessons = e.LessonProgresses.Count,
+                ProgressPercent = e.Course != null && e.Course.Lessons.Count > 0
+                    ? Math.Round(e.LessonProgresses.Count * 100d / e.Course.Lessons.Count, 1)
+                    : 0
+            })
+            .ToListAsync();
 
-        return Ok(results);
+        return Ok(enrolls);
     }
 
     [HttpPost]

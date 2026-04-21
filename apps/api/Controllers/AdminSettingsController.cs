@@ -26,18 +26,17 @@ public class AdminSettingsController : ControllerBase
             .AsNoTracking()
             .OrderBy(s => s.Group)
             .ThenBy(s => s.Key)
+            .Select(s => new SystemSettingDto
+            {
+                Key = s.Key,
+                Value = s.Value,
+                Group = s.Group,
+                Description = s.Description,
+                UpdatedAt = s.UpdatedAt
+            })
             .ToListAsync();
 
-        var results = settings.Select(s => new SystemSettingDto
-        {
-            Key = s.Key,
-            Value = s.Value,
-            Group = s.Group,
-            Description = s.Description,
-            UpdatedAt = s.UpdatedAt
-        }).ToList();
-
-        return Ok(results);
+        return Ok(settings);
     }
 
     [HttpPut("{key}")]

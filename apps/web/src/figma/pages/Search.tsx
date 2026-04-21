@@ -1,42 +1,52 @@
 ﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "@/figma/compat/router";
-import { Search, Mic, MicOff, SlidersHorizontal, X, BookOpen } from "lucide-react";
-import CourseCard from "../components/CourseCard";
 import {
-  fetchCourses,
-  fetchCategories,
-  mapCourseList,
-  formatPrice,
-  type CategoryDto,
-} from "../data/api";
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Mic,
+  MicOff,
+  Search,
+  SlidersHorizontal,
+  Sparkles,
+  X,
+} from "lucide-react";
+import CourseCard from "../components/CourseCard";
+import { fetchCategories, fetchCourses, mapCourseList, type CategoryDto } from "../data/api";
 import { useLanguage } from "../contexts/LanguageContext";
 import type { Course } from "../contexts/CartContext";
 
-const PRICE_MAX = 500;
+const ITEMS_PER_PAGE = 20;
 
-const levelOptions = [
-  { label: "Tất cả", value: "all" },
-  { label: "Sơ cấp", value: "Beginner" },
-  { label: "Trung cấp", value: "Intermediate" },
-  { label: "Nâng cao", value: "Advanced" },
-  { label: "Phù hợp mọi trình độ", value: "All Levels" },
-];
+type PriceFilter = "all" | "free" | "under200" | "200-400" | "over400";
+type DurationFilter = "all" | "under3h" | "3-6h" | "6-12h" | "over12h";
+type LanguageFilter = "all" | "vietnamese" | "english";
+
+const LEVELS = [
+  { value: "all", label: "Tất cả" },
+  { value: "Beginner", label: "Sơ cấp" },
+  { value: "Intermediate", label: "Trung cấp" },
+  { value: "Advanced", label: "Nâng cao" },
+  { value: "All Levels", label: "Phù hợp mọi trình độ" },
+  { value: "All levels", label: "Phù hợp mọi trình độ" },
+] as const;
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { t, language } = useLanguage();
-
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
   const [selectedLevel, setSelectedLevel] = useState(searchParams.get("level") || "all");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, PRICE_MAX]);
+  const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
+  const [durationFilter, setDurationFilter] = useState<DurationFilter>("all");
+  const [languageFilter, setLanguageFilter] = useState<LanguageFilter>("all");
   const [minRating, setMinRating] = useState(0);
   const [sortBy, setSortBy] = useState("popular");
   const [showFilters, setShowFilters] = useState(false);
   const [isListening, setIsListening] = useState(false);
-
+  const [currentPage, setCurrentPage] = useState(1);
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,12 +60,10 @@ export default function SearchPage() {
     let active = true;
     fetchCategories()
       .then((data) => {
-        if (!active) return;
-        setCategories(data);
+        if (active) setCategories(data);
       })
       .catch(() => {
-        if (!active) return;
-        setCategories([]);
+        if (active) setCategories([]);
       });
     return () => {
       active = false;
@@ -79,21 +87,39 @@ export default function SearchPage() {
       search: query || undefined,
       category: selectedCategory === "all" ? undefined : selectedCategory,
       level: selectedLevel === "all" ? undefined : selectedLevel,
-      minPrice: priceRange[0] > 0 ? priceRange[0] * 1000 : undefined,
-      maxPrice: priceRange[1] < PRICE_MAX ? priceRange[1] * 1000 : undefined,
+      minPrice:
+        priceFilter === "free"
+          ? 0
+          : priceFilter === "under200"
+            ? 1
+            : priceFilter === "200-400"
+              ? 200000
+              : priceFilter === "over400"
+                ? 400000
+                : undefined,
+      maxPrice:
+        priceFilter === "free"
+          ? 0
+          : priceFilter === "under200"
+            ? 199999
+            : priceFilter === "200-400"
+              ? 399999
+              : undefined,
       minRating: minRating > 0 ? minRating : undefined,
       sort: sortMap[sortBy] ?? "popular",
-      pageSize: 36,
+      pageSize: 48,
     })
-      .then((courseDtos) => {
-        if (!active) return;
-        setCourses(courseDtos.map((dto) => mapCourseList(dto, language)));
+      .then((dtos) => {
+        if (active) {
+          setCourses(dtos.map((dto) => mapCourseList(dto, language)));
+        }
       })
       .catch((err) => {
         console.error("Failed to load courses", err);
-        if (!active) return;
-        setCourses([]);
-        setError("Không thể tải khóa học. Vui lòng thử lại.");
+        if (active) {
+          setCourses([]);
+          setError("Không thể tải khóa học. Vui lòng thử lại.");
+        }
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -102,7 +128,64 @@ export default function SearchPage() {
     return () => {
       active = false;
     };
-  }, [query, selectedCategory, selectedLevel, priceRange, minRating, sortBy, language]);
+  }, [query, selectedCategory, selectedLevel, priceFilter, minRating, sortBy, language]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, selectedCategory, selectedLevel, priceFilter, durationFilter, languageFilter, minRating, sortBy]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return courses.filter((course) => {
+      const matchQ =
+        !q ||
+        course.title.toLowerCase().includes(q) ||
+        course.instructor.toLowerCase().includes(q) ||
+        course.description.toLowerCase().includes(q) ||
+        course.category.toLowerCase().includes(q);
+      const matchCategory =
+        selectedCategory === "all" || course.categorySlug === selectedCategory || course.category === selectedCategory;
+      const matchLevel = selectedLevel === "all" || course.level === selectedLevel;
+      const matchPrice =
+        priceFilter === "all" ||
+        (priceFilter === "free" && course.price === 0) ||
+        (priceFilter === "under200" && course.price > 0 && course.price < 200000) ||
+        (priceFilter === "200-400" && course.price >= 200000 && course.price < 400000) ||
+        (priceFilter === "over400" && course.price >= 400000);
+      const matchLanguage =
+        languageFilter === "all" ||
+        (languageFilter === "english" ? course.language === "English" : course.language !== "English");
+      const matchRating = course.rating >= minRating;
+      const matchDuration = durationFilter === "all" || matchesDuration(course.duration, durationFilter);
+      return matchQ && matchCategory && matchLevel && matchPrice && matchLanguage && matchRating && matchDuration;
+    });
+  }, [courses, durationFilter, languageFilter, minRating, priceFilter, query, selectedCategory, selectedLevel]);
+
+  const sorted = useMemo(() => {
+    const list = [...filtered];
+    switch (sortBy) {
+      case "priceAsc":
+        return list.sort((a, b) => a.price - b.price);
+      case "priceDesc":
+        return list.sort((a, b) => b.price - a.price);
+      case "rating":
+        return list.sort((a, b) => b.rating - a.rating);
+      case "newest":
+        return list.sort((a, b) => Number.parseInt(b.id, 10) - Number.parseInt(a.id, 10));
+      default:
+        return list.sort((a, b) => b.students - a.students);
+    }
+  }, [filtered, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / ITEMS_PER_PAGE));
+  const currentItems = sorted.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const hasFilters =
+    selectedCategory !== "all" ||
+    selectedLevel !== "all" ||
+    priceFilter !== "all" ||
+    durationFilter !== "all" ||
+    languageFilter !== "all" ||
+    minRating > 0;
 
   const handleVoiceSearch = () => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -110,192 +193,224 @@ export default function SearchPage() {
       alert("Trình duyệt không hỗ trợ");
       return;
     }
-    const r = new SR();
-    r.lang = "vi-VN";
-    r.onstart = () => setIsListening(true);
-    r.onend = () => setIsListening(false);
-    r.onresult = (e: any) => {
-      const t = e.results[0][0].transcript;
-      setQuery(t);
-      setSearchParams({ q: t });
+    const recognition = new SR();
+    recognition.lang = "vi-VN";
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setQuery(transcript);
+      setSearchParams(transcript ? { q: transcript } : {});
     };
-    r.start();
+    recognition.start();
   };
 
   const clearFilters = () => {
     setSelectedCategory("all");
     setSelectedLevel("all");
-    setPriceRange([0, PRICE_MAX]);
+    setPriceFilter("all");
+    setDurationFilter("all");
+    setLanguageFilter("all");
     setMinRating(0);
     setSortBy("popular");
   };
 
-  const hasFilters =
-    selectedCategory !== "all" ||
-    selectedLevel !== "all" ||
-    priceRange[0] > 0 ||
-    priceRange[1] < PRICE_MAX ||
-    minRating > 0;
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Search Header */}
-      <div className="bg-white border-b border-gray-200 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-3">
-            <div className="flex-1 relative flex bg-white border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
+    <div className="min-h-screen overflow-x-hidden bg-gray-50">
+      <section className="border-b border-gray-200 bg-white py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                <Sparkles className="size-3.5" />
+                Tìm kiếm khóa học
+              </div>
+              <h1 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-gray-950 sm:text-4xl">
+                Khám phá khóa học phù hợp
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm text-gray-600 sm:text-base">
+                Lọc theo danh mục, trình độ, mức giá và đánh giá để tìm nhanh khóa học phù hợp nhất.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+              <span className="rounded-full bg-gray-100 px-3 py-1.5 font-medium">{sorted.length} kết quả</span>
+              <span className="rounded-full bg-gray-100 px-3 py-1.5 font-medium">{categories.length + 1} danh mục</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-gray-200 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="relative flex flex-1 items-center overflow-hidden rounded-xl border border-gray-300 bg-white focus-within:ring-2 focus-within:ring-blue-500">
+              <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setSearchParams(e.target.value ? { q: e.target.value } : {});
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setQuery(value);
+                  setSearchParams(value ? { q: value } : {});
                 }}
                 placeholder={t("home", "searchPlaceholder")}
-                className="flex-1 pl-11 pr-4 py-3 focus:outline-none text-gray-900"
+                className="w-full bg-transparent py-3 pl-11 pr-10 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none"
               />
-              {query && (
+              {query ? (
                 <button
                   onClick={() => {
                     setQuery("");
                     setSearchParams({});
                   }}
-                  className="px-3 text-gray-400 hover:text-gray-600"
+                  className="absolute right-1.5 inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
                 >
                   <X className="size-4" />
                 </button>
-              )}
+              ) : null}
             </div>
+
             <button
               onClick={handleVoiceSearch}
-              className={`px-4 rounded-xl border transition-colors ${
+              className={`inline-flex items-center justify-center rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${
                 isListening
-                  ? "bg-red-50 border-red-300 text-red-500"
-                  : "bg-white border-gray-300 text-gray-600 hover:border-blue-400 hover:text-blue-600"
+                  ? "border-red-300 bg-red-50 text-red-600"
+                  : "border-gray-300 bg-white text-gray-700 hover:border-blue-400 hover:text-blue-600"
               }`}
             >
               {isListening ? <MicOff className="size-5" /> : <Mic className="size-5" />}
             </button>
+
             <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`hidden sm:flex items-center gap-2 px-4 rounded-xl border transition-colors ${
-                showFilters ? "bg-blue-600 text-white border-blue-600" : "bg-white border-gray-300 text-gray-600 hover:border-blue-400"
+              onClick={() => setShowFilters((prev) => !prev)}
+              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${
+                showFilters
+                  ? "border-blue-600 bg-blue-600 text-white"
+                  : "border-gray-300 bg-white text-gray-700 hover:border-blue-400"
               }`}
             >
               <SlidersHorizontal className="size-5" />
-              <span className="hidden sm:inline text-sm font-medium">Lọc</span>
-              {hasFilters && <span className="size-2 bg-red-500 rounded-full" />}
+              <span className="hidden sm:inline">Lọc</span>
+              {hasFilters ? <span className="size-2 rounded-full bg-red-500" /> : null}
             </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex gap-8">
-          {/* Filters Sidebar */}
-          {showFilters && (
-            <aside className="hidden sm:block w-64 flex-shrink-0">
-              <div className="bg-white rounded-xl border border-gray-200 p-5 sticky top-20">
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="font-semibold text-gray-900">Bộ lọc nâng cao</h3>
-                  {hasFilters && (
+          {showFilters ? (
+            <aside className="hidden w-64 flex-shrink-0 sm:block">
+              <div className="sticky top-20 rounded-xl border border-gray-200 bg-white p-5">
+                <div className="mb-5 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-gray-900">Bộ lọc nâng cao</h3>
+                  {hasFilters ? (
                     <button onClick={clearFilters} className="text-xs text-blue-600 hover:underline">
                       Xóa tất cả
                     </button>
-                  )}
+                  ) : null}
                 </div>
 
-                {/* Category */}
-                <div className="mb-5">
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Danh mục</h4>
-                  <div className="space-y-2">
-                    {[{ title: "Tất cả", slug: "all" }, ...categories].map((cat) => (
-                      <label key={cat.slug} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="category"
-                          checked={selectedCategory === cat.slug}
-                          onChange={() => setSelectedCategory(cat.slug)}
-                          className="text-blue-600"
-                        />
-                        <span className="text-sm text-gray-600">{cat.title}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Level */}
-                <div className="mb-5">
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Trình độ</h4>
-                  <div className="space-y-2">
-                    {levelOptions.map((lv) => (
-                      <label key={lv.value} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="level"
-                          checked={selectedLevel === lv.value}
-                          onChange={() => setSelectedLevel(lv.value)}
-                          className="text-blue-600"
-                        />
-                        <span className="text-sm text-gray-600">{lv.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Price Range */}
-                <div className="mb-5">
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Giá (nghìn đồng)</h4>
-                  <div className="space-y-2">
-                    <input
-                      type="range"
-                      min={0}
-                      max={PRICE_MAX}
-                      value={priceRange[1]}
-                      onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value, 10)])}
-                      className="w-full accent-blue-600"
+                <FilterGroup title="Danh mục">
+                  {[{ title: "Tất cả", slug: "all" }, ...categories].map((category) => (
+                    <Choice
+                      key={category.slug}
+                      checked={selectedCategory === category.slug}
+                      onChange={() => setSelectedCategory(category.slug)}
+                      label={category.title}
+                      name="category"
                     />
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>0đ</span>
-                      <span>{formatPrice(priceRange[1] * 1000)}</span>
-                    </div>
-                  </div>
-                </div>
+                  ))}
+                </FilterGroup>
 
-                {/* Rating */}
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Đánh giá tối thiểu</h4>
-                  <div className="space-y-2">
-                    {[0, 4, 4.5, 4.8].map((r) => (
-                      <label key={r} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="rating"
-                          checked={minRating === r}
-                          onChange={() => setMinRating(r)}
-                          className="text-blue-600"
-                        />
-                        <span className="text-sm text-gray-600">{r === 0 ? "Tất cả" : `${r}★ trở lên`}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+                <FilterGroup title="Trình độ">
+                  {LEVELS.map((level) => (
+                    <Choice
+                      key={level.value}
+                      checked={selectedLevel === level.value}
+                      onChange={() => setSelectedLevel(level.value)}
+                      label={level.label}
+                      name="level"
+                    />
+                  ))}
+                </FilterGroup>
+
+                <FilterGroup title="Mức giá">
+                  {[
+                    { value: "all", label: "Tất cả" },
+                    { value: "free", label: "Miễn phí" },
+                    { value: "under200", label: "Dưới 200Kđ" },
+                    { value: "200-400", label: "200Kđ - 400Kđ" },
+                    { value: "over400", label: "Trên 400Kđ" },
+                  ].map((item) => (
+                    <Choice
+                      key={item.value}
+                      checked={priceFilter === item.value}
+                      onChange={() => setPriceFilter(item.value as PriceFilter)}
+                      label={item.label}
+                      name="price"
+                    />
+                  ))}
+                </FilterGroup>
+
+                <FilterGroup title="Thời lượng">
+                  {[
+                    { value: "all", label: "Tất cả" },
+                    { value: "under3h", label: "Dưới 3 giờ" },
+                    { value: "3-6h", label: "3-6 giờ" },
+                    { value: "6-12h", label: "6-12 giờ" },
+                    { value: "over12h", label: "Trên 12 giờ" },
+                  ].map((item) => (
+                    <Choice
+                      key={item.value}
+                      checked={durationFilter === item.value}
+                      onChange={() => setDurationFilter(item.value as DurationFilter)}
+                      label={item.label}
+                      name="duration"
+                    />
+                  ))}
+                </FilterGroup>
+
+                <FilterGroup title="Ngôn ngữ">
+                  {[
+                    { value: "all", label: "Tất cả" },
+                    { value: "vietnamese", label: "Tiếng Việt" },
+                    { value: "english", label: "Tiếng Anh" },
+                  ].map((item) => (
+                    <Choice
+                      key={item.value}
+                      checked={languageFilter === item.value}
+                      onChange={() => setLanguageFilter(item.value as LanguageFilter)}
+                      label={item.label}
+                      name="language"
+                    />
+                  ))}
+                </FilterGroup>
+
+                <FilterGroup title="Đánh giá tối thiểu">
+                  {[0, 4, 4.5, 4.8].map((rating) => (
+                    <Choice
+                      key={rating}
+                      checked={minRating === rating}
+                      onChange={() => setMinRating(rating)}
+                      label={rating === 0 ? "Tất cả" : `${rating}★ trở lên`}
+                      name="rating"
+                    />
+                  ))}
+                </FilterGroup>
               </div>
             </aside>
-          )}
+          ) : null}
 
-          {/* Results */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-5">
-              <p className="text-gray-600 text-sm">
-                {query && <span className="font-medium">"{query}" · </span>}
-                Tìm thấy <span className="font-semibold text-gray-900">{courses.length}</span> khóa học
+          <main className="min-w-0 flex-1 overflow-hidden">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-gray-600">
+                {query ? <span className="font-medium text-gray-950">“{query}” · </span> : null}
+                Tìm thấy <span className="font-semibold text-gray-950">{sorted.length}</span> khóa học
               </p>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                onChange={(event) => setSortBy(event.target.value)}
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="popular">Phổ biến nhất</option>
                 <option value="rating">Đánh giá cao nhất</option>
@@ -306,30 +421,128 @@ export default function SearchPage() {
             </div>
 
             {loading ? (
-              <div className="text-center py-16 text-gray-500">Đang tải khóa học...</div>
-            ) : error ? (
-              <div className="text-center py-16 text-gray-500">{error}</div>
-            ) : courses.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {courses.map((c) => (
-                  <CourseCard key={c.id} course={c} />
-                ))}
+              <div className="rounded-xl border border-gray-200 bg-white py-20 text-center text-gray-500">
+                Đang tải khóa học...
               </div>
+            ) : error ? (
+              <div className="rounded-xl border border-gray-200 bg-white py-20 text-center text-gray-500">
+                {error}
+              </div>
+            ) : currentItems.length > 0 ? (
+              <>
+                <div className="mb-8 grid grid-cols-1 gap-5 justify-items-stretch sm:grid-cols-2 lg:grid-cols-3">
+                  {currentItems.map((course) => (
+                    <CourseCard key={course.id} course={course} />
+                  ))}
+                </div>
+
+                {totalPages > 1 ? (
+                  <div className="mt-8 flex items-center justify-center gap-2">
+                    <Pager
+                      onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="size-4" />
+                    </Pager>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => {
+                        const show =
+                          page === 1 ||
+                          page === totalPages ||
+                          (page >= currentPage - 1 && page <= currentPage + 1);
+
+                        if (!show) {
+                          if (page === currentPage - 2 || page === currentPage + 2) {
+                            return (
+                              <span key={page} className="px-2 text-gray-400">
+                                ...
+                              </span>
+                            );
+                          }
+                          return null;
+                        }
+
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`min-w-[40px] rounded-lg px-3 py-2 text-sm transition-colors ${
+                              currentPage === page
+                                ? "bg-blue-600 text-white"
+                                : "border border-gray-300 hover:bg-gray-50"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <Pager
+                      onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="size-4" />
+                    </Pager>
+                  </div>
+                ) : null}
+              </>
             ) : (
-              <div className="text-center py-20">
-                <BookOpen className="size-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">Không tìm thấy kết quả</h3>
-                <p className="text-gray-500 mb-4">Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc</p>
-                {hasFilters && (
-                  <button onClick={clearFilters} className="text-blue-600 hover:underline text-sm">
+              <div className="rounded-xl border border-gray-200 bg-white px-4 py-16 text-center">
+                <BookOpen className="mx-auto mb-4 size-14 text-gray-300" />
+                <h3 className="text-lg font-semibold text-gray-700">Không tìm thấy kết quả</h3>
+                <p className="mt-2 text-sm text-gray-500">
+                  Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc để xem thêm khóa học.
+                </p>
+                {hasFilters ? (
+                  <button onClick={clearFilters} className="mt-5 text-sm font-semibold text-blue-600 hover:underline">
                     Xóa tất cả bộ lọc
                   </button>
-                )}
+                ) : null}
               </div>
             )}
-          </div>
+          </main>
         </div>
       </div>
     </div>
+  );
+}
+
+function matchesDuration(duration: string, filter: DurationFilter) {
+  const hours = Number.parseFloat(duration);
+  if (Number.isNaN(hours)) return false;
+  if (filter === "under3h") return hours < 3;
+  if (filter === "3-6h") return hours >= 3 && hours < 6;
+  if (filter === "6-12h") return hours >= 6 && hours < 12;
+  if (filter === "over12h") return hours >= 12;
+  return true;
+}
+
+function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="mb-5">
+      <h3 className="mb-3 text-sm font-semibold text-gray-900">{title}</h3>
+      <div className="space-y-2">{children}</div>
+    </section>
+  );
+}
+
+function Choice({ checked, label, name, onChange }: { checked: boolean; label: string; name: string; onChange: () => void }) {
+  return (
+    <label className="flex cursor-pointer items-center gap-2 rounded-lg px-1 py-1 text-sm text-gray-600 transition hover:text-gray-950">
+      <input type="radio" checked={checked} name={name} onChange={onChange} className="size-4 accent-blue-600" />
+      <span>{label}</span>
+    </label>
+  );
+}
+
+function Pager({ children, disabled, onClick }: { children: React.ReactNode; disabled?: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      {children}
+    </button>
   );
 }

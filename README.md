@@ -1,27 +1,32 @@
-## Django E-Learning App
+# Django Udemy Clone
 
-Live: [Demo](https://django-udemy-clone.herokuapp.com/)
+Repo hien tai duoc to chuc theo huong:
 
-Used Tech Stack
+- Frontend Next.js: `apps/web`
+- Backend ASP.NET Core API: `apps/api`
 
-1. Django
-2. Sqlite
+## Chay nhanh
 
-### Screenshots
+Tai root repo, dung cac lenh sau:
 
-## Home page
+```bash
+npm run dev
+npm run build
+```
 
-<img src="screenshots/one.png" height="800">
+Root `package.json` chi dong vai tro dieu huong sang `apps/web` de ban khong can nho them mot frontend cu nao nua.
 
-## Course Details page
+## Frontend chinh
 
-<img src="screenshots/two.png" height="800">
+Frontend dang duoc su dung la:
 
-## Enrolled course details
+```text
+apps/web
+```
 
-<img src="screenshots/three.png" height="800">
+Toan bo giao dien Vite cu da duoc migrate vao Next.js va cac phan duplicate/legacy dang duoc don dan.
 
-Show your support by 🌟 the project!!
+## Tai khoan mau
 
-Admin: tungdv14112003@gmail.com
-Instructor: tungdaouploaddrive@gmail.com
+- Admin: `tungdv14112003@gmail.com`
+- Instructor: `tungdaouploaddrive@gmail.com`

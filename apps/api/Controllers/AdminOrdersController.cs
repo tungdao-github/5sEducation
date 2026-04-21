@@ -23,8 +23,6 @@ public class AdminOrdersController : ControllerBase
     {
         var query = _db.Orders
             .AsNoTracking()
-            .Include(o => o.Items)
-            .Include(o => o.User)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(status))
@@ -32,38 +30,37 @@ public class AdminOrdersController : ControllerBase
             query = query.Where(o => o.Status == status);
         }
 
-        var orders = await query
+        var results = await query
             .OrderByDescending(o => o.CreatedAt)
+            .Select(o => new OrderAdminDto
+            {
+                Id = o.Id,
+                Status = o.Status,
+                Subtotal = o.Subtotal,
+                DiscountTotal = o.DiscountTotal,
+                Total = o.Total,
+                Currency = o.Currency,
+                CouponCode = o.CouponCode,
+                CreatedAt = o.CreatedAt,
+                UpdatedAt = o.UpdatedAt,
+                UserId = o.UserId,
+                UserEmail = o.User != null ? (o.User.Email ?? string.Empty) : string.Empty,
+                UserName = o.User != null ? (o.User.FirstName + " " + o.User.LastName).Trim() : string.Empty,
+                Items = o.Items
+                    .OrderBy(i => i.Id)
+                    .Select(i => new OrderItemDto
+                    {
+                        Id = i.Id,
+                        CourseId = i.CourseId,
+                        CourseTitle = i.CourseTitle,
+                        CourseSlug = i.CourseSlug,
+                        UnitPrice = i.UnitPrice,
+                        Quantity = i.Quantity,
+                        LineTotal = i.LineTotal
+                    })
+                    .ToList()
+            })
             .ToListAsync();
-
-        var results = orders.Select(o => new OrderAdminDto
-        {
-            Id = o.Id,
-            Status = o.Status,
-            Subtotal = o.Subtotal,
-            DiscountTotal = o.DiscountTotal,
-            Total = o.Total,
-            Currency = o.Currency,
-            CouponCode = o.CouponCode,
-            CreatedAt = o.CreatedAt,
-            UpdatedAt = o.UpdatedAt,
-            UserId = o.UserId,
-            UserEmail = o.User?.Email ?? string.Empty,
-            UserName = $"{o.User?.FirstName} {o.User?.LastName}".Trim(),
-            Items = o.Items
-                .OrderBy(i => i.Id)
-                .Select(i => new OrderItemDto
-                {
-                    Id = i.Id,
-                    CourseId = i.CourseId,
-                    CourseTitle = i.CourseTitle,
-                    CourseSlug = i.CourseSlug,
-                    UnitPrice = i.UnitPrice,
-                    Quantity = i.Quantity,
-                    LineTotal = i.LineTotal
-                })
-                .ToList()
-        }).ToList();
 
         return Ok(results);
     }

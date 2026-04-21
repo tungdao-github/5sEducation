@@ -1,33 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { API_URL, resolveApiAsset } from "@/lib/api";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { clearStoredAuth, resolveApiAsset } from "@/lib/api";
 import { useI18n } from "@/app/providers";
+import type { HeaderUserProfile } from "@/components/useHeaderAccount";
 
 type HeaderAuthProps = {
   compact?: boolean;
   variant?: "pill" | "icon";
+  account: {
+    isAuthed: boolean;
+    isInstructor: boolean;
+    user: HeaderUserProfile | null;
+  };
 };
 
-type UserProfile = {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl?: string | null;
-  isAdmin: boolean;
-};
-
-export function HeaderAuth({ compact, variant = "pill" }: HeaderAuthProps) {
+export function HeaderAuth({ compact, variant = "pill", account }: HeaderAuthProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { tx } = useI18n();
-  const [isAuthed, setIsAuthed] = useState(false);
-  const [user, setUser] = useState<UserProfile | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+
+  const { isAuthed, isInstructor, user } = account;
 
   const displayName = useMemo(() => {
     if (!user) return "";
@@ -43,50 +41,17 @@ export function HeaderAuth({ compact, variant = "pill" }: HeaderAuthProps) {
     return letters ? letters.toUpperCase() : (user.email?.trim()?.[0] ?? "U").toUpperCase();
   }, [user]);
 
-  const loadProfile = async (token: string) => {
-    try {
-      const res = await fetch(`${API_URL}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) {
-        setUser(null);
-        return;
-      }
-      const data = (await res.json()) as UserProfile;
-      setUser(data);
-    } catch {
-      setUser(null);
-    }
-  };
+  const nextPath = useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("auth");
+    const query = params.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  }, [pathname, searchParams]);
 
-  const syncAuth = () => {
-    const token = localStorage.getItem("token");
-    const authed = Boolean(token);
-    setIsAuthed(authed);
-    if (!authed) {
-      setUser(null);
-      setMenuOpen(false);
-      return;
-    }
-    if (token) {
-      loadProfile(token);
-    }
-  };
-
-  useEffect(() => {
-    syncAuth();
-
-    window.addEventListener("storage", syncAuth);
-    window.addEventListener("auth-changed", syncAuth);
-    return () => {
-      window.removeEventListener("storage", syncAuth);
-      window.removeEventListener("auth-changed", syncAuth);
-    };
-  }, []);
-
-  useEffect(() => {
-    syncAuth();
-  }, [pathname]);
+  const authHref = useCallback(
+    (mode: "login" | "register") => `/?auth=${mode}&next=${encodeURIComponent(nextPath || "/")}`,
+    [nextPath]
+  );
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -112,9 +77,7 @@ export function HeaderAuth({ compact, variant = "pill" }: HeaderAuthProps) {
   }, [menuOpen]);
 
   const handleSignOut = () => {
-    localStorage.removeItem("token");
-    setIsAuthed(false);
-    setUser(null);
+    clearStoredAuth({ notify: false });
     setMenuOpen(false);
     window.dispatchEvent(new Event("auth-changed"));
     router.refresh();
@@ -123,41 +86,58 @@ export function HeaderAuth({ compact, variant = "pill" }: HeaderAuthProps) {
   if (!isAuthed) {
     if (variant === "icon") {
       return (
-        <Link
-          href="/login"
-          className="flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-500"
-        >
+        <Link href={authHref("login")} className="flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-500">
           <span>{tx("Account", "Tai khoan")}</span>
-          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600">
-            U
-          </span>
+          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-600">U</span>
         </Link>
       );
     }
 
     if (compact) {
-      return (
-        <Link href="/login" className="text-xs font-semibold text-slate-700">
-          {tx("Sign in", "Dang nhap")}
-        </Link>
-      );
+      return <Link href={authHref("login")} className="text-xs font-semibold text-slate-700">{tx("Sign in", "Dang nhap")}</Link>;
     }
 
     return (
       <>
-        <Link
-          href="/login"
-          className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700"
-        >
+        <Link href={authHref("login")} className="px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:text-blue-600">
           {tx("Sign in", "Dang nhap")}
         </Link>
-        <Link
-          href="/register"
-          className="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white"
-        >
+        <Link href={authHref("register")} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
           {tx("Sign up", "Dang ky")}
         </Link>
       </>
+    );
+  }
+
+  if (variant === "icon") {
+    return (
+      <div ref={menuRef} className="relative">
+        <button
+          type="button"
+          onClick={() => setMenuOpen((prev) => !prev)}
+          className="flex flex-col items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-[10px] font-semibold text-slate-500"
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+        >
+          {user?.avatarUrl ? (
+            <img src={resolveApiAsset(user.avatarUrl)} alt={displayName || "User avatar"} className="h-10 w-10 rounded-full object-cover" />
+          ) : (
+            <span className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-700">{initials}</span>
+          )}
+        </button>
+        {menuOpen && (
+          <div role="menu" className="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg">
+            <div className="px-3 py-2">
+              <p className="text-xs font-semibold text-slate-900">{displayName || tx("Account", "Tai khoan")}</p>
+              {user?.email && <p className="text-[11px] text-slate-500">{user.email}</p>}
+            </div>
+            <div className="my-2 h-px bg-slate-100" />
+            <button type="button" onClick={handleSignOut} className="w-full rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-700 hover:bg-slate-100">
+              {tx("Sign out", "Dang xuat")}
+            </button>
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -166,108 +146,67 @@ export function HeaderAuth({ compact, variant = "pill" }: HeaderAuthProps) {
       <button
         type="button"
         onClick={() => setMenuOpen((prev) => !prev)}
-        className={`flex items-center gap-2 ${
-          variant === "icon"
-            ? "flex-col rounded-full border border-slate-200 bg-white px-3 py-2 text-[10px] font-semibold text-slate-500"
-            : "rounded-full border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700"
-        } ${variant === "icon" ? "" : compact ? "pr-2" : "pr-3"}`}
+        className="flex items-center gap-2 transition-opacity hover:opacity-80"
         aria-haspopup="menu"
         aria-expanded={menuOpen}
       >
-        {variant === "icon" && !compact && <span>{tx("Account", "Tai khoan")}</span>}
         {user?.avatarUrl ? (
           <img
             src={resolveApiAsset(user.avatarUrl)}
             alt={displayName || "User avatar"}
-            className={`rounded-full object-cover ${variant === "icon" ? "h-10 w-10" : "h-8 w-8"}`}
+            className="h-10 w-10 rounded-full object-cover"
           />
         ) : (
-          <span
-            className={`flex items-center justify-center rounded-full ${
-              variant === "icon" ? "h-10 w-10 border border-slate-200 bg-white text-sm" : "h-8 w-8 bg-slate-100 text-xs"
-            } font-bold text-slate-700`}
-          >
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-bold text-white">
             {initials}
-          </span>
-        )}
-        {!compact && variant !== "icon" && (
-          <span className="max-w-[140px] truncate text-[11px] font-semibold text-slate-700">
-            {displayName || tx("Account", "Tai khoan")}
           </span>
         )}
       </button>
 
       {menuOpen && (
-        <div
-          role="menu"
-          className="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg"
-        >
-          <div className="px-3 py-2">
-            <p className="text-xs font-semibold text-slate-900">
-              {displayName || tx("Account", "Tai khoan")}
-            </p>
-            {user?.email && <p className="text-[11px] text-slate-500">{user.email}</p>}
+        <div role="menu" className="absolute right-0 top-full z-50 mt-2 w-64 rounded-xl border border-gray-100 bg-white py-2 shadow-xl">
+          <div className="border-b border-gray-100 px-4 py-3">
+            <p className="font-semibold text-gray-900">{displayName || tx("Account", "Tai khoan")}</p>
+            {user?.email && <p className="truncate text-xs text-gray-500">{user.email}</p>}
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs font-semibold text-sky-400">⭐ {user?.loyaltyTier || "Bronze"}</span>
+              <span className="text-xs text-gray-400">•</span>
+              <span className="text-xs font-medium text-blue-600">{user?.loyaltyPoints ?? 0} điểm</span>
+            </div>
           </div>
-          <div className="my-2 h-px bg-slate-100" />
-          <div className="flex flex-col gap-1 text-xs font-semibold text-slate-700">
-            <Link
-              href="/account"
-              className="rounded-xl px-3 py-2 hover:bg-slate-100"
-              onClick={() => setMenuOpen(false)}
-            >
-              {tx("Account settings", "Tai khoan")}
+          <div className="px-1 py-1">
+            <Link href="/my-learning" className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600" onClick={() => setMenuOpen(false)}>
+              {tx("My Learning", "Khóa học của tôi")}
             </Link>
-            <Link
-              href="/support"
-              className="rounded-xl px-3 py-2 hover:bg-slate-100"
-              onClick={() => setMenuOpen(false)}
-            >
-              {tx("Support", "Ho tro")}
+            <Link href="/account" className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600" onClick={() => setMenuOpen(false)}>
+              {tx("Account", "Tài khoản")}
             </Link>
-            <Link
-              href="/dashboard"
-              className="rounded-xl px-3 py-2 hover:bg-slate-100"
-              onClick={() => setMenuOpen(false)}
-            >
-              {tx("My Learning", "Hoc tap")}
+            <Link href="/wishlist" className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600" onClick={() => setMenuOpen(false)}>
+              {tx("Wishlist", "Yêu thích")}
             </Link>
-            <Link
-              href="/studio"
-              className="rounded-xl px-3 py-2 hover:bg-slate-100"
-              onClick={() => setMenuOpen(false)}
-            >
-              Studio
+            <Link href="/cart" className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600" onClick={() => setMenuOpen(false)}>
+              {tx("Cart", "Giỏ hàng")}
             </Link>
-            {user?.isAdmin && (
-              <Link
-                href="/admin"
-                className="rounded-xl px-3 py-2 hover:bg-slate-100"
-                onClick={() => setMenuOpen(false)}
-              >
-                Admin
+          </div>
+          <div className="my-2 border-t border-gray-100" />
+          <div className="px-1 py-1">
+            {isInstructor ? (
+              <Link href="/instructor" className="flex items-center gap-3 px-3 py-2.5 text-sm text-green-600 transition-colors hover:bg-green-50" onClick={() => setMenuOpen(false)}>
+                {tx("Dashboard Giảng viên", "Dashboard Giảng viên")}
+              </Link>
+            ) : (
+              <Link href="/become-instructor" className="flex items-center gap-3 px-3 py-2.5 text-sm text-purple-600 transition-colors hover:bg-purple-50" onClick={() => setMenuOpen(false)}>
+                {tx("Trở thành Giảng viên", "Trở thành Giảng viên")}
               </Link>
             )}
-            <Link
-              href="/wishlist"
-              className="rounded-xl px-3 py-2 hover:bg-slate-100"
-              onClick={() => setMenuOpen(false)}
-            >
-              {tx("Wishlist", "Yeu thich")}
-            </Link>
-            <Link
-              href="/cart"
-              className="rounded-xl px-3 py-2 hover:bg-slate-100"
-              onClick={() => setMenuOpen(false)}
-            >
-              {tx("Cart", "Gio hang")}
-            </Link>
+            {user?.isAdmin && (
+              <Link href="/admin" className="flex items-center gap-3 px-3 py-2.5 text-sm text-purple-600 transition-colors hover:bg-purple-50" onClick={() => setMenuOpen(false)}>
+                {tx("Quản trị Admin", "Quản trị Admin")}
+              </Link>
+            )}
           </div>
-          <div className="my-2 h-px bg-slate-100" />
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="w-full rounded-xl px-3 py-2 text-left text-xs font-semibold text-slate-700 hover:bg-slate-100"
-          >
+          <div className="my-2 border-t border-gray-100" />
+          <button type="button" onClick={handleSignOut} className="w-full px-4 py-2.5 text-left text-sm text-red-600 transition-colors hover:bg-red-50">
             {tx("Sign out", "Dang xuat")}
           </button>
         </div>

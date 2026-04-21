@@ -83,12 +83,6 @@ public class HistoryController : ControllerBase
         var items = await _db.CourseViewHistories
             .AsNoTracking()
             .Where(v => v.UserId == userId)
-            .Include(v => v.Course!)
-            .ThenInclude(c => c.Category)
-            .Include(v => v.Course!)
-            .ThenInclude(c => c.Reviews)
-            .Include(v => v.Course!)
-            .ThenInclude(c => c.Enrollments)
             .OrderByDescending(v => v.ViewedAt)
             .Take(take)
             .Select(v => new CourseHistoryDto

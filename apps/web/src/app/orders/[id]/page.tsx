@@ -105,7 +105,7 @@ export default function OrderDetailPage() {
             {tx("Please sign in to view your order.", "Vui long dang nhap de xem don hang.")}
           </p>
           <Link
-            href={`/login?next=/orders/${orderId}`}
+            href={`/?auth=login&next=${encodeURIComponent(`/orders/${orderId}`)}`}
             className="mt-4 inline-flex rounded-full bg-emerald-700 px-6 py-2 text-sm font-semibold text-white"
           >
             {tx("Sign in", "Dang nhap")}

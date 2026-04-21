@@ -29,7 +29,7 @@ export function CourseActions({
           "Vui long dang nhap de tiep tuc.",
         ),
       });
-      router.push(`/login?next=/courses/${courseSlug}`);
+      router.push(`/?auth=login&next=${encodeURIComponent(`/courses/${courseSlug}`)}`);
       return null;
     }
     return token;
@@ -97,7 +97,7 @@ export function CourseActions({
           "Ban co the vao hoc ngay bay gio.",
         ),
       });
-      router.push("/dashboard");
+      router.push(`/learn/${courseSlug}`);
     } catch {
       notify({
         title: tx("Enrollment failed", "Dang ky that bai"),

@@ -22,8 +22,9 @@ public class HomePageBlocksController : ControllerBase
         var normalizedLocale = (locale ?? string.Empty).Trim().ToLowerInvariant();
 
         var blocks = await _db.HomePageBlocks
+            .AsNoTracking()
             .Where(b => b.IsPublished)
-            .Where(b => string.IsNullOrEmpty(b.Locale) || b.Locale.ToLower() == normalizedLocale)
+            .Where(b => string.IsNullOrEmpty(b.Locale) || b.Locale == normalizedLocale)
             .OrderBy(b => b.SortOrder)
             .ThenBy(b => b.Id)
             .Select(b => new HomePageBlockDto

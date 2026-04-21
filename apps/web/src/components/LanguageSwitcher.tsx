@@ -50,12 +50,12 @@ export function LanguageSwitcher({ compact, variant = "pill" }: LanguageSwitcher
 
   if (variant === "icon") {
     return (
-      <div ref={menuRef} className="relative flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-500">
-        {!compact && <span>{tx("Language", "Ngon ngu")}</span>}
+      <div ref={menuRef} className="ml-3 relative flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-500">
+        {!compact && <span>{tx("Language", "Ngon ngu", "Idioma", "Langue")}</span>}
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
-          aria-label={tx("Language", "Ngon ngu")}
+          aria-label={tx("Language", "Ngon ngu", "Idioma", "Langue")}
           className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -82,7 +82,25 @@ export function LanguageSwitcher({ compact, variant = "pill" }: LanguageSwitcher
                 locale === "vi" ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-slate-100"
               }`}
             >
-              Tieng Viet
+              Tiếng Việt
+            </button>
+            <button
+              type="button"
+              onClick={() => handleChange("es")}
+              className={`mt-1 w-full rounded-xl px-3 py-2 text-left text-xs font-semibold ${
+                locale === "es" ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              Español
+            </button>
+            <button
+              type="button"
+              onClick={() => handleChange("fr")}
+              className={`mt-1 w-full rounded-xl px-3 py-2 text-left text-xs font-semibold ${
+                locale === "fr" ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              Français
             </button>
           </div>
         )}
@@ -94,7 +112,7 @@ export function LanguageSwitcher({ compact, variant = "pill" }: LanguageSwitcher
     <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700">
       {!compact && (
         <span className="px-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
-          {tx("Lang", "Ngon ngu")}
+          {tx("Lang", "Ngon ngu", "Idioma", "Langue")}
         </span>
       )}
       <button
@@ -118,6 +136,28 @@ export function LanguageSwitcher({ compact, variant = "pill" }: LanguageSwitcher
         }`}
       >
         VI
+      </button>
+      <button
+        type="button"
+        onClick={() => handleChange("es")}
+        className={`rounded-full px-2 py-1 ${
+          locale === "es"
+            ? "bg-blue-600 text-white"
+            : "text-slate-700 hover:bg-slate-100"
+        }`}
+      >
+        ES
+      </button>
+      <button
+        type="button"
+        onClick={() => handleChange("fr")}
+        className={`rounded-full px-2 py-1 ${
+          locale === "fr"
+            ? "bg-blue-600 text-white"
+            : "text-slate-700 hover:bg-slate-100"
+        }`}
+      >
+        FR
       </button>
     </div>
   );

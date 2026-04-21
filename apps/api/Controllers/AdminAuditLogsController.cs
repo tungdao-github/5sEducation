@@ -36,12 +36,12 @@ public class AdminAuditLogsController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(query))
         {
-            var q = query.Trim().ToLowerInvariant();
+            var q = $"%{query.Trim()}%";
             logsQuery = logsQuery.Where(l =>
-                l.UserEmail.ToLower().Contains(q)
-                || l.Action.ToLower().Contains(q)
-                || l.Path.ToLower().Contains(q)
-                || l.Method.ToLower().Contains(q));
+                EF.Functions.Like(l.UserEmail, q)
+                || EF.Functions.Like(l.Action, q)
+                || EF.Functions.Like(l.Path, q)
+                || EF.Functions.Like(l.Method, q));
         }
 
         if (from.HasValue)
@@ -57,24 +57,23 @@ public class AdminAuditLogsController : ControllerBase
         var logs = await logsQuery
             .OrderByDescending(l => l.CreatedAt)
             .Take(normalizedTake)
+            .Select(l => new AdminAuditLogDto
+            {
+                Id = l.Id,
+                UserId = l.UserId,
+                UserEmail = l.UserEmail,
+                Action = l.Action,
+                Method = l.Method,
+                Path = l.Path,
+                QueryString = l.QueryString,
+                StatusCode = l.StatusCode,
+                IpAddress = l.IpAddress,
+                UserAgent = l.UserAgent,
+                DurationMs = l.DurationMs,
+                CreatedAt = l.CreatedAt
+            })
             .ToListAsync();
 
-        var results = logs.Select(l => new AdminAuditLogDto
-        {
-            Id = l.Id,
-            UserId = l.UserId,
-            UserEmail = l.UserEmail,
-            Action = l.Action,
-            Method = l.Method,
-            Path = l.Path,
-            QueryString = l.QueryString,
-            StatusCode = l.StatusCode,
-            IpAddress = l.IpAddress,
-            UserAgent = l.UserAgent,
-            DurationMs = l.DurationMs,
-            CreatedAt = l.CreatedAt
-        }).ToList();
-
-        return Ok(results);
+        return Ok(logs);
     }
 }

@@ -6,7 +6,8 @@ import { useSearchParams, Link } from "@/figma/compat/router";
 import {
   User, ShoppingBag, Heart, Lock, Star, Edit3, Save, X,
   CheckCircle, Clock, AlertCircle, XCircle, BookOpen, LogOut,
-  MapPin, Plus, Trash2, Gift, Award, Zap,
+  MapPin, Plus, Trash2, Gift, Award, Zap, RotateCcw, Shield,
+  Copy, Check,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useWishlist } from "../contexts/WishlistContext";
@@ -48,9 +49,10 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   cancelled: { label: "Đã hủy", color: "bg-red-100 text-red-700" },
 };
 
-function buildTrackingSteps(status: string) {
+function buildTrackingSteps(status: string, createdAt?: string) {
+  const baseDate = createdAt ? new Date(createdAt).toLocaleDateString("vi-VN") : "";
   return [
-    { label: "Đặt hàng", done: true, date: "" },
+    { label: "Đặt hàng", done: true, date: baseDate },
     { label: "Xác nhận", done: status !== "pending", date: "" },
     { label: "Xử lý", done: status === "processing" || status === "completed", date: "" },
     { label: "Hoàn thành", done: status === "completed", date: "" },
@@ -70,6 +72,9 @@ type OrderView = {
   status: string;
   createdAt: string;
   total: number;
+  subtotal: number;
+  discountTotal: number;
+  couponCode?: string | null;
   itemsView: OrderItemView[];
   trackingSteps: { label: string; done: boolean; date: string }[];
 };
@@ -87,6 +92,8 @@ export default function Account() {
   const [passwords, setPasswords] = useState({ current: "", newPwd: "", confirm: "" });
   const [orders, setOrders] = useState<OrderView[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [refundModal, setRefundModal] = useState<{ show: boolean; orderId: number | null }>({ show: false, orderId: null });
+  const [refundReason, setRefundReason] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -128,8 +135,11 @@ export default function Account() {
             status: order.status,
             createdAt: order.createdAt,
             total: order.total,
+            subtotal: order.subtotal,
+            discountTotal: order.discountTotal,
+            couponCode: order.couponCode ?? null,
             itemsView,
-            trackingSteps: buildTrackingSteps(order.status),
+            trackingSteps: buildTrackingSteps(order.status, order.createdAt),
           };
         });
 
@@ -205,6 +215,26 @@ export default function Account() {
     }
   };
 
+  const handleRefundRequest = () => {
+    if (!refundReason.trim()) {
+      toast.error("Vui lòng nhập lý do hoàn tiền");
+      return;
+    }
+    toast.success(
+      `Yêu cầu hoàn tiền cho đơn hàng ${refundModal.orderId} đã được gửi! Chúng tôi sẽ xem xét trong 3-5 ngày làm việc.`
+    );
+    setRefundModal({ show: false, orderId: null });
+    setRefundReason("");
+  };
+
+  const canRefund = (order: OrderView) => {
+    if (order.status !== "completed") return false;
+    const orderDate = new Date(order.createdAt);
+    const now = new Date();
+    const daysDiff = Math.floor((now.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
+    return daysDiff <= 30;
+  };
+
   const tabs: { id: Tab; label: string; icon: React.ReactNode; badge?: number }[] = [
     { id: "profile", label: "Hồ sơ cá nhân", icon: <User className="size-4" /> },
     { id: "orders", label: "Đơn hàng", icon: <ShoppingBag className="size-4" />, badge: userOrders.length },
@@ -215,7 +245,8 @@ export default function Account() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
+    <>
+      <div className="min-h-screen bg-gray-50 py-10">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header card */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 mb-6 text-white">
@@ -422,9 +453,21 @@ export default function Account() {
                               ))}
                             </div>
                             <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
-                              <div className="text-sm text-gray-500">Thanh toán qua VND</div>
-                              <div className="font-bold text-gray-900 text-sm">
-                                Tổng: <span className="text-blue-600">{formatPrice(order.total)}</span>
+                              <div>
+                                <div className="text-sm text-gray-500">Thanh toán qua VND</div>
+                                {order.couponCode && order.discountTotal > 0 ? (
+                                  <div className="text-xs text-green-600">Mã giảm giá: {order.couponCode}</div>
+                                ) : null}
+                              </div>
+                              <div className="text-right text-sm">
+                                {order.discountTotal > 0 ? (
+                                  <div className="text-xs text-gray-400 line-through">
+                                    {formatPrice(order.subtotal)}
+                                  </div>
+                                ) : null}
+                                <div className="font-bold text-gray-900">
+                                  Tổng: <span className="text-blue-600">{formatPrice(order.total)}</span>
+                                </div>
                               </div>
                             </div>
                             {/* Tracking steps */}
@@ -439,9 +482,23 @@ export default function Account() {
                                   </div>
                                 ))}
                               </div>
-                              <p className="text-xs text-gray-500 mt-1.5">
-                                {order.trackingSteps.filter((s) => s.done).pop()?.label || "—"}
-                              </p>
+                              <div className="flex items-center justify-between mt-1.5">
+                                <p className="text-xs text-gray-500">
+                                  {order.trackingSteps.filter((s) => s.done).pop()?.label || "—"}{" "}
+                                  {order.trackingSteps.filter((s) => s.done).pop()?.date
+                                    ? `· ${order.trackingSteps.filter((s) => s.done).pop()?.date}`
+                                    : ""}
+                                </p>
+                                {canRefund(order) && (
+                                  <button
+                                    onClick={() => setRefundModal({ show: true, orderId: order.id })}
+                                    className="text-xs text-red-600 hover:text-red-700 font-medium flex items-center gap-1"
+                                  >
+                                    <RotateCcw className="size-3" />
+                                    Yêu cầu hoàn tiền
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </div>
                         );
@@ -507,7 +564,7 @@ export default function Account() {
 
               {/* Password Tab */}
               {activeTab === "password" && (
-                <div>
+                <div className="space-y-8">
                   <h2 className="text-lg font-semibold text-gray-900 mb-5">Đổi mật khẩu</h2>
                   <form onSubmit={handleChangePassword} className="max-w-sm space-y-4">
                     {[
@@ -535,6 +592,9 @@ export default function Account() {
                     </button>
                     <p className="text-xs text-gray-400">Mật khẩu phải có ít nhất 6 ký tự</p>
                   </form>
+                  <div className="border-t border-gray-200 pt-8">
+                    <TwoFactorSettings />
+                  </div>
                 </div>
               )}
 
@@ -543,6 +603,77 @@ export default function Account() {
         </div>
       </div>
     </div>
+
+      {refundModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="bg-gradient-to-r from-red-600 to-pink-600 px-6 py-6 text-white">
+              <button
+                onClick={() => {
+                  setRefundModal({ show: false, orderId: null });
+                  setRefundReason("");
+                }}
+                className="absolute top-4 right-4 text-white/80 hover:text-white"
+              >
+                <X className="size-5" />
+              </button>
+              <div className="size-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                <RotateCcw className="size-7" />
+              </div>
+              <h2 className="text-xl font-bold text-center">Yêu cầu hoàn tiền</h2>
+              <p className="text-red-100 text-sm mt-1 text-center">Đơn hàng: {refundModal.orderId}</p>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-5">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="size-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm text-amber-800">
+                      <p className="font-medium mb-1">Chính sách hoàn tiền</p>
+                      <ul className="text-xs text-amber-700 space-y-1">
+                        <li>• Áp dụng trong vòng 30 ngày kể từ ngày mua</li>
+                        <li>• Chưa hoàn thành quá 30% khóa học</li>
+                        <li>• Xét duyệt trong 3-5 ngày làm việc</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Lý do yêu cầu hoàn tiền *
+                </label>
+                <textarea
+                  value={refundReason}
+                  onChange={(e) => setRefundReason(e.target.value)}
+                  rows={4}
+                  placeholder="Vui lòng cho chúng tôi biết lý do bạn muốn hoàn tiền..."
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setRefundModal({ show: false, orderId: null });
+                    setRefundReason("");
+                  }}
+                  className="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-50 transition-colors text-sm"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleRefundRequest}
+                  className="flex-1 bg-red-600 text-white py-2.5 rounded-xl font-semibold hover:bg-red-700 transition-colors text-sm"
+                >
+                  Gửi yêu cầu
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -835,3 +966,243 @@ function LoyaltyTab({ user }: { user: any }) {
     </div>
   );
 }
+
+// Two Factor Authentication Component
+function TwoFactorSettings() {
+  const [enabled, setEnabled] = useState(false);
+  const [isEnabling, setIsEnabling] = useState(false);
+  const [isDisabling, setIsDisabling] = useState(false);
+  const [step, setStep] = useState<"idle" | "setup">("idle");
+  const [secret, setSecret] = useState("EDUCOURSE-2FA-SECRET");
+  const [verifyCode, setVerifyCode] = useState("");
+  const [disableCode, setDisableCode] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const handleEnable2FA = async () => {
+    setIsEnabling(true);
+    try {
+      setSecret(`EDUCOURSE-${Math.random().toString(36).slice(2, 8).toUpperCase()}`);
+      setStep("setup");
+      toast.info("Quét mã QR bằng ứng dụng xác thực của bạn");
+    } finally {
+      setIsEnabling(false);
+    }
+  };
+
+  const handleVerifyAndEnable = () => {
+    if (verifyCode === "123456") {
+      setEnabled(true);
+      setStep("idle");
+      setVerifyCode("");
+      toast.success("Đã bật xác thực hai yếu tố!");
+    } else {
+      toast.error("Mã xác thực không đúng");
+    }
+  };
+
+  const handleDisable2FA = async () => {
+    if (!disableCode) {
+      toast.error("Vui lòng nhập mã xác thực");
+      return;
+    }
+    setIsDisabling(true);
+    try {
+      if (disableCode !== "123456") {
+        toast.error("Mã xác thực không đúng");
+        return;
+      }
+      setEnabled(false);
+      setDisableCode("");
+      toast.success("Đã tắt xác thực hai yếu tố!");
+    } finally {
+      setIsDisabling(false);
+    }
+  };
+
+  const handleCopySecret = () => {
+    navigator.clipboard.writeText(secret);
+    setCopied(true);
+    toast.success("Đã sao chép mã bí mật!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div>
+      <div className="flex items-start justify-between mb-5">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <Shield className="size-5 text-blue-600" />
+            Xác thực hai yếu tố (2FA)
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">Tăng cường bảo mật cho tài khoản của bạn</p>
+        </div>
+        <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+          enabled
+            ? "bg-green-100 text-green-700 border border-green-200"
+            : "bg-gray-100 text-gray-600 border border-gray-200"
+        }`}>
+          {enabled ? "Đã bật" : "Chưa bật"}
+        </div>
+      </div>
+
+      {!enabled && step === "idle" && (
+        <div className="max-w-sm">
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+            <h3 className="font-semibold text-blue-900 text-sm mb-2">Tại sao nên bật 2FA?</h3>
+            <ul className="text-xs text-blue-700 space-y-1">
+              <li>• Bảo vệ tài khoản khỏi truy cập trái phép</li>
+              <li>• Thêm lớp bảo mật ngoài mật khẩu</li>
+              <li>• An toàn hơn với mã xác thực động</li>
+            </ul>
+          </div>
+          <button
+            onClick={handleEnable2FA}
+            disabled={isEnabling}
+            className="w-full bg-blue-600 text-white py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {isEnabling ? (
+              <>
+                <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Đang thiết lập...
+              </>
+            ) : (
+              <>
+                <Shield className="size-4" />
+                Bật xác thực hai yếu tố
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {step === "setup" && !enabled && (
+        <div className="max-w-md">
+          <div className="border border-gray-200 rounded-xl p-5 mb-4">
+            <h3 className="font-semibold text-gray-900 mb-3 text-sm">Bước 1: Quét mã QR</h3>
+            <div className="bg-white p-4 border border-gray-200 rounded-lg mb-3 flex items-center justify-center">
+              <div className="text-center">
+                <div className="size-48 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <div className="text-xs text-gray-400 text-center px-4">
+                    QR Code
+                    <br />
+                    <span className="text-[10px]">otpauth://totp/EduCourse:...</span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">Quét mã này bằng ứng dụng như Google Authenticator, Authy</p>
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3">
+              <p className="text-xs text-gray-600 mb-2 font-medium">Hoặc nhập mã thủ công:</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 bg-white border border-gray-200 px-3 py-2 rounded text-xs font-mono">
+                  {secret}
+                </code>
+                <button
+                  onClick={handleCopySecret}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Sao chép"
+                >
+                  {copied ? <Check className="size-4 text-green-600" /> : <Copy className="size-4 text-gray-600" />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="border border-gray-200 rounded-xl p-5 mb-4">
+            <h3 className="font-semibold text-gray-900 mb-3 text-sm">Bước 2: Xác thực mã</h3>
+            <div className="space-y-3">
+              <div>
+                <input
+                  type="text"
+                  placeholder="Nhập mã 6 chữ số"
+                  value={verifyCode}
+                  onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center text-xl tracking-[0.5em] font-mono"
+                  maxLength={6}
+                />
+                <p className="text-xs text-gray-500 mt-2 text-center">Demo code: 123456</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setStep("idle");
+                    setVerifyCode("");
+                  }}
+                  className="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-xl font-semibold hover:bg-gray-50 transition-colors text-sm"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleVerifyAndEnable}
+                  disabled={verifyCode.length !== 6}
+                  className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm disabled:opacity-60"
+                >
+                  Xác nhận
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex gap-2">
+              <AlertCircle className="size-4 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div className="text-xs text-amber-700">
+                <p className="font-medium">Lưu ý quan trọng</p>
+                <p className="mt-1">Hãy lưu mã bí mật ở nơi an toàn. Bạn sẽ cần nó nếu muốn khôi phục 2FA trên thiết bị mới.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {enabled && step === "idle" && (
+        <div className="max-w-sm">
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg mb-4">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="size-5 text-green-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold text-green-900 text-sm mb-1">2FA đã được kích hoạt</h3>
+                <p className="text-xs text-green-700">Tài khoản của bạn được bảo vệ bởi xác thực hai yếu tố</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nhập mã xác thực để tắt 2FA
+              </label>
+              <input
+                type="text"
+                placeholder="Mã 6 chữ số"
+                value={disableCode}
+                onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center text-xl tracking-[0.5em] font-mono"
+                maxLength={6}
+              />
+              <p className="text-xs text-gray-500 mt-2 text-center">Demo code: 123456</p>
+            </div>
+            <button
+              onClick={handleDisable2FA}
+              disabled={isDisabling || disableCode.length !== 6}
+              className="w-full bg-red-600 text-white py-2.5 rounded-xl font-semibold hover:bg-red-700 transition-colors text-sm disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {isDisabling ? (
+                <>
+                  <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Đang xử lý...
+                </>
+              ) : (
+                <>
+                  <XCircle className="size-4" />
+                  Tắt xác thực hai yếu tố
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+

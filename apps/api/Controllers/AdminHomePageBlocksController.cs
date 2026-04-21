@@ -23,6 +23,7 @@ public class AdminHomePageBlocksController : ControllerBase
     public async Task<ActionResult<List<HomePageBlockDto>>> GetAll()
     {
         var blocks = await _db.HomePageBlocks
+            .AsNoTracking()
             .OrderBy(b => b.SortOrder)
             .ThenBy(b => b.Id)
             .Select(b => new HomePageBlockDto

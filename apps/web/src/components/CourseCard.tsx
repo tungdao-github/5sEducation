@@ -1,115 +1,138 @@
 import Link from "next/link";
-import { resolveApiAsset } from "@/lib/api";
-import { pickLocaleText, type AppLocale } from "@/lib/i18n";
-import { CompareToggle } from "@/components/CompareToggle";
+import type { MouseEvent } from "react";
+import { useCart, type Course } from "@/figma/contexts/CartContext";
+import { useWishlist } from "@/figma/contexts/WishlistContext";
+import { toast } from "@/figma/compat/sonner";
+import { Clock, BarChart3, Star, ShoppingCart, Check, Heart } from "lucide-react";
 
-export interface CourseSummary {
-  id: number;
-  title: string;
-  slug: string;
-  shortDescription: string;
-  price: number;
-  effectivePrice?: number;
-  originalPrice?: number | null;
-  isFlashSaleActive?: boolean;
-  flashSaleEndsAt?: string | null;
-  thumbnailUrl: string;
-  language: string;
-  level: string;
-  averageRating: number;
-  reviewCount: number;
-  studentCount: number;
-  category?: {
-    id: number;
-    title: string;
-    slug: string;
-  } | null;
+interface CourseCardProps {
+  course: Course;
 }
 
-function formatPrice(price: number, locale: AppLocale) {
-  if (price <= 0) {
-    return pickLocaleText(locale, "Free", "Mien phi");
-  }
+export default function CourseCard({ course }: CourseCardProps) {
+  const { addToCart, isInCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const inCart = isInCart(course.id);
+  const inWishlist = isInWishlist(course.id);
 
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(price);
-}
+  const handleAddToCart = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!inCart) {
+      void addToCart(course);
+      toast.success("Đã thêm vào giỏ hàng!");
+    }
+  };
 
-export function CourseCard({ course, locale = "en" }: { course: CourseSummary; locale?: AppLocale }) {
-  const imageUrl = resolveApiAsset(course.thumbnailUrl) || "/images/learning.jpg";
-  const rating = course.averageRating ?? 0;
-  const reviewCount = course.reviewCount ?? 0;
-  const roundedRating = Math.round(rating);
-  const stars = Array.from({ length: 5 }, (_, index) => (index < roundedRating ? "?" : "?")).join("");
-  const effectivePrice = course.effectivePrice ?? course.price;
-  const originalPrice = course.originalPrice;
-  const discount = originalPrice ? Math.round(((originalPrice - effectivePrice) / originalPrice) * 100) : 0;
+  const handleWishlist = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    void toggleWishlist(course);
+    if (inWishlist) {
+      toast("Đã xóa khỏi yêu thích", { icon: "💔" });
+    } else {
+      toast.success("Đã thêm vào yêu thích!");
+    }
+  };
+
+  const discount = course.originalPrice
+    ? Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100)
+    : 0;
 
   return (
-    <article className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-gray-200 flex flex-col">
-      <div className="relative overflow-hidden aspect-video flex-shrink-0">
+    <Link
+      href={`/courses/${course.slug ?? course.id}`}
+      className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md transition-all duration-300 hover:shadow-xl"
+    >
+      <div className="relative aspect-video shrink-0 overflow-hidden">
         <img
-          src={imageUrl}
+          src={course.image}
           alt={course.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
-          decoding="async"
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         {discount > 0 && (
-          <div className="absolute top-3 left-3 bg-red-500 text-white px-2.5 py-0.5 rounded-full text-xs font-bold">
+          <div className="absolute left-3 top-3 rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-bold text-white">
             -{discount}%
           </div>
         )}
-        <span className="absolute top-3 right-3">
-          <CompareToggle courseId={course.id} />
-        </span>
+        <button
+          type="button"
+          onClick={handleWishlist}
+          className={`absolute right-3 top-3 flex size-8 items-center justify-center rounded-full shadow-md transition-all ${
+            inWishlist
+              ? "bg-red-500 text-white"
+              : "bg-white/90 text-gray-500 hover:bg-red-50 hover:text-red-500"
+          }`}
+        >
+          <Heart className={`size-4 ${inWishlist ? "fill-current" : ""}`} />
+        </button>
       </div>
 
-      <div className="p-4 flex flex-col flex-1">
-        {course.category?.title && (
-          <div className="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-1.5">
-            {course.category.title}
-          </div>
-        )}
+      <div className="flex flex-1 flex-col p-4">
+        <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-600">
+          {course.category}
+        </div>
 
-        <Link
-          href={`/courses/${course.slug}`}
-          className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors flex-1"
-        >
+        <h3 className="mb-2 line-clamp-2 flex-1 text-sm font-semibold text-gray-900 transition-colors group-hover:text-blue-600">
           {course.title}
-        </Link>
+        </h3>
 
-        <p className="text-xs text-gray-500 mb-3 line-clamp-2">{course.shortDescription}</p>
+        <p className="mb-2 text-xs text-gray-500">
+          Giảng viên: <span className="font-medium text-gray-700">{course.instructor}</span>
+        </p>
 
-        <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+        <div className="mb-3 flex items-center gap-3 text-xs text-gray-500">
           <div className="flex items-center gap-1">
-            <span className="text-yellow-500">{stars}</span>
-            <span className="font-semibold text-gray-800">{rating.toFixed(1)}</span>
-            <span>({reviewCount})</span>
+            <Star className="size-3.5 fill-yellow-400 text-yellow-400" />
+            <span className="font-semibold text-gray-800">{course.rating}</span>
+            <span>({course.students.toLocaleString()})</span>
           </div>
           <div className="flex items-center gap-1">
-            <span>{course.level || pickLocaleText(locale, "Beginner", "Co ban")}</span>
+            <Clock className="size-3.5" />
+            <span>{course.duration}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <BarChart3 className="size-3.5" />
+            <span className="max-w-[60px] truncate">{course.level.split(" ")[0]}</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+        <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-3">
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold text-blue-600">
-              {formatPrice(effectivePrice, locale)}
+              {`${course.price.toLocaleString("vi-VN")}K₫`}
             </span>
-            {originalPrice ? (
+            {course.originalPrice && (
               <span className="text-xs text-gray-400 line-through">
-                {formatPrice(originalPrice, locale)}
+                {`${course.originalPrice.toLocaleString("vi-VN")}K₫`}
               </span>
-            ) : null}
+            )}
           </div>
-          <span className="text-xs text-gray-500">
-            {course.studentCount} {pickLocaleText(locale, "students", "hoc vien")}
-          </span>
+
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={inCart}
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+              inCart
+                ? "cursor-default bg-green-100 text-green-700"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+          >
+            {inCart ? (
+              <>
+                <Check className="size-3.5" />
+                Đã thêm
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="size-3.5" />
+                Thêm giỏ
+              </>
+            )}
+          </button>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

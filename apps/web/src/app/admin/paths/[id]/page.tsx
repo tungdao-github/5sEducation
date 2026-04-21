@@ -265,7 +265,7 @@ export default function AdminPathDetailPage() {
             {tx("Admin access only.", "Chi danh cho quan tri vien.")}
           </p>
           <Link
-            href={`/login?next=/admin/paths/${pathId}`}
+            href={`/?auth=login&next=${encodeURIComponent(`/admin/paths/${pathId}`)}`}
             className="mt-4 inline-flex rounded-full bg-emerald-700 px-6 py-2 text-sm font-semibold text-white"
           >
             {tx("Sign in", "Dang nhap")}

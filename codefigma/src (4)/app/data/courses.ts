@@ -1,0 +1,255 @@
+import { Course } from '../contexts/CartContext';
+
+export const courses: Course[] = [
+  {
+    id: '1',
+    title: 'Nguyên tắc Gestalt: Thiết kế giao diện trực quan',
+    price: 289,
+    originalPrice: 399,
+    image: 'https://images.unsplash.com/photo-1618788372246-79faff0c3742?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxVWCUyMGRlc2lnbiUyMGludGVyZmFjZSUyMHdpcmVmcmFtZXxlbnwxfHx8fDE3NzUzOTkyMjZ8MA&ixlib=rb-4.1.0&q=80&w=1080',
+    instructor: 'Tanner Kohler',
+    duration: '7 giờ',
+    level: 'Trung cấp đến nâng cao',
+    lessons: 42,
+    students: 2847,
+    rating: 4.8,
+    category: 'Thiết kế UX/UI',
+    description: 'Các thiết kế được xây dựng dựa trên nghiên cứu về nhận thức của con người để dễ hiểu hơn. Tìm hiểu cách áp dụng các nguyên tắc Gestalt vào thiết kế giao diện người dùng.',
+    learningOutcomes: [
+      'Hiểu các nguyên tắc tâm lý học Gestalt',
+      'Áp dụng nguyên tắc Prägnanz vào thiết kế',
+      'Tạo giao diện trực quan và dễ sử dụng',
+      'Nhận diện Gestalt trong nghiên cứu người dùng',
+      'Thiết kế cho người khiếm thị'
+    ],
+    curriculum: [
+      { title: 'Nguồn gốc của Tâm lý học Gestalt', lessons: 4, duration: '23 phút' },
+      { title: 'Những nền tảng của nhận thức thị giác', lessons: 6, duration: '89 phút' },
+      { title: 'Nguyên tắc dựa trên thuộc tính', lessons: 8, duration: '114 phút' },
+      { title: 'Nguyên tắc dựa trên sự thay đổi', lessons: 4, duration: '54 phút' },
+      { title: 'Nguyên tắc dựa trên đường viền', lessons: 8, duration: '97 phút' },
+      { title: 'Áp dụng lý thuyết Gestalt vào công việc', lessons: 4, duration: '33 phút' }
+    ]
+  },
+  {
+    id: '2',
+    title: 'Các điều khiển đầu vào: Mẫu thiết kế và thực tiễn',
+    price: 289,
+    originalPrice: 399,
+    image: 'https://images.unsplash.com/photo-1767482385627-d6b25c74957d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkZXNpZ24lMjBwYXR0ZXJucyUyMHZpc3VhbHxlbnwxfHx8fDE3NzUzOTkyMzB8MA&ixlib=rb-4.1.0&q=80&w=1080',
+    instructor: 'Huei-Hsin Wang',
+    duration: '5.25 giờ',
+    level: 'Sơ cấp đến trung cấp',
+    lessons: 27,
+    students: 1923,
+    rating: 4.7,
+    category: 'Thiết kế UX/UI',
+    description: 'Thiết kế các công cụ nhập liệu dễ tiếp cận và trực quan giúp bạn thu thập dữ liệu chất lượng cao.',
+    learningOutcomes: [
+      'Hiểu các loại điều khiển đầu vào',
+      'Thiết kế biểu mẫu hiệu quả',
+      'Áp dụng xác thực dữ liệu đúng cách',
+      'Tạo trải nghiệm nhập liệu tốt',
+      'Hỗ trợ người dùng trong quá trình nhập liệu'
+    ],
+    curriculum: [
+      { title: 'Giới thiệu', lessons: 3, duration: '17 phút' },
+      { title: 'Ô nhập văn bản', lessons: 4, duration: '35 phút' },
+      { title: 'Đầu vào lựa chọn', lessons: 9, duration: '90 phút' },
+      { title: 'Đầu vào số', lessons: 3, duration: '48 phút' },
+      { title: 'Đầu vào chuyên dụng', lessons: 2, duration: '16 phút' },
+      { title: 'Hỗ trợ và xác thực dữ liệu', lessons: 5, duration: '69 phút' },
+      { title: 'Phần kết luận', lessons: 1, duration: '17 phút' }
+    ]
+  },
+  {
+    id: '3',
+    title: 'Microcopy: Tiêu đề, đề mục, thẻ và nhiều hơn nữa',
+    price: 199,
+    originalPrice: 279,
+    image: 'https://images.unsplash.com/photo-1586943759341-be5595944989?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3B5d3JpdGluZyUyMGNvbnRlbnQlMjB3cml0aW5nfGVufDF8fHx8MTc3NTM5OTIyOHww&ixlib=rb-4.1.0&q=80&w=1080',
+    instructor: 'Kate Moran',
+    duration: '4.5 giờ',
+    level: 'Sơ cấp đến trung cấp',
+    lessons: 22,
+    students: 3156,
+    rating: 4.9,
+    category: 'Viết nội dung UX',
+    description: 'Học cách viết microcopy hiệu quả để cung cấp thông tin rõ ràng và hướng dẫn người dùng.',
+    learningOutcomes: [
+      'Phân biệt microcopy chất lượng cao và thấp',
+      'Viết nội dung rõ ràng, ngắn gọn',
+      'Thêm cá tính vào văn bản',
+      'Đánh giá hiệu quả microcopy',
+      'Áp dụng khung 3C: Clarity, Conciseness, Character'
+    ],
+    curriculum: [
+      { title: 'Giới thiệu Microcopy', lessons: 5, duration: '44 phút' },
+      { title: 'Mục tiêu 1: Sự rõ ràng', lessons: 3, duration: '45 phút' },
+      { title: 'Mục tiêu 2: Sự ngắn gọn', lessons: 4, duration: '49 phút' },
+      { title: 'Mục tiêu 3: Phẩm chất', lessons: 2, duration: '31 phút' },
+      { title: 'Chiến lược viết microcopy', lessons: 3, duration: '40 phút' },
+      { title: 'Đánh giá microcopy', lessons: 3, duration: '35 phút' },
+      { title: 'Phần kết luận', lessons: 1, duration: '4 phút' }
+    ]
+  },
+  {
+    id: '4',
+    title: 'Thể hiện giá trị UX',
+    price: 199,
+    originalPrice: 279,
+    image: 'https://images.unsplash.com/photo-1758691736082-b69a65770026?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMHN0cmF0ZWd5JTIwcHJlc2VudGF0aW9ufGVufDF8fHx8MTc3NTM5OTIzMXww&ixlib=rb-4.1.0&q=80&w=1080',
+    instructor: 'Sarah Gibbons',
+    duration: '4 giờ',
+    level: 'Trung cấp đến nâng cao',
+    lessons: 15,
+    students: 2234,
+    rating: 4.8,
+    category: 'Quản lý UX',
+    description: 'Chứng minh giá trị của UX bằng các chỉ số phù hợp và truyền đạt tác động đến các bên liên quan.',
+    learningOutcomes: [
+      'Xác định giá trị của công việc UX',
+      'Theo dõi tiến độ với các chỉ số đo lường',
+      'Thiết lập tiêu chí thành công rõ ràng',
+      'Trình bày tác động đến lợi nhuận',
+      'Xây dựng sự đồng thuận với các bên liên quan'
+    ],
+    curriculum: [
+      { title: 'Giới thiệu', lessons: 1, duration: '3 phút' },
+      { title: 'Xác định giá trị', lessons: 3, duration: '45 phút' },
+      { title: 'Đo lường giá trị', lessons: 5, duration: '65 phút' },
+      { title: 'Giá trị dự án', lessons: 3, duration: '55 phút' },
+      { title: 'Giá trị chiến lược và sản phẩm', lessons: 3, duration: '50 phút' },
+      { title: 'Phần kết luận', lessons: 1, duration: '3 phút' }
+    ]
+  },
+  {
+    id: '5',
+    title: '10 nguyên tắc đánh giá khả năng sử dụng',
+    price: 99,
+    originalPrice: 149,
+    image: 'https://images.unsplash.com/photo-1585624882829-f92c2d4cd89d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx1c2VyJTIwZXhwZXJpZW5jZSUyMHJlc2VhcmNoJTIwdGVzdGluZ3xlbnwxfHx8fDE3NzUzOTkyMjd8MA&ixlib=rb-4.1.0&q=80&w=1080',
+    instructor: 'Jakob Nielsen',
+    duration: '10.5 giờ',
+    level: 'Phù hợp mọi trình độ',
+    lessons: 52,
+    students: 5432,
+    rating: 4.9,
+    category: 'Thiết kế UX/UI',
+    description: 'Tìm hiểu và áp dụng 10 nguyên tắc đánh giá khả năng sử dụng của Jakob Nielsen vào thiết kế.',
+    learningOutcomes: [
+      'Định nghĩa 10 nguyên tắc khả năng sử dụng',
+      'Nhận diện vấn đề thiết kế',
+      'Chẩn đoán qua các nguyên tắc',
+      'Giải thích nguyên tắc tâm lý',
+      'Liên kết thiết kế với nguyên tắc'
+    ],
+    curriculum: [
+      { title: 'Giới thiệu', lessons: 4, duration: '31 phút' },
+      { title: 'Khả năng hiển thị trạng thái hệ thống', lessons: 7, duration: '82 phút' },
+      { title: 'Sự phù hợp giữa hệ thống và thế giới thực', lessons: 5, duration: '69 phút' },
+      { title: 'Quyền kiểm soát và tự do người dùng', lessons: 5, duration: '56 phút' },
+      { title: 'Tính nhất quán và tiêu chuẩn', lessons: 5, duration: '74 phút' },
+      { title: 'Ngăn ngừa lỗi', lessons: 4, duration: '51 phút' }
+    ]
+  },
+  {
+    id: '6',
+    title: 'Nghiên cứu người dùng: Phương pháp và kỹ thuật',
+    price: 289,
+    originalPrice: 399,
+    image: 'https://images.unsplash.com/photo-1771408427146-09be9a1d4535?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbmxpbmUlMjBsZWFybmluZyUyMGVkdWNhdGlvbiUyMHN0dWRlbnR8ZW58MXx8fHwxNzc1Mzk5MjI2fDA&ixlib=rb-4.1.0&q=80&w=1080',
+    instructor: 'Maria Rosala',
+    duration: '8 giờ',
+    level: 'Trung cấp',
+    lessons: 35,
+    students: 2891,
+    rating: 4.7,
+    category: 'Nghiên cứu UX',
+    description: 'Khám phá các phương pháp nghiên cứu người dùng hiệu quả để đưa ra quyết định thiết kế dựa trên dữ liệu.',
+    learningOutcomes: [
+      'Chọn phương pháp nghiên cứu phù hợp',
+      'Lập kế hoạch và thực hiện nghiên cứu',
+      'Phân tích dữ liệu định tính và định lượng',
+      'Trình bày kết quả nghiên cứu',
+      'Áp dụng insight vào thiết kế'
+    ],
+    curriculum: [
+      { title: 'Tổng quan về nghiên cứu người dùng', lessons: 4, duration: '45 phút' },
+      { title: 'Phương pháp định tính', lessons: 8, duration: '120 phút' },
+      { title: 'Phương pháp định lượng', lessons: 7, duration: '95 phút' },
+      { title: 'Phân tích và tổng hợp', lessons: 6, duration: '85 phút' },
+      { title: 'Trình bày kết quả', lessons: 5, duration: '70 phút' },
+      { title: 'Áp dụng vào thực tiễn', lessons: 5, duration: '65 phút' }
+    ]
+  },
+  {
+    id: '7',
+    title: 'Phân tích và Trải nghiệm người dùng',
+    price: 249,
+    originalPrice: 349,
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkYXRhJTIwYW5hbHl0aWNzJTIwZGFzaGJvYXJkfGVufDF8fHx8MTc3NTI5OTA0MXww&ixlib=rb-4.1.0&q=80&w=1080',
+    instructor: 'Rachel Krause',
+    duration: '6 giờ',
+    level: 'Trung cấp đến nâng cao',
+    lessons: 28,
+    students: 1876,
+    rating: 4.6,
+    category: 'Phân tích UX',
+    description: 'Nghiên cứu hành vi thực tế của người dùng và đưa ra các quyết định thiết kế dựa trên dữ liệu.',
+    learningOutcomes: [
+      'Thiết lập và sử dụng analytics',
+      'Phân tích hành vi người dùng',
+      'Tạo dashboard hiệu quả',
+      'Kết hợp dữ liệu định tính và định lượng',
+      'Đo lường UX và ROI'
+    ],
+    curriculum: [
+      { title: 'Giới thiệu Analytics', lessons: 3, duration: '30 phút' },
+      { title: 'Thiết lập tracking', lessons: 5, duration: '75 phút' },
+      { title: 'Phân tích hành vi', lessons: 6, duration: '90 phút' },
+      { title: 'Tạo dashboard', lessons: 4, duration: '60 phút' },
+      { title: 'A/B Testing', lessons: 5, duration: '70 phút' },
+      { title: 'Đo lường ROI', lessons: 5, duration: '65 phút' }
+    ]
+  },
+  {
+    id: '8',
+    title: 'Thiết kế hệ thống Design System',
+    price: 349,
+    originalPrice: 449,
+    image: 'https://images.unsplash.com/photo-1683818051102-dd1199d163b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9kdWN0JTIwZGVzaWduJTIwc2tldGNofGVufDF8fHx8MTc3NTM5MDg0N3ww&ixlib=rb-4.1.0&q=80&w=1080',
+    instructor: 'Therese Fessenden',
+    duration: '9 giờ',
+    level: 'Nâng cao',
+    lessons: 38,
+    students: 1654,
+    rating: 4.8,
+    category: 'Thiết kế UX/UI',
+    description: 'Xây dựng và quản lý design system để đảm bảo tính nhất quán và hiệu quả trong thiết kế.',
+    learningOutcomes: [
+      'Hiểu giá trị của design system',
+      'Xây dựng component library',
+      'Tạo design tokens',
+      'Quản lý và duy trì design system',
+      'Triển khai trong tổ chức'
+    ],
+    curriculum: [
+      { title: 'Giới thiệu Design System', lessons: 4, duration: '50 phút' },
+      { title: 'Xây dựng foundations', lessons: 6, duration: '95 phút' },
+      { title: 'Tạo components', lessons: 8, duration: '130 phút' },
+      { title: 'Documentation', lessons: 5, duration: '80 phút' },
+      { title: 'Quản lý và governance', lessons: 7, duration: '110 phút' },
+      { title: 'Triển khai và áp dụng', lessons: 8, duration: '115 phút' }
+    ]
+  }
+];
+
+export const categories = [
+  'Tất cả',
+  'Thiết kế UX/UI',
+  'Nghiên cứu UX',
+  'Viết nội dung UX',
+  'Quản lý UX',
+  'Phân tích UX'
+];

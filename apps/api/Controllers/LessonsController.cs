@@ -50,6 +50,8 @@ public class LessonsController : ControllerBase
         }
 
         var lessons = await _db.Lessons
+            .AsNoTracking()
+            .AsSplitQuery()
             .Include(l => l.ExerciseQuestions)
             .Where(l => l.CourseId == courseId)
             .OrderBy(l => l.SortOrder)
@@ -142,6 +144,7 @@ public class LessonsController : ControllerBase
     public async Task<IActionResult> Update(int id, LessonUpdateRequest request)
     {
         var lesson = await _db.Lessons
+            .AsSplitQuery()
             .Include(l => l.Course)
             .Include(l => l.ExerciseQuestions)
             .FirstOrDefaultAsync(l => l.Id == id);
@@ -217,7 +220,15 @@ public class LessonsController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var lesson = await _db.Lessons.Include(l => l.Course).FirstOrDefaultAsync(l => l.Id == id);
+        var lesson = await _db.Lessons
+            .AsNoTracking()
+            .Select(l => new
+            {
+                l.Id,
+                l.CourseId,
+                InstructorId = l.Course != null ? l.Course.InstructorId : string.Empty
+            })
+            .FirstOrDefaultAsync(l => l.Id == id);
         if (lesson is null)
         {
             return NotFound();
@@ -225,12 +236,12 @@ public class LessonsController : ControllerBase
 
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isAdmin = User.IsInRole("Admin");
-        if (!isAdmin && lesson.Course?.InstructorId != userId)
+        if (!isAdmin && lesson.InstructorId != userId)
         {
             return Forbid();
         }
 
-        _db.Lessons.Remove(lesson);
+        _db.Lessons.Remove(new Lesson { Id = lesson.Id });
         await _db.SaveChangesAsync();
         return NoContent();
     }
@@ -246,6 +257,8 @@ public class LessonsController : ControllerBase
         }
 
         var lesson = await _db.Lessons
+            .AsNoTracking()
+            .AsSplitQuery()
             .Include(l => l.ExerciseQuestions)
             .FirstOrDefaultAsync(l => l.Id == id);
         if (lesson is null)
@@ -335,6 +348,8 @@ public class LessonsController : ControllerBase
         }
 
         var lesson = await _db.Lessons
+            .AsNoTracking()
+            .AsSplitQuery()
             .Include(l => l.ExerciseQuestions)
             .FirstOrDefaultAsync(l => l.Id == id);
         if (lesson is null)

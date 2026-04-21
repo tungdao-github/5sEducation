@@ -30,19 +30,19 @@ public class WishlistController : ControllerBase
         }
 
         var items = await _db.WishlistItems
-            .Include(w => w.Course)
+            .AsNoTracking()
             .Where(w => w.UserId == userId)
             .OrderByDescending(w => w.CreatedAt)
             .Select(w => new WishlistItemDto
             {
                 Id = w.Id,
                 CourseId = w.CourseId,
-                CourseTitle = w.Course!.Title,
-                CourseSlug = w.Course.Slug,
-                ThumbnailUrl = w.Course.ThumbnailUrl,
-                Price = w.Course.Price,
-                Level = w.Course.Level,
-                Language = w.Course.Language
+                CourseTitle = w.Course != null ? w.Course.Title : string.Empty,
+                CourseSlug = w.Course != null ? w.Course.Slug : string.Empty,
+                ThumbnailUrl = w.Course != null ? w.Course.ThumbnailUrl : string.Empty,
+                Price = w.Course != null ? w.Course.Price : 0,
+                Level = w.Course != null ? w.Course.Level : string.Empty,
+                Language = w.Course != null ? w.Course.Language : string.Empty
             })
             .ToListAsync();
 

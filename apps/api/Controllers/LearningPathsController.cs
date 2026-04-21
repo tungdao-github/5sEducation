@@ -20,6 +20,7 @@ public class LearningPathsController : ControllerBase
     public async Task<ActionResult<List<LearningPathListDto>>> GetAll()
     {
         var paths = await _db.LearningPaths
+            .AsNoTracking()
             .Where(p => p.IsPublished)
             .OrderByDescending(p => p.UpdatedAt)
             .Select(p => new LearningPathListDto
@@ -43,6 +44,8 @@ public class LearningPathsController : ControllerBase
     public async Task<ActionResult<LearningPathDetailDto>> GetBySlug(string slug)
     {
         var path = await _db.LearningPaths
+            .AsNoTracking()
+            .AsSplitQuery()
             .Include(p => p.Sections)
             .Include(p => p.Courses)
             .ThenInclude(pc => pc.Course)
@@ -123,18 +126,14 @@ public class LearningPathsController : ControllerBase
             return null;
         }
 
-        var courseIds = await _db.LearningPathCourses
+        var courseIdsQuery = _db.LearningPathCourses
+            .AsNoTracking()
             .Where(pc => pc.LearningPathId == learningPathId)
-            .Select(pc => pc.CourseId)
-            .ToListAsync();
-
-        if (courseIds.Count == 0)
-        {
-            return 0;
-        }
+            .Select(pc => pc.CourseId);
 
         return await _db.Enrollments
-            .Where(e => e.UserId == userId && courseIds.Contains(e.CourseId))
+            .AsNoTracking()
+            .Where(e => e.UserId == userId && courseIdsQuery.Contains(e.CourseId))
             .Select(e => e.CourseId)
             .Distinct()
             .CountAsync();

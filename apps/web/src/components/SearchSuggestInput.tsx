@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_URL } from "@/lib/api";
 import { useI18n } from "@/app/providers";
+import { Search } from "lucide-react";
 
 type Suggestion = {
   type: string;
@@ -118,17 +119,21 @@ export function SearchSuggestInput({
   }, [enableVoice, tx]);
 
   useEffect(() => {
-    if (query.trim().length < 2) {
+    const trimmedQuery = query.trim();
+    if (trimmedQuery.length < 2) {
       setItems([]);
       setOpen(false);
+      setLoading(false);
       return;
     }
 
+    const controller = new AbortController();
     setLoading(true);
     const timer = window.setTimeout(async () => {
       try {
         const res = await fetch(
-          `${API_URL}/api/search/suggestions?query=${encodeURIComponent(query.trim())}`
+          `${API_URL}/api/search/suggestions?query=${encodeURIComponent(trimmedQuery)}`,
+          { signal: controller.signal }
         );
         if (!res.ok) {
           setItems([]);
@@ -139,14 +144,22 @@ export function SearchSuggestInput({
         setItems(data);
         setOpen(data.length > 0);
       } catch {
+        if (controller.signal.aborted) {
+          return;
+        }
         setItems([]);
         setOpen(false);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     }, 250);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
   }, [query]);
 
   const handleSelect = (item: Suggestion) => {
@@ -161,18 +174,19 @@ export function SearchSuggestInput({
   return (
     <div ref={wrapperRef} className={`relative ${className ?? ""}`}>
       <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <input
-        type="text"
-        name={name}
-        value={query}
-        onChange={(event) => setQuery(event.currentTarget.value)}
-        onFocus={() => {
-          if (items.length > 0) setOpen(true);
-        }}
-        placeholder={placeholder}
-        className={`${inputClassName ?? ""} ${enableVoice ? "pr-10" : ""}`.trim()}
-        autoComplete="off"
-      />
+          type="text"
+          name={name}
+          value={query}
+          onChange={(event) => setQuery(event.currentTarget.value)}
+          onFocus={() => {
+            if (items.length > 0) setOpen(true);
+          }}
+          placeholder={placeholder}
+          className={`${inputClassName ?? ""} ${enableVoice ? "pr-10" : ""}`.trim()}
+          autoComplete="off"
+        />
         {enableVoice && (
           <button
             type="button"

@@ -15,9 +15,9 @@ type CouponForm = {
   code: string;
   description: string;
   type: "fixed" | "percent";
-  value: number;
-  minOrder: number;
-  maxUses: number;
+  value: string;
+  minOrder: string;
+  maxUses: string;
   expiresAt: string;
   isActive: boolean;
 };
@@ -26,9 +26,9 @@ const defaultForm: CouponForm = {
   code: "",
   description: "",
   type: "fixed",
-  value: 0,
-  minOrder: 0,
-  maxUses: 0,
+  value: "",
+  minOrder: "",
+  maxUses: "",
   expiresAt: "",
   isActive: true,
 };
@@ -115,9 +115,9 @@ export default function CouponsTab() {
       code: coupon.code,
       description: coupon.description || "",
       type: (coupon.type as "fixed" | "percent") || "fixed",
-      value: Number(coupon.value),
-      minOrder: Number(coupon.minOrder),
-      maxUses: Number(coupon.maxUses),
+      value: coupon.value ? String(coupon.value) : "",
+      minOrder: coupon.minOrder ? String(coupon.minOrder) : "",
+      maxUses: coupon.maxUses ? String(coupon.maxUses) : "",
       expiresAt: coupon.expiresAt ? coupon.expiresAt.slice(0, 10) : "",
       isActive: coupon.isActive,
     });
@@ -199,7 +199,7 @@ export default function CouponsTab() {
               <input
                 type="number"
                 value={form.value}
-                onChange={(e) => setForm((f) => ({ ...f, value: Number(e.target.value) }))}
+                onChange={(e) => setForm((f) => ({ ...f, value: e.target.value }))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -208,7 +208,7 @@ export default function CouponsTab() {
               <input
                 type="number"
                 value={form.minOrder}
-                onChange={(e) => setForm((f) => ({ ...f, minOrder: Number(e.target.value) }))}
+                onChange={(e) => setForm((f) => ({ ...f, minOrder: e.target.value }))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -217,7 +217,7 @@ export default function CouponsTab() {
               <input
                 type="number"
                 value={form.maxUses}
-                onChange={(e) => setForm((f) => ({ ...f, maxUses: Number(e.target.value) }))}
+                onChange={(e) => setForm((f) => ({ ...f, maxUses: e.target.value }))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -287,7 +287,7 @@ export default function CouponsTab() {
                   <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
                     <span>Giảm: <strong className="text-green-600">{coupon.type === "fixed" ? `${coupon.value}` : `${coupon.value}%`}</strong></span>
                     <span>Đơn tối thiểu: <strong>{coupon.minOrder}</strong></span>
-                    <span className="flex items-center gap-1"><Calendar className="size-3" />HH: {coupon.expiresAt ? new Date(coupon.expiresAt).toLocaleDateString("vi-VN") : "--"}</span>
+                    <span className="flex items-center gap-1"><Calendar className="size-3" />Hạn: {coupon.expiresAt ? new Date(coupon.expiresAt).toLocaleDateString("vi-VN") : "--"}</span>
                   </div>
                   <div className="mt-2">
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">

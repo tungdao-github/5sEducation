@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { resolveApiAsset } from "@/lib/api";
 import { pickLocaleText } from "@/lib/i18n";
+import type { AppLocale } from "@/lib/i18n";
 
 export type LearningPathSummary = {
   id: number;
@@ -15,7 +16,7 @@ export type LearningPathSummary = {
 
 type LearningPathCardProps = {
   path: LearningPathSummary;
-  locale: "en" | "vi";
+  locale: AppLocale;
 };
 
 export function LearningPathCard({ path, locale }: LearningPathCardProps) {

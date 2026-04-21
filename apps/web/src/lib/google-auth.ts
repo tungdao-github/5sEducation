@@ -1,4 +1,4 @@
-﻿import { API_URL } from "@/lib/api";
+import { API_URL, setStoredToken } from "@/lib/api";
 
 type GoogleCredentialResponse = {
   credential?: string;
@@ -56,6 +56,23 @@ export type AuthPayload = {
 };
 
 let googleScriptPromise: Promise<void> | null = null;
+const googleInitializedClientIds = new Set<string>();
+const explicitAllowedOrigins = (process.env.NEXT_PUBLIC_GOOGLE_AUTH_ALLOWED_ORIGINS ?? "")
+  .split(",")
+  .map((item) => item.trim())
+  .filter(Boolean);
+const siteUrlOrigin = (() => {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!siteUrl) {
+    return "";
+  }
+
+  try {
+    return new URL(siteUrl).origin;
+  } catch {
+    return "";
+  }
+})();
 
 function getErrorMessage(payload: unknown, fallback: string) {
   if (typeof payload === "string" && payload.trim()) {
@@ -103,6 +120,39 @@ export function getGoogleClientId() {
   return process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 }
 
+export function getBrowserOrigin() {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return window.location.origin;
+}
+
+export function isGoogleAuthAllowedOrigin() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const origin = getBrowserOrigin();
+  if (explicitAllowedOrigins.length > 0) {
+    return explicitAllowedOrigins.includes(origin);
+  }
+
+  if (siteUrlOrigin && siteUrlOrigin === origin) {
+    return true;
+  }
+
+  return origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:");
+}
+
+export function hasInitializedGoogleIdentity(clientId: string) {
+  return googleInitializedClientIds.has(clientId);
+}
+
+export function markGoogleIdentityInitialized(clientId: string) {
+  googleInitializedClientIds.add(clientId);
+}
+
 export async function loadGoogleIdentityScript() {
   if (typeof window === "undefined") {
     return;
@@ -123,6 +173,10 @@ export async function loadGoogleIdentityScript() {
       );
 
       if (existingScript) {
+        if (existingScript.dataset.loaded === "true") {
+          resolve();
+          return;
+        }
         existingScript.addEventListener("load", () => resolve(), {
           once: true,
         });
@@ -138,7 +192,11 @@ export async function loadGoogleIdentityScript() {
       script.src = "https://accounts.google.com/gsi/client";
       script.async = true;
       script.defer = true;
-      script.onload = () => resolve();
+      script.dataset.loaded = "false";
+      script.onload = () => {
+        script.dataset.loaded = "true";
+        resolve();
+      };
       script.onerror = () => rejectWithReset(new Error("Could not load Google script."));
       document.head.appendChild(script);
     });
@@ -176,8 +234,9 @@ export async function signInWithGoogleIdToken(idToken: string) {
     throw new Error("Google sign-in failed: missing token.");
   }
 
-  localStorage.setItem("token", token);
+  setStoredToken(token);
   window.dispatchEvent(new Event("auth-changed"));
   return data;
 }
+
 

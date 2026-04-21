@@ -449,6 +449,8 @@ namespace UdemyClone.Api.Migrations
 
                     b.HasIndex("Locale", "IsPublished");
 
+                    b.HasIndex("Locale", "IsPublished", "PublishedAt");
+
                     b.ToTable("BlogPosts");
                 });
 
@@ -652,12 +654,20 @@ namespace UdemyClone.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
                     b.HasIndex("InstructorId");
 
                     b.HasIndex("Slug")
                         .IsUnique();
+
+                    b.HasIndex("CategoryId", "IsPublished");
+
+                    b.HasIndex("IsPublished", "CreatedAt");
+
+                    b.HasIndex("IsPublished", "Language");
+
+                    b.HasIndex("IsPublished", "Level");
+
+                    b.HasIndex("IsPublished", "UpdatedAt");
 
                     b.ToTable("Courses");
                 });
@@ -778,7 +788,8 @@ namespace UdemyClone.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Key");
+                    b.HasIndex("Key")
+                        .IsUnique();
 
                     b.HasIndex("Locale", "SortOrder");
 
@@ -830,6 +841,8 @@ namespace UdemyClone.Api.Migrations
                     b.HasIndex("Slug")
                         .IsUnique();
 
+                    b.HasIndex("IsPublished", "UpdatedAt");
+
                     b.ToTable("LearningPaths");
                 });
 
@@ -861,6 +874,9 @@ namespace UdemyClone.Api.Migrations
                     b.HasIndex("CourseId");
 
                     b.HasIndex("LearningPathSectionId");
+
+                    b.HasIndex("LearningPathId", "CourseId")
+                        .IsUnique();
 
                     b.HasIndex("LearningPathId", "SortOrder");
 
@@ -986,7 +1002,7 @@ namespace UdemyClone.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseId");
+                    b.HasIndex("CourseId", "SortOrder");
 
                     b.ToTable("Lessons");
                 });
@@ -1202,6 +1218,8 @@ namespace UdemyClone.Api.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Status", "CreatedAt");
+
                     b.HasIndex("UserId", "CreatedAt");
 
                     b.ToTable("Orders");
@@ -1241,6 +1259,8 @@ namespace UdemyClone.Api.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
 
                     b.HasIndex("OrderId", "CourseId");
 
@@ -1334,6 +1354,10 @@ namespace UdemyClone.Api.Migrations
                     b.HasIndex("Status");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Status", "CreatedAt");
+
+                    b.HasIndex("UserId", "CreatedAt");
 
                     b.ToTable("SupportMessages");
                 });

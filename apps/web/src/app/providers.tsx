@@ -4,8 +4,10 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { normalizeLocale, type AppLocale } from "@/lib/i18n";
 import { AuthProvider } from "@/figma/contexts/AuthContext";
 import { CartProvider } from "@/figma/contexts/CartContext";
+import { InstructorProvider } from "@/figma/contexts/InstructorContext";
 import { WishlistProvider } from "@/figma/contexts/WishlistContext";
 import { LanguageProvider } from "@/figma/contexts/LanguageContext";
+import { LearningProvider } from "@/figma/contexts/LearningContext";
 import { ReviewProvider } from "@/figma/contexts/ReviewContext";
 
 export type { AppLocale } from "@/lib/i18n";
@@ -13,7 +15,7 @@ export type { AppLocale } from "@/lib/i18n";
 type I18nContextValue = {
   locale: AppLocale;
   setLocale: (locale: AppLocale) => void;
-  tx: (en: string, vi: string) => string;
+  tx: (en: string, vi: string, es?: string, fr?: string) => string;
 };
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -49,7 +51,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
     () => ({
       locale,
       setLocale,
-      tx: (en: string, vi: string) => (locale === "vi" ? vi : en),
+      tx: (en: string, vi: string, es?: string, fr?: string) => {
+        if (locale === "vi") return vi;
+        if (locale === "es") return es ?? en;
+        if (locale === "fr") return fr ?? en;
+        return en;
+      },
     }),
     [locale]
   );
@@ -58,11 +65,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <I18nContext.Provider value={value}>
       <LanguageProvider>
         <AuthProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <ReviewProvider>{children}</ReviewProvider>
-            </WishlistProvider>
-          </CartProvider>
+          <InstructorProvider>
+            <LearningProvider>
+              <CartProvider>
+                <WishlistProvider>
+                  <ReviewProvider>{children}</ReviewProvider>
+                </WishlistProvider>
+              </CartProvider>
+            </LearningProvider>
+          </InstructorProvider>
         </AuthProvider>
       </LanguageProvider>
     </I18nContext.Provider>

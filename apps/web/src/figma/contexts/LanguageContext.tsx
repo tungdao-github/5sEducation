@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { translations, Language } from '../data/translations';
+import { translations, type Language } from '../data/translations-extended';
 
 interface LanguageContextType {
   language: Language;
@@ -12,7 +12,7 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>('vi');
+  const [language, setLanguage] = useState<Language>('en');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -28,10 +28,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   const t = (section: string, key: string): string => {
-    const sectionData = (translations[language] as any)[section];
+    const sectionData = (translations[language] as any)?.[section];
     if (sectionData && sectionData[key]) return sectionData[key];
+    const enSection = (translations.en as any)[section];
     const viSection = (translations.vi as any)[section];
-    return viSection?.[key] || key;
+    return enSection?.[key] || viSection?.[key] || key;
   };
 
   return (

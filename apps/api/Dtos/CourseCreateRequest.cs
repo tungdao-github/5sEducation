@@ -41,6 +41,9 @@ public class CourseCreateRequest
     [MaxLength(200)]
     public string PreviewVideoUrl { get; set; } = string.Empty;
 
+    [MaxLength(255)]
+    public string ThumbnailUrl { get; set; } = string.Empty;
+
     public bool IsPublished { get; set; } = true;
 
     public IFormFile? Thumbnail { get; set; }

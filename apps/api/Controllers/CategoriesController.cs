@@ -20,6 +20,7 @@ public class CategoriesController : ControllerBase
     public async Task<ActionResult<List<CategoryDto>>> GetAll()
     {
         var categories = await _db.Categories
+            .AsNoTracking()
             .OrderBy(c => c.Title)
             .Select(c => new CategoryDto
             {

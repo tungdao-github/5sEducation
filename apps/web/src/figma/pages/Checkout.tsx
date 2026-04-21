@@ -1,38 +1,38 @@
 ﻿"use client";
 
-import { useState } from 'react';
-import { useNavigate } from '@/figma/compat/router';
-import { useCart } from '../contexts/CartContext';
-import { CreditCard, Lock, CheckCircle, Tag, X, Smartphone, Wallet } from 'lucide-react';
-import { toast } from '@/figma/compat/sonner';
-import { formatPrice, validateCoupon } from '../data/api';
+import { useState } from "react";
+import { useNavigate } from "@/figma/compat/router";
+import { useCart } from "../contexts/CartContext";
+import { CheckCircle, CreditCard, Download, Mail, QrCode, Smartphone, Tag, Wallet, X, Lock } from "lucide-react";
+import { toast } from "@/figma/compat/sonner";
+import { formatPrice, validateCoupon } from "../data/api";
 
-type PaymentMethod = 'card' | 'vnpay' | 'zalopay';
+type PaymentMethod = "card" | "momo" | "vnpay" | "zalopay";
+
+const paymentOptions: { id: PaymentMethod; label: string; icon: React.ReactNode; desc: string }[] = [
+  { id: "card", label: "Thẻ tín dụng / Ghi nợ", icon: <CreditCard className="size-5" />, desc: "Visa, Mastercard, JCB" },
+  { id: "momo", label: "Ví MoMo", icon: <Wallet className="size-5 text-pink-500" />, desc: "Quét mã QR hoặc thanh toán qua app" },
+  { id: "vnpay", label: "VNPay", icon: <Smartphone className="size-5 text-blue-500" />, desc: "Thanh toán qua ví VNPay" },
+  { id: "zalopay", label: "ZaloPay", icon: <Wallet className="size-5 text-sky-500" />, desc: "Thanh toán qua ví ZaloPay" },
+];
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { cartItems, totalPrice, checkout } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
-  const [couponInput, setCouponInput] = useState('');
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
+  const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [displayOrderId, setDisplayOrderId] = useState("");
+  const [formData, setFormData] = useState({ email: "", fullName: "", cardNumber: "", expiryDate: "", cvv: "" });
 
-  const [formData, setFormData] = useState({
-    email: '',
-    fullName: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-  });
-
-  const finalPrice = appliedCoupon
-    ? Math.max(0, totalPrice - appliedCoupon.discount)
-    : totalPrice;
+  const finalPrice = appliedCoupon ? Math.max(0, totalPrice - appliedCoupon.discount) : totalPrice;
 
   if (cartItems.length === 0 && !isComplete) {
-    navigate('/cart');
+    navigate("/cart");
     return null;
   }
 
@@ -45,12 +45,12 @@ export default function Checkout() {
       if (result.isValid) {
         setAppliedCoupon({ code, discount: result.discount });
         toast.success(`Áp dụng mã "${code}" - Giảm ${formatPrice(result.discount)}!`);
-        setCouponInput('');
+        setCouponInput("");
       } else {
-        toast.error(result.message || 'Mã giảm giá không hợp lệ');
+        toast.error(result.message || "Mã giảm giá không hợp lệ");
       }
-    } catch (error) {
-      toast.error('Không thể áp dụng mã giảm giá');
+    } catch {
+      toast.error("Không thể áp dụng mã giảm giá");
     } finally {
       setIsApplyingCoupon(false);
     }
@@ -58,58 +58,85 @@ export default function Checkout() {
 
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
-    toast('Đã xóa mã giảm giá');
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsProcessing(true);
-    try {
-      const order = await checkout(appliedCoupon?.code);
-      if (order) {
-        setIsComplete(true);
-      } else {
-        toast.error('Vui lòng đăng nhập để thanh toán');
-      }
-    } catch (error) {
-      toast.error('Thanh toán thất bại. Vui lòng thử lại.');
-    } finally {
-      setIsProcessing(false);
-    }
+    toast("Đã xóa mã giảm giá");
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  if (isComplete) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (paymentMethod === "momo" || paymentMethod === "vnpay" || paymentMethod === "zalopay") {
+      if (!displayOrderId) setDisplayOrderId(`EDU${Date.now()}`);
+      setShowQRCode(true);
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const newOrder = await checkout(appliedCoupon?.code);
+      if (!newOrder) {
+        toast.error("Vui lòng đăng nhập để thanh toán");
+        return;
+      }
+      setDisplayOrderId(`EDU${newOrder.id}`);
+      setIsComplete(true);
+    } catch {
+      toast.error("Thanh toán thất bại. Vui lòng thử lại.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleQRPaymentComplete = async () => {
+    setIsProcessing(true);
+    setShowQRCode(false);
+    try {
+      const newOrder = await checkout(appliedCoupon?.code);
+      if (!newOrder) {
+        toast.error("Vui lòng đăng nhập để thanh toán");
+        return;
+      }
+      setDisplayOrderId(`EDU${newOrder.id}`);
+      setIsComplete(true);
+      toast.success("Thanh toán thành công!");
+    } catch {
+      toast.error("Không thể xác nhận thanh toán. Vui lòng thử lại.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDownloadInvoice = () => {
+    toast.success("Đang tải hóa đơn PDF...");
+    setTimeout(() => toast.success("Hóa đơn đã được tải xuống!"), 1000);
+  };
+
+  if (showQRCode) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12">
-        <div className="max-w-md w-full mx-4">
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-            <div className="size-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="size-10 text-green-600" />
+      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] py-12">
+        <div className="mx-4 w-full max-w-md">
+          <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center shadow-[0_20px_70px_rgba(15,23,42,0.12)]">
+            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-blue-100"><QrCode className="size-8 text-blue-600" /></div>
+            <h2 className="mb-2 text-2xl font-semibold text-slate-950">Quét mã QR để thanh toán</h2>
+            <p className="mb-6 text-slate-600">Mở ứng dụng {paymentMethod === "momo" ? "MoMo" : paymentMethod === "vnpay" ? "VNPay" : "ZaloPay"} và quét mã QR</p>
+            <div className="mx-auto mb-6 inline-block rounded-[28px] border-2 border-slate-200 bg-white p-6">
+              <div className="flex size-48 items-center justify-center rounded-2xl bg-slate-100">
+                <div className="text-center">
+                  <QrCode className="mx-auto mb-2 size-16 text-slate-400" />
+                  <p className="text-xs text-slate-500">QR Code thanh toán</p>
+                  <p className="mt-1 text-xs text-slate-400">{displayOrderId || "EDU..."}</p>
+                </div>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Thanh toán thành công!</h2>
-            <p className="text-gray-600 mb-2">
-              Cảm ơn bạn đã mua khóa học. Thông tin truy cập đã được gửi đến email của bạn.
-            </p>
-            <div className="bg-blue-50 rounded-lg px-4 py-3 mb-6 text-sm text-blue-700">
-              Kiểm tra email để nhận hướng dẫn truy cập khóa học nhé!
+            <div className="mb-6">
+              <div className="mb-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700"><p className="font-medium">Số tiền: {formatPrice(finalPrice)}</p></div>
+              <p className="text-xs text-slate-500">Demo: Click "Xác nhận đã thanh toán" để mô phỏng callback</p>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={() => navigate('/account?tab=orders')}
-                className="flex-1 border border-blue-600 text-blue-600 py-2.5 rounded-lg font-semibold hover:bg-blue-50 transition-colors text-sm"
-              >
-                Xem đơn hàng
-              </button>
-              <button
-                onClick={() => navigate('/')}
-                className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm"
-              >
-                Tiếp tục học
-              </button>
+              <button onClick={() => setShowQRCode(false)} className="flex-1 rounded-xl border border-slate-300 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Hủy</button>
+              <button onClick={handleQRPaymentComplete} disabled={isProcessing} className="flex-1 rounded-xl bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60">{isProcessing ? "Đang xử lý..." : "Xác nhận đã thanh toán"}</button>
             </div>
           </div>
         </div>
@@ -117,232 +144,109 @@ export default function Checkout() {
     );
   }
 
-  const paymentOptions: { id: PaymentMethod; label: string; icon: React.ReactNode; desc: string }[] = [
-    { id: 'card', label: 'Thẻ tín dụng / Ghi nợ', icon: <CreditCard className="size-5" />, desc: 'Visa, Mastercard, JCB' },
-    { id: 'vnpay', label: 'VNPay', icon: <Smartphone className="size-5" />, desc: 'Thanh toán qua ví VNPay' },
-    { id: 'zalopay', label: 'ZaloPay', icon: <Wallet className="size-5" />, desc: 'Thanh toán qua ví ZaloPay' },
-  ];
+  if (isComplete) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] py-12">
+        <div className="mx-4 w-full max-w-md">
+          <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center shadow-[0_20px_70px_rgba(15,23,42,0.12)]">
+            <div className="mx-auto mb-4 flex size-20 items-center justify-center rounded-full bg-emerald-100"><CheckCircle className="size-10 text-emerald-600" /></div>
+            <h2 className="mb-2 text-2xl font-semibold text-slate-950">Thanh toán thành công!</h2>
+            <p className="mb-2 text-slate-600">Cảm ơn bạn đã mua khóa học. Thông tin truy cập đã được gửi đến email của bạn.</p>
+            {displayOrderId && <div className="mb-4 rounded-lg bg-slate-50 px-4 py-2"><p className="text-xs text-slate-500">Mã đơn hàng</p><p className="font-mono text-sm font-bold text-slate-950">{displayOrderId}</p></div>}
+            <div className="mb-6 flex gap-2">
+              <div className="flex-1 rounded-xl bg-blue-50 px-3 py-2 text-xs"><Mail className="mx-auto mb-1 size-4 text-blue-600" /><p className="font-medium text-blue-700">Email đã gửi</p></div>
+              <button onClick={handleDownloadInvoice} className="group flex-1 rounded-xl bg-emerald-50 px-3 py-2 text-xs transition-colors hover:bg-emerald-100"><Download className="mx-auto mb-1 size-4 text-emerald-600 transition-transform group-hover:translate-y-0.5" /><p className="font-medium text-emerald-700">Tải hóa đơn</p></button>
+            </div>
+            <div className="mb-6 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-700">Kiểm tra email để nhận hướng dẫn truy cập khóa học nhé!</div>
+            <div className="flex gap-3">
+              <button onClick={() => navigate("/account?tab=orders")} className="flex-1 rounded-xl border border-blue-600 py-2.5 text-sm font-semibold text-blue-600 transition hover:bg-blue-50">Xem đơn hàng</button>
+              <button onClick={() => navigate("/my-learning")} className="flex-1 rounded-xl bg-blue-600 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">Bắt đầu học</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Thanh toán</h1>
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_30%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] py-10">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 flex items-center gap-3">
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600"><Lock className="size-5" /></div>
+          <div>
+            <h1 className="text-3xl font-semibold tracking-[-0.03em] text-slate-950">Thanh toán</h1>
+            <p className="text-sm text-slate-500">Hoàn tất mua khóa học an toàn và nhanh chóng</p>
+          </div>
+        </div>
 
-        <div className="grid lg:grid-cols-5 gap-8">
-          {/* Left: Form */}
-          <div className="lg:col-span-3 space-y-5">
-            {/* Contact Info */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Thông tin liên hệ</h2>
+        <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
+              <h2 className="mb-4 text-lg font-semibold text-slate-950">Thông tin liên hệ</h2>
               <div className="space-y-4">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                  <input type="email" id="email" name="email" required value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    placeholder="email@example.com" />
-                </div>
-                <div>
-                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Họ và tên *</label>
-                  <input type="text" id="fullName" name="fullName" required value={formData.fullName}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    placeholder="Nguyễn Văn A" />
-                </div>
+                <div><label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">Email *</label><input type="email" id="email" name="email" required value={formData.email} onChange={handleChange} className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="email@example.com" /></div>
+                <div><label htmlFor="fullName" className="mb-1 block text-sm font-medium text-slate-700">Họ và tên *</label><input type="text" id="fullName" name="fullName" required value={formData.fullName} onChange={handleChange} className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nguyễn Văn A" /></div>
               </div>
             </div>
 
-            {/* Coupon */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Mã giảm giá</h2>
+            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
+              <h2 className="mb-4 text-lg font-semibold text-slate-950">Mã giảm giá</h2>
               {appliedCoupon ? (
-                <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
-                  <Tag className="size-4 text-green-600 flex-shrink-0" />
-                  <div className="flex-1">
-                    <span className="font-mono font-bold text-green-700">{appliedCoupon.code}</span>
-                    <span className="text-sm text-green-600 ml-2">
-                      — Giảm {formatPrice(appliedCoupon.discount)}
-                    </span>
-                  </div>
-                  <button onClick={handleRemoveCoupon} className="text-green-500 hover:text-green-700 p-1">
-                    <X className="size-4" />
-                  </button>
+                <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                  <Tag className="size-4 shrink-0 text-emerald-600" />
+                  <div className="flex-1"><span className="font-mono font-bold text-emerald-700">{appliedCoupon.code}</span><span className="ml-2 text-sm text-emerald-600">— Giảm {formatPrice(appliedCoupon.discount)}</span></div>
+                  <button type="button" onClick={handleRemoveCoupon} className="p-1 text-emerald-500 hover:text-emerald-700"><X className="size-4" /></button>
                 </div>
               ) : (
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={couponInput}
-                    onChange={e => setCouponInput(e.target.value.toUpperCase())}
-                    onKeyDown={e => e.key === 'Enter' && handleApplyCoupon()}
-                    placeholder="Nhập mã giảm giá (VD: SALE50)"
-                    className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-mono uppercase"
-                  />
-                  <button
-                    onClick={handleApplyCoupon}
-                    disabled={isApplyingCoupon}
-                    className="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
-                  >
-                    {isApplyingCoupon ? 'Đang kiểm tra...' : 'Áp dụng'}
-                  </button>
-                </div>
+                <div className="flex gap-2"><input type="text" value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Nhập mã giảm giá" className="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" /><button type="button" onClick={handleApplyCoupon} disabled={isApplyingCoupon} className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-60">{isApplyingCoupon ? "..." : "Áp dụng"}</button></div>
               )}
-              <p className="text-xs text-gray-400 mt-2">Mã giảm giá sẽ được kiểm tra với hệ thống.</p>
             </div>
 
-            {/* Payment Method */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Phương thức thanh toán</h2>
-              <div className="space-y-3">
-                {paymentOptions.map(opt => (
-                  <label
-                    key={opt.id}
-                    className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      paymentMethod === opt.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value={opt.id}
-                      checked={paymentMethod === opt.id}
-                      onChange={() => setPaymentMethod(opt.id)}
-                      className="sr-only"
-                    />
-                    <div className={`size-9 rounded-lg flex items-center justify-center ${
-                      paymentMethod === opt.id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500'
-                    }`}>
-                      {opt.icon}
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900 text-sm">{opt.label}</div>
-                      <div className="text-xs text-gray-500">{opt.desc}</div>
-                    </div>
-                    <div className={`size-5 rounded-full border-2 flex items-center justify-center ${
-                      paymentMethod === opt.id ? 'border-blue-500' : 'border-gray-300'
-                    }`}>
-                      {paymentMethod === opt.id && <div className="size-2.5 bg-blue-500 rounded-full" />}
-                    </div>
-                  </label>
+            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
+              <h2 className="mb-4 text-lg font-semibold text-slate-950">Phương thức thanh toán</h2>
+              <div className="grid gap-3 md:grid-cols-2">
+                {paymentOptions.map((option) => (
+                  <button key={option.id} type="button" onClick={() => setPaymentMethod(option.id)} className={`rounded-2xl border p-4 text-left transition ${paymentMethod === option.id ? "border-blue-600 bg-blue-50" : "border-slate-200 bg-white hover:border-blue-200"}`}>
+                    <div className="mb-1 flex items-center gap-3"><div className="flex size-10 items-center justify-center rounded-xl bg-slate-100">{option.icon}</div><div><p className="font-semibold text-slate-950">{option.label}</p><p className="text-xs text-slate-500">{option.desc}</p></div></div>
+                  </button>
                 ))}
               </div>
-
-              {/* Card details */}
-              {paymentMethod === 'card' && (
-                <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-                  <div>
-                    <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 mb-1">Số thẻ</label>
-                    <input type="text" id="cardNumber" name="cardNumber" required value={formData.cardNumber}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      placeholder="1234 5678 9012 3456" maxLength={19} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700 mb-1">Ngày hết hạn</label>
-                      <input type="text" id="expiryDate" name="expiryDate" required value={formData.expiryDate}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        placeholder="MM/YY" maxLength={5} />
-                    </div>
-                    <div>
-                      <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">CVV</label>
-                      <input type="text" id="cvv" name="cvv" required value={formData.cvv}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        placeholder="123" maxLength={3} />
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg">
-                    <Lock className="size-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-gray-600">Thông tin thanh toán được mã hóa SSL 256-bit. Chúng tôi không lưu thẻ của bạn.</p>
-                  </div>
-                  <button type="submit" disabled={isProcessing || !formData.email || !formData.fullName}
-                    className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                    {isProcessing ? (
-                      <><div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Đang xử lý...</>
-                    ) : (
-                      <><Lock className="size-4" /> Thanh toán {formatPrice(finalPrice)}</>
-                    )}
-                  </button>
-                </form>
-              )}
-
-              {/* VNPay / ZaloPay */}
-              {(paymentMethod === 'vnpay' || paymentMethod === 'zalopay') && (
-                <div className="mt-5">
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 text-sm text-yellow-800">
-                    Bạn sẽ được chuyển đến trang thanh toán của {paymentMethod === 'vnpay' ? 'VNPay' : 'ZaloPay'} để hoàn tất giao dịch.
-                  </div>
-                  <button
-                    onClick={(e) => handleSubmit(e as any)}
-                    disabled={isProcessing || !formData.email || !formData.fullName}
-                    className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {isProcessing ? 'Đang xử lý...' : `Thanh toán qua ${paymentMethod === 'vnpay' ? 'VNPay' : 'ZaloPay'}`}
-                  </button>
-                </div>
-              )}
             </div>
-          </div>
 
-          {/* Right: Order Summary */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-20">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Đơn hàng của bạn</h2>
+            {paymentMethod === "card" && (
+              <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
+                <h2 className="mb-4 text-lg font-semibold text-slate-950">Thông tin thẻ</h2>
+                <div className="space-y-4">
+                  <div><label className="mb-1 block text-sm font-medium text-slate-700">Số thẻ</label><input name="cardNumber" value={formData.cardNumber} onChange={handleChange} className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="1234 5678 9012 3456" /></div>
+                  <div className="grid gap-4 md:grid-cols-2"><div><label className="mb-1 block text-sm font-medium text-slate-700">Ngày hết hạn</label><input name="expiryDate" value={formData.expiryDate} onChange={handleChange} className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="MM/YY" /></div><div><label className="mb-1 block text-sm font-medium text-slate-700">CVV</label><input name="cvv" value={formData.cvv} onChange={handleChange} className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="123" /></div></div>
+                </div>
+              </div>
+            )}
 
-              <div className="space-y-3 mb-5 max-h-72 overflow-y-auto pr-1">
+            <button type="submit" disabled={isProcessing} className="w-full rounded-2xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60">
+              {isProcessing ? "Đang xử lý thanh toán..." : `Thanh toán ${formatPrice(finalPrice)}`}
+            </button>
+          </form>
+
+          <aside className="lg:sticky lg:top-24 h-fit">
+            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
+              <h2 className="mb-5 text-xl font-bold text-slate-950">Tóm tắt đơn hàng</h2>
+              <div className="space-y-4 border-b border-slate-200 pb-5">
                 {cartItems.map((course) => (
-                  <div key={course.id} className="flex gap-3 pb-3 border-b border-gray-100 last:border-0">
-                    <img src={course.image} alt={course.title}
-                      className="w-16 h-11 object-cover rounded-lg flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xs font-medium text-gray-900 line-clamp-2">{course.title}</h3>
-                      <p className="text-xs text-gray-500 mt-0.5">{course.instructor}</p>
-                      <p className="text-sm font-bold text-blue-600 mt-1">
-                        {formatPrice(course.price)}
-                      </p>
-                    </div>
+                  <div key={course.id} className="flex items-center gap-3">
+                    <img src={course.image} alt={course.title} className="h-16 w-20 rounded-xl object-cover" />
+                    <div className="min-w-0 flex-1"><p className="line-clamp-2 text-sm font-semibold text-slate-950">{course.title}</p><p className="text-xs text-slate-500">{course.instructor}</p></div>
+                    <div className="text-sm font-semibold text-slate-950">{formatPrice(course.price)}</div>
                   </div>
                 ))}
               </div>
-
-              <div className="space-y-2 pt-3 border-t border-gray-100">
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Tổng phụ:</span>
-                  <span>{formatPrice(totalPrice)}</span>
-                </div>
-                {appliedCoupon && (
-                  <div className="flex justify-between text-sm text-green-600 font-medium">
-                    <span>Giảm giá ({appliedCoupon.code}):</span>
-                    <span>-{formatPrice(appliedCoupon.discount)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Thuế:</span>
-                  <span>Miễn phí</span>
-                </div>
-                <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
-                  <span>Tổng cộng:</span>
-                  <span className="text-blue-600">{formatPrice(finalPrice)}</span>
-                </div>
-              </div>
-
-              <div className="mt-5 pt-5 border-t border-gray-100">
-                <p className="text-xs font-semibold text-gray-700 mb-3">Quyền lợi của bạn:</p>
-                <ul className="space-y-1.5 text-xs text-gray-600">
-                  {['Truy cập trọn đời', 'Chứng chỉ hoàn thành', 'Cập nhật miễn phí', 'Hoàn tiền 30 ngày'].map(item => (
-                    <li key={item} className="flex items-center gap-2">
-                      <span className="size-4 bg-green-100 rounded-full flex items-center justify-center text-green-600 flex-shrink-0">✓</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+              <div className="space-y-3 py-5 text-slate-700">
+                <div className="flex justify-between"><span>Tổng phụ:</span><span>{formatPrice(totalPrice)}</span></div>
+                {appliedCoupon && <div className="flex justify-between text-emerald-700"><span>Giảm giá:</span><span>-{formatPrice(appliedCoupon.discount)}</span></div>}
+                <div className="flex justify-between border-t border-slate-200 pt-3 text-lg font-bold text-slate-950"><span>Tổng cộng:</span><span className="text-blue-600">{formatPrice(finalPrice)}</span></div>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </div>

@@ -90,18 +90,18 @@ public class AdminCategoriesController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var category = await _db.Categories.Include(c => c.Courses).FirstOrDefaultAsync(c => c.Id == id);
-        if (category is null)
+        var categoryExists = await _db.Categories.AsNoTracking().AnyAsync(c => c.Id == id);
+        if (!categoryExists)
         {
             return NotFound();
         }
 
-        if (category.Courses.Count > 0)
+        if (await _db.Courses.AsNoTracking().AnyAsync(c => c.CategoryId == id))
         {
             return BadRequest("Cannot delete category with courses.");
         }
 
-        _db.Categories.Remove(category);
+        _db.Categories.Remove(new Models.Category { Id = id });
         await _db.SaveChangesAsync();
 
         return NoContent();

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
 using UdemyClone.Api.Data;
@@ -12,6 +13,7 @@ namespace UdemyClone.Api.Controllers;
 
 [ApiController]
 [Route("api/support/messages")]
+[EnableRateLimiting("auth")]
 public class SupportController : ControllerBase
 {
     private readonly ApplicationDbContext _db;

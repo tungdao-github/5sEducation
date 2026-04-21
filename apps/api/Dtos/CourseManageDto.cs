@@ -24,7 +24,21 @@ public class CourseManageDto
 
     public bool IsPublished { get; set; }
 
+    public int StudentCount { get; set; }
+
+    public double AverageRating { get; set; }
+
+    public int ReviewCount { get; set; }
+
+    public decimal Revenue { get; set; }
+
+    public int TotalLessons { get; set; }
+
     public DateTime? UpdatedAt { get; set; }
 
     public CategoryDto? Category { get; set; }
+
+    public string? InstructorName { get; set; }
+
+    public string? InstructorAvatarUrl { get; set; }
 }

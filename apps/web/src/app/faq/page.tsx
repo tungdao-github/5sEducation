@@ -1,12 +1,22 @@
-﻿import Link from "next/link";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { buildMetadata } from "@/lib/seo";
 import { getServerLocale } from "@/lib/server-locale";
 import { pickLocaleText } from "@/lib/i18n";
+
+export const metadata: Metadata = buildMetadata({
+  title: "FAQ",
+  description: "Cac cau hoi thuong gap ve EduCourse, thanh toan, truy cap khoa hoc va tai khoan.",
+  path: "/faq",
+  type: "website",
+  keywords: ["faq", "ho tro", "EduCourse"],
+});
 
 const faqGroups = [
   {
     title: {
       en: "Learning & access",
-      vi: "Học tập & truy cập",
+      vi: "Hoc tap & truy cap",
     },
     items: [
       {
@@ -15,8 +25,8 @@ const faqGroups = [
           a: "Your courses appear immediately in My Learning once the payment completes.",
         },
         vi: {
-          q: "Sau khi thanh toán tôi xem khóa học ở đâu?",
-          a: "Khóa học sẽ xuất hiện ngay trong trang Học tập sau khi thanh toán thành công.",
+          q: "Sau khi thanh toan toi xem khoa hoc o dau?",
+          a: "Khoa hoc se xuat hien ngay trong trang Hoc tap sau khi thanh toan thanh cong.",
         },
       },
       {
@@ -25,8 +35,8 @@ const faqGroups = [
           a: "Yes. All self-paced courses are available anytime with progress tracking.",
         },
         vi: {
-          q: "Tôi có thể học theo tiến độ riêng không?",
-          a: "Có. Bạn học bất kỳ lúc nào và hệ thống sẽ lưu tiến độ.",
+          q: "Toi co the hoc theo tien do rieng khong?",
+          a: "Co. Ban hoc bat ky luc nao va he thong se luu tien do.",
         },
       },
       {
@@ -35,8 +45,8 @@ const faqGroups = [
           a: "Materials are available in the course player under the Resources tab.",
         },
         vi: {
-          q: "Tôi tìm tài liệu học ở đâu?",
-          a: "Tài liệu nằm trong trình phát bài học ở tab Tài nguyên.",
+          q: "Toi tim tai lieu hoc o dau?",
+          a: "Tai lieu nam trong trinh phat bai hoc o tab Tai nguyen.",
         },
       },
     ],
@@ -44,7 +54,7 @@ const faqGroups = [
   {
     title: {
       en: "Account & security",
-      vi: "Tài khoản & bảo mật",
+      vi: "Tai khoan & bao mat",
     },
     items: [
       {
@@ -53,8 +63,8 @@ const faqGroups = [
           a: "Yes. Use the language switcher on the header to change the site language.",
         },
         vi: {
-          q: "Có đổi ngôn ngữ được không?",
-          a: "Có. Bạn có thể đổi ngôn ngữ ở phần header.",
+          q: "Co doi ngon ngu duoc khong?",
+          a: "Co. Ban co the doi ngon ngu o phan header.",
         },
       },
       {
@@ -63,8 +73,8 @@ const faqGroups = [
           a: "Use the Forgot Password page to receive a reset link via email.",
         },
         vi: {
-          q: "Tôi quên mật khẩu thì làm sao?",
-          a: "Vào trang Quên mật khẩu để nhận link đặt lại qua email.",
+          q: "Toi quen mat khau thi lam sao?",
+          a: "Vao trang Quen mat khau de nhan link dat lai qua email.",
         },
       },
       {
@@ -73,46 +83,8 @@ const faqGroups = [
           a: "Yes. Use the Google button on the login page for one-click sign-in.",
         },
         vi: {
-          q: "Tôi có thể đăng nhập bằng Google không?",
-          a: "Có. Chọn nút Google ở trang đăng nhập để đăng nhập nhanh.",
-        },
-      },
-    ],
-  },
-  {
-    title: {
-      en: "Payments & support",
-      vi: "Thanh toán & hỗ trợ",
-    },
-    items: [
-      {
-        en: {
-          q: "What payment methods are supported?",
-          a: "You can pay by card; VNPay and ZaloPay will be added in later phases.",
-        },
-        vi: {
-          q: "Hỗ trợ những phương thức thanh toán nào?",
-          a: "Hiện hỗ trợ thẻ; VNPay và ZaloPay sẽ bổ sung ở phase sau.",
-        },
-      },
-      {
-        en: {
-          q: "Where can I request support?",
-          a: "Use the Support page or chat widget for help with billing, access, or content.",
-        },
-        vi: {
-          q: "Liên hệ hỗ trợ ở đâu?",
-          a: "Bạn có thể vào trang Hỗ trợ hoặc mở chat widget để được hỗ trợ.",
-        },
-      },
-      {
-        en: {
-          q: "How long does it take to get a reply?",
-          a: "Most tickets receive a response within 24 hours on business days.",
-        },
-        vi: {
-          q: "Bao lâu sẽ được phản hồi?",
-          a: "Phần lớn yêu cầu sẽ được phản hồi trong 24 giờ làm việc.",
+          q: "Toi co the dang nhap bang Google khong?",
+          a: "Co. Chon nut Google o trang dang nhap de dang nhap nhanh.",
         },
       },
     ],
@@ -125,66 +97,30 @@ export default async function FaqPage() {
 
   return (
     <div className="section-shell space-y-10 py-12 fade-in">
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-          {t("Help center", "Trung tam ho tro")}
-        </p>
-        <h1 className="section-title text-4xl font-semibold text-emerald-950">
-          {t("Frequently asked questions", "Cac cau hoi thuong gap")}
-        </h1>
-        <p className="text-sm text-emerald-800/70">
-          {t("Quick answers to the most common questions.", "Tong hop nhanh cac cau hoi ban thuong gap.")}
-        </p>
+      <div className="space-y-2 text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{t("Help center", "Trung tam tro giup")}</p>
+        <h1 className="section-title text-4xl font-semibold text-emerald-950">{t("Frequently asked questions", "Cau hoi thuong gap")}</h1>
       </div>
-
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="space-y-6">
-          {faqGroups.map((group, groupIndex) => (
-            <div key={`group-${groupIndex}`} className="surface-card space-y-4 p-6">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                  {t(group.title.en, group.title.vi)}
-                </p>
-              </div>
-              <div className="space-y-3">
-                {group.items.map((item, itemIndex) => (
-                  <details
-                    key={`faq-${groupIndex}-${itemIndex}`}
-                    className="rounded-2xl border border-[color:var(--stroke)] bg-white/80 px-4 py-3"
-                    open={groupIndex === 0 && itemIndex === 0}
-                  >
-                    <summary className="cursor-pointer text-sm font-semibold text-emerald-950">
-                      {t(item.en.q, item.vi.q)}
-                    </summary>
-                    <p className="mt-2 text-sm text-emerald-800/70">
-                      {t(item.en.a, item.vi.a)}
-                    </p>
-                  </details>
-                ))}
-              </div>
+      <div className="space-y-8">
+        {faqGroups.map((group) => (
+          <section key={group.title.en} className="surface-card space-y-5 rounded-3xl p-6">
+            <h2 className="text-xl font-semibold text-emerald-950">{pickLocaleText(locale, group.title.en, group.title.vi)}</h2>
+            <div className="space-y-4">
+              {group.items.map((item) => {
+                const data = locale.startsWith("vi") ? item.vi : item.en;
+                return (
+                  <article key={data.q} className="rounded-2xl border border-[color:var(--stroke)] bg-white/70 p-4">
+                    <h3 className="text-sm font-semibold text-emerald-950">{data.q}</h3>
+                    <p className="mt-2 text-sm text-emerald-800/70">{data.a}</p>
+                  </article>
+                );
+              })}
             </div>
-          ))}
-        </div>
-
-        <aside className="space-y-4 lg:sticky lg:top-24">
-          <div className="surface-card space-y-3 p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-              {t("Need more help?", "Can ho tro them?")}
-            </p>
-            <p className="text-sm text-emerald-800/70">
-              {t(
-                "Send a request or chat with our team for faster answers.",
-                "Gui yeu cau hoac chat voi doi ngu ho tro de nhan phan hoi nhanh hon."
-              )}
-            </p>
-            <Link
-              href="/support"
-              className="inline-flex rounded-full bg-emerald-700 px-5 py-2 text-sm font-semibold text-white"
-            >
-              {t("Open support", "Mo ho tro")}
-            </Link>
-          </div>
-        </aside>
+          </section>
+        ))}
+      </div>
+      <div className="text-center text-sm text-emerald-800/70">
+        <Link href="/support" className="font-semibold text-emerald-900 underline underline-offset-4">{t("Contact support", "Lien he ho tro")}</Link>
       </div>
     </div>
   );

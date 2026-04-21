@@ -40,19 +40,18 @@ public class SettingsController : ControllerBase
             }
         }
 
-        var settings = await query
+        var results = await query
             .OrderBy(s => s.Group)
             .ThenBy(s => s.Key)
+            .Select(s => new SystemSettingDto
+            {
+                Key = s.Key,
+                Value = s.Value,
+                Group = s.Group,
+                Description = s.Description,
+                UpdatedAt = s.UpdatedAt
+            })
             .ToListAsync();
-
-        var results = settings.Select(s => new SystemSettingDto
-        {
-            Key = s.Key,
-            Value = s.Value,
-            Group = s.Group,
-            Description = s.Description,
-            UpdatedAt = s.UpdatedAt
-        }).ToList();
 
         return Ok(results);
     }

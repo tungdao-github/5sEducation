@@ -114,7 +114,7 @@ export function CourseReviews({ courseId, courseSlug }: { courseId: number; cour
             {tx("Submit review", "Gui danh gia")}
           </button>
           {needsAuth && (
-            <Link href={`/login?next=/courses/${courseSlug}`} className="text-xs font-semibold text-emerald-900">
+            <Link href={`/?auth=login&next=${encodeURIComponent(`/courses/${courseSlug}`)}`} className="text-xs font-semibold text-emerald-900">
               {tx("Sign in to review", "Dang nhap de danh gia")}
             </Link>
           )}

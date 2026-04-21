@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
+import { buildMetadata } from "@/lib/seo";
 import { getServerLocale } from "@/lib/server-locale";
 import { pickLocaleText } from "@/lib/i18n";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Chinh sach bao mat",
+  description: "Thong tin ve du lieu, quyen rieng tu va cach EduCourse xu ly thong tin nguoi dung.",
+  path: "/policy/privacy",
+  type: "website",
+  keywords: ["privacy", "bao mat", "EduCourse"],
+});
 
 export default async function PrivacyPage() {
   const locale = await getServerLocale();

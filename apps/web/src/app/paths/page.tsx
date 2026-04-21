@@ -1,8 +1,18 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { API_URL } from "@/lib/api";
 import { LearningPathCard, LearningPathSummary } from "@/components/LearningPathCard";
 import { getServerLocale } from "@/lib/server-locale";
 import { pickLocaleText } from "@/lib/i18n";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Lo trinh hoc tap",
+  description: "Theo hoc lo trinh co cau truc de chinh phuc UX/UI Design va cac ky nang lien quan.",
+  path: "/paths",
+  type: "website",
+  keywords: ["lo trinh hoc tap", "UX/UI roadmap", "EduCourse"],
+});
 
 async function getLearningPaths(): Promise<LearningPathSummary[]> {
   try {

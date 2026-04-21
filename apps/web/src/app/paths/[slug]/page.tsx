@@ -1,7 +1,9 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { API_URL, resolveApiAsset } from "@/lib/api";
 import { getServerLocale } from "@/lib/server-locale";
 import { pickLocaleText } from "@/lib/i18n";
+import { buildMetadata } from "@/lib/seo";
 
 type PathSection = {
   id: number;
@@ -48,10 +50,36 @@ async function getPath(slug: string): Promise<PathDetail | null> {
   }
 }
 
-export default async function PathDetailPage({ params }: { params: { slug: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const path = await getPath(slug);
+
+  if (!path) {
+    return buildMetadata({
+      title: "Lo trinh hoc tap",
+      description: "Lo trinh hoc tap theo ky nang va vai tro tren EduCourse.",
+      path: `/paths/${slug}`,
+    });
+  }
+
+  return buildMetadata({
+    title: path.title,
+    description: path.description || `Theo hoc lo trinh ${path.title} tren EduCourse.`,
+    path: `/paths/${path.slug}`,
+    image: path.thumbnailUrl,
+    keywords: [path.title, path.level || "lo trinh hoc tap", "EduCourse"],
+  });
+}
+
+export default async function PathDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const locale = await getServerLocale();
   const t = (en: string, vi: string) => pickLocaleText(locale, en, vi);
-  const path = await getPath(params.slug);
+  const { slug } = await params;
+  const path = await getPath(slug);
 
   if (!path) {
     return (

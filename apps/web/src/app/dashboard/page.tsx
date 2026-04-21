@@ -1,7 +1,5 @@
-"use client";
-
-import MyLearning from "@/figma/pages/MyLearning";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <MyLearning />;
+  redirect("/my-learning");
 }

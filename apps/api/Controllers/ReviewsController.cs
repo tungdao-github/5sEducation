@@ -23,7 +23,7 @@ public class ReviewsController : ControllerBase
     public async Task<ActionResult<List<ReviewDto>>> GetByCourse([FromQuery] int courseId)
     {
         var reviews = await _db.Reviews
-            .Include(r => r.User)
+            .AsNoTracking()
             .Where(r => r.CourseId == courseId)
             .OrderByDescending(r => r.CreatedAt)
             .Select(r => new ReviewDto
@@ -33,6 +33,7 @@ public class ReviewsController : ControllerBase
                 Rating = r.Rating,
                 Comment = r.Comment,
                 CreatedAt = r.CreatedAt,
+                UserId = r.UserId,
                 UserName = r.User == null
                     ? "Learner"
                     : string.IsNullOrWhiteSpace(r.User.FirstName)

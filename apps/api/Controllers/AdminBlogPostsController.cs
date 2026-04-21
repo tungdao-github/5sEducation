@@ -36,7 +36,8 @@ public class AdminBlogPostsController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(p => p.Title.Contains(search) || p.Summary.Contains(search));
+            var q = $"%{search.Trim()}%";
+            query = query.Where(p => EF.Functions.Like(p.Title, q) || EF.Functions.Like(p.Summary, q));
         }
 
         if (!string.IsNullOrWhiteSpace(status))

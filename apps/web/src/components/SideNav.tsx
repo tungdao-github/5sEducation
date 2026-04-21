@@ -190,7 +190,7 @@ export function SideNav() {
       {
         title: tx("Learning", "Hoc tap"),
         items: [
-          { href: "/dashboard", label: tx("My learning", "Viec hoc cua toi"), icon: <DashboardIcon /> },
+          { href: "/my-learning", label: tx("My learning", "Viec hoc cua toi"), icon: <DashboardIcon /> },
           { href: "/orders", label: tx("Orders", "Don hang"), icon: <ReceiptIcon /> },
         ],
       },
@@ -208,7 +208,7 @@ export function SideNav() {
 
   const supportItems: NavItem[] = [
     { href: "/support", label: tx("Support", "Ho tro"), icon: <SupportIcon /> },
-    { href: "/studio", label: "Studio", icon: <SparkIcon /> },
+    { href: "/instructor", label: "Studio", icon: <SparkIcon /> },
     { href: "/admin", label: "Admin", icon: <ShieldIcon /> },
   ];
 

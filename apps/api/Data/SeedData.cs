@@ -80,6 +80,52 @@ public static class SeedData
             autoConfirmEmails);
         await EnsureUserInRoleAsync(userManager, user, "User");
 
+        var instructorProfiles = new[]
+        {
+            new { Email = "tanner.kohler@educourse.dev", FirstName = "Tanner", LastName = "Kohler" },
+            new { Email = "huei-hsin.wang@educourse.dev", FirstName = "Huei-Hsin", LastName = "Wang" },
+            new { Email = "kate.moran@educourse.dev", FirstName = "Kate", LastName = "Moran" },
+            new { Email = "sarah.gibbons@educourse.dev", FirstName = "Sarah", LastName = "Gibbons" },
+            new { Email = "jakob.nielsen@educourse.dev", FirstName = "Jakob", LastName = "Nielsen" },
+            new { Email = "maria.rosala@educourse.dev", FirstName = "Maria", LastName = "Rosala" },
+            new { Email = "rachel.krause@educourse.dev", FirstName = "Rachel", LastName = "Krause" },
+            new { Email = "therese.fessenden@educourse.dev", FirstName = "Therese", LastName = "Fessenden" }
+        };
+
+        var instructors = new Dictionary<string, ApplicationUser>(StringComparer.OrdinalIgnoreCase)
+        {
+            [instructorEmail] = instructor
+        };
+
+        foreach (var profile in instructorProfiles)
+        {
+            var created = await EnsureUserAsync(
+                userManager,
+                profile.Email,
+                profile.FirstName,
+                profile.LastName,
+                defaultPassword,
+                resetDefaultAccounts,
+                autoConfirmEmails);
+            await EnsureUserInRoleAsync(userManager, created, "Instructor");
+            instructors[profile.Email] = created;
+        }
+
+        var studentUsers = new List<ApplicationUser> { user };
+        for (var i = 1; i <= 8; i += 1)
+        {
+            var student = await EnsureUserAsync(
+                userManager,
+                $"student{i}@educourse.dev",
+                "Student",
+                i.ToString("00"),
+                defaultPassword,
+                resetDefaultAccounts,
+                autoConfirmEmails);
+            await EnsureUserInRoleAsync(userManager, student, "User");
+            studentUsers.Add(student);
+        }
+
         if (!await db.Categories.AnyAsync())
         {
             var categories = new List<Category>
@@ -90,6 +136,20 @@ public static class SeedData
             };
             db.Categories.AddRange(categories);
             await db.SaveChangesAsync();
+        }
+
+        var categorySeeds = new[]
+        {
+            "Thiết kế UX/UI",
+            "Nghiên cứu UX",
+            "Viết nội dung UX",
+            "Quản lý UX",
+            "Phân tích UX"
+        };
+
+        foreach (var categoryTitle in categorySeeds)
+        {
+            await EnsureCategoryAsync(db, categoryTitle);
         }
 
         if (!await db.Courses.AnyAsync())
@@ -357,6 +417,221 @@ public static class SeedData
                 });
                 sortOrder += 1;
             }
+
+            await db.SaveChangesAsync();
+        }
+
+        var uxCourseSeeds = new List<CourseSeed>
+        {
+            new CourseSeed
+            {
+                Title = "Nguyên tắc Gestalt: Thiết kế giao diện trực quan",
+                CategorySlug = SlugHelper.Slugify("Thiết kế UX/UI"),
+                InstructorEmail = "tanner.kohler@educourse.dev",
+                Price = 289000m,
+                FlashSalePrice = 202000m,
+                Level = "Intermediate",
+                Language = "Vietnamese",
+                ShortDescription = "Áp dụng nguyên tắc Gestalt để thiết kế giao diện trực quan.",
+                Description = "Khóa học tập trung vào các nguyên tắc Gestalt, cách nhóm thông tin và tạo bố cục trực quan.",
+                Outcome = "Nắm vững cách áp dụng Gestalt để tăng tính trực quan và dễ hiểu.",
+                Requirements = "Đã có kiến thức UI/UX cơ bản.",
+                LessonCount = 24,
+                LessonMinutes = 12,
+                ReviewCount = 3,
+                Rating = 5
+            },
+            new CourseSeed
+            {
+                Title = "Các điều khiển đầu vào: Mẫu thiết kế và thực tiễn",
+                CategorySlug = SlugHelper.Slugify("Thiết kế UX/UI"),
+                InstructorEmail = "huei-hsin.wang@educourse.dev",
+                Price = 289000m,
+                FlashSalePrice = 202000m,
+                Level = "Beginner",
+                Language = "Vietnamese",
+                ShortDescription = "Thiết kế input controls rõ ràng, dễ tiếp cận.",
+                Description = "Tổng hợp các mẫu input phổ biến và cách áp dụng trong form.",
+                Outcome = "Thiết kế form tối ưu, giảm sai sót cho người dùng.",
+                Requirements = "Không yêu cầu.",
+                LessonCount = 20,
+                LessonMinutes = 10,
+                ReviewCount = 3,
+                Rating = 5
+            },
+            new CourseSeed
+            {
+                Title = "Microcopy: Tiêu đề, đề mục, thẻ và nhiều hơn nữa",
+                CategorySlug = SlugHelper.Slugify("Viết nội dung UX"),
+                InstructorEmail = "kate.moran@educourse.dev",
+                Price = 199000m,
+                FlashSalePrice = 139000m,
+                Level = "Beginner",
+                Language = "Vietnamese",
+                ShortDescription = "Viết microcopy giúp người dùng ra quyết định nhanh.",
+                Description = "Tập trung vào các nguyên tắc viết microcopy ngắn gọn, rõ ràng.",
+                Outcome = "Viết nội dung UX hiệu quả, giảm tải nhận thức.",
+                Requirements = "Không yêu cầu.",
+                LessonCount = 18,
+                LessonMinutes = 10,
+                ReviewCount = 3,
+                Rating = 5
+            },
+            new CourseSeed
+            {
+                Title = "Thể hiện giá trị UX",
+                CategorySlug = SlugHelper.Slugify("Quản lý UX"),
+                InstructorEmail = "sarah.gibbons@educourse.dev",
+                Price = 199000m,
+                FlashSalePrice = 139000m,
+                Level = "Intermediate",
+                Language = "Vietnamese",
+                ShortDescription = "Chứng minh tác động UX bằng dữ liệu.",
+                Description = "Hướng dẫn đo lường và trình bày giá trị UX với stakeholders.",
+                Outcome = "Tạo báo cáo UX thuyết phục, gắn với KPI.",
+                Requirements = "Hiểu quy trình UX căn bản.",
+                LessonCount = 14,
+                LessonMinutes = 12,
+                ReviewCount = 3,
+                Rating = 5
+            },
+            new CourseSeed
+            {
+                Title = "10 nguyên tắc đánh giá khả năng sử dụng",
+                CategorySlug = SlugHelper.Slugify("Thiết kế UX/UI"),
+                InstructorEmail = "jakob.nielsen@educourse.dev",
+                Price = 99000m,
+                FlashSalePrice = 99000m,
+                Level = "All Levels",
+                Language = "Vietnamese",
+                ShortDescription = "Hiểu 10 heuristic để đánh giá usability.",
+                Description = "Phân tích 10 nguyên tắc heuristic và cách áp dụng.",
+                Outcome = "Nhận diện vấn đề UX nhanh và đề xuất cải tiến.",
+                Requirements = "Không yêu cầu.",
+                LessonCount = 22,
+                LessonMinutes = 10,
+                ReviewCount = 4,
+                Rating = 5
+            },
+            new CourseSeed
+            {
+                Title = "Nghiên cứu người dùng: Phương pháp và kỹ thuật",
+                CategorySlug = SlugHelper.Slugify("Nghiên cứu UX"),
+                InstructorEmail = "maria.rosala@educourse.dev",
+                Price = 289000m,
+                FlashSalePrice = 202000m,
+                Level = "Intermediate",
+                Language = "Vietnamese",
+                ShortDescription = "Hệ thống hóa các phương pháp nghiên cứu UX.",
+                Description = "Khám phá cách thu thập insight và kiểm thử UX.",
+                Outcome = "Chọn đúng phương pháp và phân tích insight.",
+                Requirements = "Biết quy trình UX cơ bản.",
+                LessonCount = 26,
+                LessonMinutes = 12,
+                ReviewCount = 3,
+                Rating = 5
+            },
+            new CourseSeed
+            {
+                Title = "Phân tích và Trải nghiệm người dùng",
+                CategorySlug = SlugHelper.Slugify("Phân tích UX"),
+                InstructorEmail = "rachel.krause@educourse.dev",
+                Price = 249000m,
+                FlashSalePrice = 199000m,
+                Level = "Intermediate",
+                Language = "Vietnamese",
+                ShortDescription = "Dùng dữ liệu phân tích để tối ưu UX.",
+                Description = "Cách đọc dữ liệu analytics và kết hợp nghiên cứu.",
+                Outcome = "Ra quyết định UX dựa trên số liệu.",
+                Requirements = "Đã từng làm UX cơ bản.",
+                LessonCount = 18,
+                LessonMinutes = 12,
+                ReviewCount = 3,
+                Rating = 4
+            },
+            new CourseSeed
+            {
+                Title = "Thiết kế hệ thống Design System",
+                CategorySlug = SlugHelper.Slugify("Thiết kế UX/UI"),
+                InstructorEmail = "therese.fessenden@educourse.dev",
+                Price = 349000m,
+                FlashSalePrice = 279000m,
+                Level = "Advanced",
+                Language = "Vietnamese",
+                ShortDescription = "Xây dựng design system bền vững.",
+                Description = "Tạo hệ thống component nhất quán cho sản phẩm.",
+                Outcome = "Thiết kế và quản trị design system hiệu quả.",
+                Requirements = "Đã có kinh nghiệm UI/UX.",
+                LessonCount = 28,
+                LessonMinutes = 12,
+                ReviewCount = 3,
+                Rating = 5
+            }
+        };
+
+        foreach (var seed in uxCourseSeeds)
+        {
+            if (!instructors.TryGetValue(seed.InstructorEmail, out var seedInstructor))
+            {
+                seedInstructor = instructor;
+            }
+
+            var category = await db.Categories.FirstOrDefaultAsync(c => c.Slug == seed.CategorySlug)
+                ?? await db.Categories.FirstAsync();
+
+            var course = await EnsureCourseAsync(db, seed, seedInstructor, category);
+            await EnsureLessonsAsync(db, course, seed.LessonCount, seed.LessonMinutes);
+            await EnsureEnrollmentsAsync(db, course, studentUsers, seed.ReviewCount + 2);
+            await EnsureReviewsAsync(db, course, studentUsers, seed.ReviewCount, seed.Rating);
+        }
+
+        if (!await db.Coupons.AnyAsync())
+        {
+            var now = DateTime.UtcNow;
+            db.Coupons.AddRange(
+                new Coupon
+                {
+                    Code = "GESTALT30",
+                    Description = "Giảm 30% cho khóa Gestalt",
+                    Type = "percent",
+                    Value = 30,
+                    MinOrder = 199000,
+                    MaxUses = 200,
+                    UsedCount = 0,
+                    ExpiresAt = now.AddMonths(2),
+                    IsActive = true,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                },
+                new Coupon
+                {
+                    Code = "UX199",
+                    Description = "Giảm 50K cho đơn từ 199K",
+                    Type = "fixed",
+                    Value = 50000,
+                    MinOrder = 199000,
+                    MaxUses = 300,
+                    UsedCount = 0,
+                    ExpiresAt = now.AddMonths(1),
+                    IsActive = true,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                },
+                new Coupon
+                {
+                    Code = "WELCOME10",
+                    Description = "Giảm 10% cho học viên mới",
+                    Type = "percent",
+                    Value = 10,
+                    MinOrder = 99000,
+                    MaxUses = 500,
+                    UsedCount = 0,
+                    ExpiresAt = now.AddMonths(3),
+                    IsActive = true,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                }
+            );
 
             await db.SaveChangesAsync();
         }
@@ -778,5 +1053,181 @@ public static class SeedData
 
         db.SystemSettings.AddRange(missing);
         await db.SaveChangesAsync();
+    }
+
+    private static async Task<Category> EnsureCategoryAsync(ApplicationDbContext db, string title)
+    {
+        var slug = SlugHelper.Slugify(title);
+        var existing = await db.Categories.FirstOrDefaultAsync(c => c.Slug == slug);
+        if (existing != null)
+        {
+            if (!string.Equals(existing.Title, title, StringComparison.Ordinal))
+            {
+                existing.Title = title;
+                await db.SaveChangesAsync();
+            }
+            return existing;
+        }
+
+        var category = new Category
+        {
+            Title = title,
+            Slug = slug
+        };
+        db.Categories.Add(category);
+        await db.SaveChangesAsync();
+        return category;
+    }
+
+    private static async Task<Course> EnsureCourseAsync(
+        ApplicationDbContext db,
+        CourseSeed seed,
+        ApplicationUser instructor,
+        Category category)
+    {
+        var slug = SlugHelper.Slugify(seed.Title);
+        var existing = await db.Courses.FirstOrDefaultAsync(c => c.Slug == slug);
+        if (existing != null)
+        {
+            return existing;
+        }
+
+        var now = DateTime.UtcNow;
+        var course = new Course
+        {
+            Title = seed.Title,
+            Slug = slug,
+            InstructorId = instructor.Id,
+            CategoryId = category.Id,
+            ShortDescription = seed.ShortDescription,
+            Description = seed.Description,
+            Outcome = seed.Outcome,
+            Requirements = seed.Requirements,
+            Language = seed.Language,
+            Price = seed.Price,
+            FlashSalePrice = seed.FlashSalePrice,
+            FlashSaleStartsAt = seed.FlashSalePrice.HasValue ? now.AddDays(-1) : null,
+            FlashSaleEndsAt = seed.FlashSalePrice.HasValue ? now.AddDays(14) : null,
+            Level = seed.Level,
+            ThumbnailUrl = "/uploads/seed-course.jpg",
+            PreviewVideoUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            IsPublished = true,
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        db.Courses.Add(course);
+        await db.SaveChangesAsync();
+        return course;
+    }
+
+    private static async Task EnsureLessonsAsync(ApplicationDbContext db, Course course, int count, int minutes)
+    {
+        if (await db.Lessons.AnyAsync(l => l.CourseId == course.Id))
+        {
+            return;
+        }
+
+        var lessons = new List<Lesson>();
+        for (var i = 1; i <= count; i += 1)
+        {
+            lessons.Add(new Lesson
+            {
+                CourseId = course.Id,
+                Title = $"Bài {i}",
+                ContentType = "video",
+                DurationMinutes = minutes,
+                SortOrder = i,
+                VideoUrl = course.PreviewVideoUrl
+            });
+        }
+
+        db.Lessons.AddRange(lessons);
+        await db.SaveChangesAsync();
+    }
+
+    private static async Task EnsureEnrollmentsAsync(ApplicationDbContext db, Course course, List<ApplicationUser> users, int take)
+    {
+        if (users.Count == 0)
+        {
+            return;
+        }
+
+        var existingUserIds = await db.Enrollments
+            .Where(e => e.CourseId == course.Id)
+            .Select(e => e.UserId)
+            .ToListAsync();
+
+        var toEnroll = users
+            .Select(u => u.Id)
+            .Where(id => !existingUserIds.Contains(id))
+            .Take(take)
+            .ToList();
+
+        if (toEnroll.Count == 0)
+        {
+            return;
+        }
+
+        db.Enrollments.AddRange(toEnroll.Select(userId => new Enrollment
+        {
+            CourseId = course.Id,
+            UserId = userId,
+            CreatedAt = DateTime.UtcNow
+        }));
+        await db.SaveChangesAsync();
+    }
+
+    private static async Task EnsureReviewsAsync(ApplicationDbContext db, Course course, List<ApplicationUser> users, int count, int rating)
+    {
+        if (users.Count == 0)
+        {
+            return;
+        }
+
+        var existingReviewers = await db.Reviews
+            .Where(r => r.CourseId == course.Id)
+            .Select(r => r.UserId)
+            .ToListAsync();
+
+        var toReview = users
+            .Where(u => !existingReviewers.Contains(u.Id))
+            .Take(count)
+            .ToList();
+
+        if (toReview.Count == 0)
+        {
+            return;
+        }
+
+        db.Reviews.AddRange(toReview.Select(u => new Review
+        {
+            CourseId = course.Id,
+            UserId = u.Id,
+            Rating = rating,
+            Comment = $"Khóa học \"{course.Title}\" rất hữu ích.",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        }));
+        await db.SaveChangesAsync();
+    }
+
+    private sealed class CourseSeed
+    {
+        public string Title { get; init; } = string.Empty;
+        public string CategorySlug { get; init; } = string.Empty;
+        public string InstructorEmail { get; init; } = string.Empty;
+        public decimal Price { get; init; }
+        public decimal? FlashSalePrice { get; init; }
+        public string Level { get; init; } = string.Empty;
+        public string Language { get; init; } = string.Empty;
+        public string ShortDescription { get; init; } = string.Empty;
+        public string Description { get; init; } = string.Empty;
+        public string Outcome { get; init; } = string.Empty;
+        public string Requirements { get; init; } = string.Empty;
+        public int LessonCount { get; init; }
+        public int LessonMinutes { get; init; }
+        public int ReviewCount { get; init; }
+        public int Rating { get; init; }
     }
 }

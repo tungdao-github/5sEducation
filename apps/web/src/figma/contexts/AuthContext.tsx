@@ -1,38 +1,56 @@
-﻿"use client";
+"use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
-import { fetchJson, fetchJsonWithAuth, getStoredToken, setStoredToken } from "@/lib/api";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  AUTH_TOKEN_KEY,
+  AUTH_USER_KEY,
+  clearStoredAuth,
+  fetchJson,
+  fetchJsonWithAuth,
+  getStoredToken,
+  getStoredUser,
+  setStoredToken,
+  setStoredUser,
+} from "@/lib/api";
 
 export interface User {
   id: string;
   name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   avatar?: string;
-  role: "user" | "admin";
+  role: "user" | "admin" | "instructor";
+  roles: string[];
   points: number;
   level: "Bronze" | "Silver" | "Gold" | "Platinum";
   joinDate: string;
   phone?: string;
   bio?: string;
+  emailConfirmed?: boolean;
+  status?: string;
+  instructorStatus?: "pending" | "approved" | "rejected";
+  expertise?: string[];
+  socialLinks?: {
+    website?: string;
+    linkedin?: string;
+    github?: string;
+    twitter?: string;
+  };
 }
 
 type AuthMode = "login" | "register" | "forgot";
+type AuthResult = { success: boolean; message: string };
 
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isAdmin: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
-  register: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
-  logout: () => void;
-  updateUser: (data: Partial<User>) => Promise<void> | void;
-  showAuthModal: boolean;
-  authMode: AuthMode;
-  openAuthModal: (mode?: AuthMode) => void;
-  closeAuthModal: () => void;
-}
-
-type ApiUser = {
+type UserDto = {
   id: string;
   email: string;
   firstName: string;
@@ -45,44 +63,63 @@ type ApiUser = {
   loyaltyPoints?: number;
   loyaltyTier?: string;
   createdAt?: string;
+  status?: string;
+  roles?: string[];
+  Roles?: string[];
 };
 
 type AuthResponse = {
   token?: string;
   Token?: string;
-  user?: ApiUser;
-  User?: ApiUser;
+  user?: UserDto;
+  User?: UserDto;
+  expiresAt?: string;
 };
 
-const PROFILE_EXTRAS_KEY = "profile_extras";
+type ForgotPasswordResponse = {
+  message?: string;
+  resetLink?: string;
+};
 
+interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  isInstructor: boolean;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  register: (name: string, email: string, password: string) => Promise<AuthResult>;
+  forgotPassword: (email: string) => Promise<AuthResult>;
+  loginWithGoogleIdToken: (idToken: string) => Promise<AuthResult>;
+  loginWithFacebookAccessToken: (accessToken: string) => Promise<AuthResult>;
+  logout: () => void;
+  updateUser: (data: Partial<User>) => Promise<AuthResult>;
+  applyAsInstructor: (data: {
+    expertise: string[];
+    bio: string;
+    socialLinks?: User["socialLinks"];
+  }) => Promise<AuthResult>;
+  showAuthModal: boolean;
+  authMode: AuthMode;
+  openAuthModal: (mode?: AuthMode) => void;
+  closeAuthModal: () => void;
+}
+
+const AUTH_CHANGE_EVENT = "auth-changed";
+const PROFILE_EXTRAS_KEY = "profile_extras";
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-function resolveUser(dto: ApiUser | null | undefined): User | null {
-  if (!dto) return null;
-  const fullName = `${dto.firstName ?? ""} ${dto.lastName ?? ""}`.trim();
-  const storedExtras = typeof window !== "undefined" ? window.localStorage.getItem(PROFILE_EXTRAS_KEY) : null;
-  let extras: { phone?: string; bio?: string } = {};
-  if (storedExtras) {
-    try {
-      extras = JSON.parse(storedExtras);
-    } catch {
-      extras = {};
-    }
+function splitFullName(fullName: string) {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) {
+    return { firstName: "Edu", lastName: "User" };
   }
-  const isAdmin = dto.isAdmin ?? dto.IsAdmin ?? false;
-  const tier = (dto.loyaltyTier as User["level"]) || "Bronze";
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: parts[0] };
+  }
   return {
-    id: dto.id,
-    name: fullName || dto.email,
-    email: dto.email,
-    avatar: dto.avatarUrl ?? undefined,
-    role: isAdmin ? "admin" : "user",
-    points: dto.loyaltyPoints ?? 0,
-    level: tier,
-    joinDate: dto.createdAt ?? new Date().toISOString().split("T")[0],
-    phone: dto.phoneNumber ?? extras.phone,
-    bio: extras.bio,
+    firstName: parts[0],
+    lastName: parts.slice(1).join(" "),
   };
 }
 
@@ -90,130 +127,309 @@ function extractToken(payload: AuthResponse) {
   return payload.token ?? payload.Token ?? "";
 }
 
+function readProfileExtras() {
+  if (typeof window === "undefined") return {} as Pick<User, "bio" | "phone" | "instructorStatus" | "expertise" | "socialLinks">;
+  const raw = window.localStorage.getItem(PROFILE_EXTRAS_KEY);
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) as Pick<User, "bio" | "phone" | "instructorStatus" | "expertise" | "socialLinks">;
+  } catch {
+    return {};
+  }
+}
+
+function writeProfileExtras(user: Partial<User>) {
+  if (typeof window === "undefined") return;
+  const current = readProfileExtras();
+  window.localStorage.setItem(
+    PROFILE_EXTRAS_KEY,
+    JSON.stringify({
+      ...current,
+      bio: user.bio ?? current.bio,
+      phone: user.phone ?? current.phone,
+      instructorStatus: user.instructorStatus ?? current.instructorStatus,
+      expertise: user.expertise ?? current.expertise,
+      socialLinks: user.socialLinks ?? current.socialLinks,
+    }),
+  );
+}
+
+function toUser(dto: UserDto): User {
+  const roles = Array.isArray(dto.roles)
+    ? dto.roles
+    : Array.isArray(dto.Roles)
+      ? dto.Roles
+      : [];
+  const isAdmin = dto.isAdmin ?? dto.IsAdmin ?? roles.some((role) => role.toLowerCase() === "admin");
+  const isInstructor = roles.some((role) => role.toLowerCase() === "instructor");
+  const fullName = `${dto.firstName ?? ""} ${dto.lastName ?? ""}`.trim() || dto.email;
+  const extras = readProfileExtras();
+
+  return {
+    id: dto.id,
+    name: fullName,
+    firstName: dto.firstName ?? "",
+    lastName: dto.lastName ?? "",
+    email: dto.email,
+    avatar: dto.avatarUrl ?? undefined,
+    role: isAdmin ? "admin" : isInstructor ? "instructor" : "user",
+    roles,
+    points: dto.loyaltyPoints ?? 0,
+    level: (dto.loyaltyTier || "Bronze") as User["level"],
+    joinDate: dto.createdAt ?? new Date().toISOString(),
+    phone: dto.phoneNumber ?? extras.phone,
+    bio: extras.bio,
+    emailConfirmed: dto.emailConfirmed ?? true,
+    status: dto.status,
+    instructorStatus: extras.instructorStatus,
+    expertise: extras.expertise,
+    socialLinks: extras.socialLinks,
+  };
+}
+
+function persistUser(user: User | null) {
+  setStoredUser(user);
+}
+
+function restoreStoredUser() {
+  return getStoredUser<User>();
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
 
-  const loadCurrentUser = useCallback(async () => {
+  const hydrateUser = useCallback(async () => {
     const token = getStoredToken();
+    const cachedUser = restoreStoredUser();
+
     if (!token) {
       setUser(null);
+      setIsLoading(false);
       return;
     }
 
+    if (cachedUser) {
+      setUser(cachedUser);
+    }
+
     try {
-      const data = await fetchJsonWithAuth<ApiUser>("/api/auth/me");
-      setUser(resolveUser(data));
-    } catch (error) {
-      console.error("Failed to load current user", error);
-      setStoredToken(null);
+      const dto = await fetchJsonWithAuth<UserDto>("/api/auth/me");
+      const mappedUser = toUser(dto);
+      setUser(mappedUser);
+      persistUser(mappedUser);
+    } catch {
+      clearStoredAuth();
       setUser(null);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadCurrentUser();
-  }, [loadCurrentUser]);
+    let mounted = true;
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handler = () => loadCurrentUser();
-    window.addEventListener("auth-changed", handler);
-    return () => window.removeEventListener("auth-changed", handler);
-  }, [loadCurrentUser]);
+    const run = async () => {
+      if (!mounted) return;
+      await hydrateUser();
+    };
 
-  const login = async (email: string, password: string) => {
+    const handleAuthChanged = () => {
+      void run();
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key && event.key !== AUTH_TOKEN_KEY && event.key !== AUTH_USER_KEY) {
+        return;
+      }
+      void run();
+    };
+
+    void run();
+    window.addEventListener(AUTH_CHANGE_EVENT, handleAuthChanged);
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener(AUTH_CHANGE_EVENT, handleAuthChanged);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, [hydrateUser]);
+
+  const completeLogin = (response: AuthResponse, message: string): AuthResult => {
+    const token = extractToken(response);
+    const userDto = response.user ?? response.User;
+    if (!token || !userDto) {
+      return { success: false, message: "Đăng nhập thất bại: thiếu thông tin phiên." };
+    }
+
+    const mappedUser = toUser(userDto);
+    setStoredToken(token);
+    persistUser(mappedUser);
+    setUser(mappedUser);
+    setIsLoading(false);
+    setShowAuthModal(false);
+    window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+    return { success: true, message };
+  };
+
+  const login = async (email: string, password: string): Promise<AuthResult> => {
     try {
-      const data = await fetchJson<AuthResponse>("/api/auth/login", {
+      const response = await fetchJson<AuthResponse>("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
+      return completeLogin(response, "Đăng nhập thành công.");
+    } catch (error) {
+      return { success: false, message: error instanceof Error ? error.message : "Đăng nhập thất bại." };
+    }
+  };
 
-      const token = extractToken(data);
-      if (!token) {
-        return { success: false, message: "Đăng nhập thất bại: thiếu token" };
+  const register = async (name: string, email: string, password: string): Promise<AuthResult> => {
+    try {
+      const parts = splitFullName(name);
+      await fetchJson<{ message?: string }>("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify({
+          email,
+          password,
+          firstName: parts.firstName,
+          lastName: parts.lastName,
+        }),
+      });
+
+      const loginResult = await login(email, password);
+      if (loginResult.success) {
+        return loginResult;
       }
 
-      setStoredToken(token);
-      const apiUser = data.user ?? data.User;
-      const resolved = resolveUser(apiUser);
-      setUser(resolved);
-      setShowAuthModal(false);
+      return {
+        success: true,
+        message: "Đăng ký thành công. Nếu chưa đăng nhập được, hãy xác thực email trước.",
+      };
+    } catch (error) {
+      return { success: false, message: error instanceof Error ? error.message : "Đăng ký thất bại." };
+    }
+  };
 
-      if (typeof window !== "undefined") {
-        if (resolved?.role === "admin") {
-          window.location.assign("/admin");
-        } else {
-          window.location.assign("/");
-        }
-      }
+  const forgotPassword = async (email: string): Promise<AuthResult> => {
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail) {
+      return { success: false, message: "Vui lòng nhập email để nhận liên kết đặt lại mật khẩu." };
+    }
 
-      return { success: true, message: "Đăng nhập thành công!" };
+    try {
+      const resetUrl = typeof window !== "undefined" ? `${window.location.origin}/reset-password` : "";
+      const response = await fetchJson<ForgotPasswordResponse>("/api/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email: normalizedEmail, resetUrl }),
+      });
+
+      return {
+        success: true,
+        message: response.message || "Nếu email tồn tại, hệ thống đã gửi liên kết đặt lại mật khẩu.",
+      };
     } catch (error) {
       return {
         success: false,
-        message: error instanceof Error ? error.message : "Email hoặc mật khẩu không đúng",
+        message: error instanceof Error ? error.message : "Không thể gửi liên kết đặt lại mật khẩu.",
       };
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const loginWithGoogleIdToken = async (idToken: string): Promise<AuthResult> => {
     try {
-      const parts = name.trim().split(/\s+/);
-      const firstName = parts.shift() ?? "";
-      const lastName = parts.join(" ") || firstName;
-
-      const res = await fetchJson<{ message?: string }>("/api/auth/register", {
+      const response = await fetchJson<AuthResponse>("/api/auth/google", {
         method: "POST",
-        body: JSON.stringify({ firstName, lastName, email, password }),
+        body: JSON.stringify({ idToken }),
       });
-
-      setShowAuthModal(false);
-      return {
-        success: true,
-        message: res?.message || "Đăng ký thành công. Vui lòng xác thực email.",
-      };
+      return completeLogin(response, "Đăng nhập Google thành công.");
     } catch (error) {
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : "Đăng ký thất bại",
-      };
+      return { success: false, message: error instanceof Error ? error.message : "Đăng nhập Google thất bại." };
+    }
+  };
+
+  const loginWithFacebookAccessToken = async (accessToken: string): Promise<AuthResult> => {
+    try {
+      const response = await fetchJson<AuthResponse>("/api/auth/facebook", {
+        method: "POST",
+        body: JSON.stringify({ accessToken }),
+      });
+      return completeLogin(response, "Đăng nhập Facebook thành công.");
+    } catch (error) {
+      return { success: false, message: error instanceof Error ? error.message : "Đăng nhập Facebook thất bại." };
     }
   };
 
   const logout = () => {
+    clearStoredAuth({ notify: true });
     setUser(null);
-    setStoredToken(null);
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("auth-changed"));
+    setShowAuthModal(false);
+  };
+
+  const updateUser = async (data: Partial<User>): Promise<AuthResult> => {
+    if (!user) {
+      return { success: false, message: "Bạn chưa đăng nhập." };
+    }
+
+    writeProfileExtras(data);
+
+    try {
+      const name = data.name ?? `${data.firstName ?? user.firstName} ${data.lastName ?? user.lastName}`.trim();
+      const parts = splitFullName(name);
+      const dto = await fetchJsonWithAuth<UserDto>("/api/auth/me", {
+        method: "PUT",
+        body: JSON.stringify({
+          firstName: parts.firstName,
+          lastName: parts.lastName,
+          avatarUrl: data.avatar ?? user.avatar ?? null,
+        }),
+      });
+
+      const updatedUser = {
+        ...toUser(dto),
+        bio: data.bio ?? user.bio,
+        phone: data.phone ?? user.phone,
+        instructorStatus: data.instructorStatus ?? user.instructorStatus,
+        expertise: data.expertise ?? user.expertise,
+        socialLinks: data.socialLinks ?? user.socialLinks,
+      };
+
+      setUser(updatedUser);
+      persistUser(updatedUser);
+      return { success: true, message: "Cập nhật hồ sơ thành công." };
+    } catch (error) {
+      return { success: false, message: error instanceof Error ? error.message : "Cập nhật hồ sơ thất bại." };
     }
   };
 
-  const updateUser = async (data: Partial<User>) => {
-    if (!user) return;
+  const applyAsInstructor = async (data: {
+    expertise: string[];
+    bio: string;
+    socialLinks?: User["socialLinks"];
+  }): Promise<AuthResult> => {
+    if (!user) {
+      return { success: false, message: "Bạn chưa đăng nhập." };
+    }
 
-    const extras: { phone?: string; bio?: string } = {
-      phone: data.phone ?? user.phone,
-      bio: data.bio ?? user.bio,
+    const nextUser: User = {
+      ...user,
+      instructorStatus: "pending",
+      bio: data.bio,
+      expertise: data.expertise,
+      socialLinks: data.socialLinks,
     };
 
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(PROFILE_EXTRAS_KEY, JSON.stringify(extras));
-    }
+    writeProfileExtras(nextUser);
+    setUser(nextUser);
+    persistUser(nextUser);
 
-    const [firstName = "", ...rest] = (data.name ?? user.name).split(/\s+/);
-    const lastName = rest.join(" ") || firstName;
-
-    try {
-      const updated = await fetchJsonWithAuth<ApiUser>("/api/auth/me", {
-        method: "PUT",
-        body: JSON.stringify({ firstName, lastName, avatarUrl: data.avatar }),
-      });
-      setUser(resolveUser(updated));
-    } catch (error) {
-      console.error("Failed to update profile", error);
-    }
+    return {
+      success: true,
+      message: "Đơn đăng ký đã được lưu. Bạn có thể nối backend duyệt giảng viên ở bước tiếp theo.",
+    };
   };
 
   const openAuthModal = (mode: AuthMode = "login") => {
@@ -223,29 +439,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const closeAuthModal = () => setShowAuthModal(false);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: !!user,
-        isAdmin: user?.role === "admin",
-        login,
-        register,
-        logout,
-        updateUser,
-        showAuthModal,
-        authMode,
-        openAuthModal,
-        closeAuthModal,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      isAdmin: user?.role === "admin",
+      isInstructor: user?.role === "instructor" || user?.role === "admin",
+      isLoading,
+      login,
+      register,
+      forgotPassword,
+      loginWithGoogleIdToken,
+      loginWithFacebookAccessToken,
+      logout,
+      updateUser,
+      applyAsInstructor,
+      showAuthModal,
+      authMode,
+      openAuthModal,
+      closeAuthModal,
+    }),
+    [user, isLoading, showAuthModal, authMode],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within AuthProvider");
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
   return context;
 }

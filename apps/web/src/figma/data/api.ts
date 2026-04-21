@@ -1,4 +1,5 @@
 ﻿import { fetchJson, fetchJsonWithAuth, resolveApiAsset } from "@/lib/api";
+import type { AppLocale } from "@/lib/i18n";
 import type { Course } from "../contexts/CartContext";
 
 export type CategoryDto = {
@@ -38,7 +39,87 @@ export type LessonDto = {
   title: string;
   contentType: string;
   durationMinutes: number;
+  videoUrl?: string;
   sortOrder: number;
+  hasExercise?: boolean;
+  exercise?: LessonExerciseDto | null;
+};
+
+export type LessonExerciseQuestionDto = {
+  id: number;
+  question: string;
+  optionA: string;
+  optionB: string;
+  optionC: string;
+  optionD: string;
+  sortOrder: number;
+};
+
+export type LessonExerciseDto = {
+  passingPercent: number;
+  timeLimitSeconds: number;
+  maxTabSwitches: number;
+  questions: LessonExerciseQuestionDto[];
+};
+
+export type LessonExerciseAnswerSubmissionDto = {
+  questionId: number;
+  selectedOption: number;
+};
+
+export type LessonExerciseQuestionResultDto = {
+  questionId: number;
+  question: string;
+  selectedOption: number;
+  correctOption: number;
+  isCorrect: boolean;
+  explanation: string;
+};
+
+export type LessonExerciseStatusDto = {
+  lessonId: number;
+  passed: boolean;
+  attemptCount: number;
+  bestScorePercent: number;
+  lastScorePercent?: number | null;
+  lastCorrectAnswers?: number | null;
+  lastTotalQuestions?: number | null;
+  lastPassed?: boolean | null;
+  lastTimedOut?: boolean | null;
+  lastTabViolation?: boolean | null;
+  lastTabSwitchCount?: number | null;
+  passingPercent: number;
+  timeLimitSeconds: number;
+  maxTabSwitches: number;
+  lastAttemptedAt?: string | null;
+};
+
+export type LessonExerciseResultDto = {
+  isCorrect: boolean;
+  passed: boolean;
+  attemptCount: number;
+  scorePercent: number;
+  passingPercent: number;
+  correctAnswers: number;
+  totalQuestions: number;
+  timeSpentSeconds: number;
+  allowedTimeSeconds: number;
+  timedOut: boolean;
+  tabSwitchCount: number;
+  allowedTabSwitches: number;
+  tabViolation: boolean;
+  messageCode: string;
+  message: string;
+  questionResults: LessonExerciseQuestionResultDto[];
+};
+
+export type ProgressSnapshotDto = {
+  courseId: number;
+  lastLessonId?: number | null;
+  totalLessons: number;
+  completedLessons: number;
+  progressPercent: number;
+  completedLessonIds: number[];
 };
 
 export type CourseDetailDto = CourseListDto & {
@@ -77,6 +158,18 @@ export type CourseCompareDto = {
   totalDurationMinutes?: number | null;
 };
 
+export type LearningPathListDto = {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  level: string;
+  thumbnailUrl?: string | null;
+  estimatedHours?: number | null;
+  courseCount: number;
+  isPublished: boolean;
+};
+
 export type CartItemDto = {
   id: number;
   courseId: number;
@@ -113,6 +206,16 @@ export type BlogPostListDto = {
   publishedAt?: string | null;
 };
 
+export type ReviewDto = {
+  id: number;
+  courseId: number;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  userName: string;
+  userId?: string;
+};
+
 export type BlogPostDetailDto = BlogPostListDto & {
   content: string;
   seoTitle?: string | null;
@@ -134,6 +237,50 @@ export type BlogPost = {
   readTime: number;
   views: number;
   category: string;
+};
+
+export type CourseModel = Course;
+
+export type LearningLesson = {
+  id: string;
+  numericId: number;
+  courseId: number;
+  sectionId: string;
+  title: string;
+  type: "video" | "quiz";
+  duration: string;
+  durationMinutes: number;
+  videoUrl: string;
+  isPreview: boolean;
+  description: string;
+  resources: Array<{
+    id: string;
+    title: string;
+    url: string;
+    type: "pdf" | "link" | "zip" | "file";
+    size?: string;
+  }>;
+  exercise?: {
+    id: string;
+    title: string;
+    description: string;
+    passingScore: number;
+    timeLimit: number;
+    maxTabSwitches: number;
+    questions: Array<{
+      id: string;
+      numericId: number;
+      question: string;
+      options: string[];
+    }>;
+  };
+};
+
+export type LearningSection = {
+  id: string;
+  title: string;
+  lessons: LearningLesson[];
+  duration: string;
 };
 
 export type EnrollmentDto = {
@@ -291,6 +438,37 @@ export type SystemSettingUpdateRequest = {
   description?: string | null;
 };
 
+export type PublicStatsDto = {
+  totalCourses: number;
+  totalStudents: number;
+  totalInstructors: number;
+  averageRating: number;
+  totalReviews: number;
+};
+
+export type CourseManageDto = {
+  id: number;
+  title: string;
+  slug: string;
+  price: number;
+  flashSalePrice?: number | null;
+  flashSaleStartsAt?: string | null;
+  flashSaleEndsAt?: string | null;
+  thumbnailUrl: string;
+  level: string;
+  language: string;
+  isPublished: boolean;
+  studentCount: number;
+  averageRating: number;
+  reviewCount: number;
+  revenue: number;
+  totalLessons: number;
+  updatedAt?: string | null;
+  category?: CategoryDto | null;
+  instructorName?: string | null;
+  instructorAvatarUrl?: string | null;
+};
+
 export type CouponDto = {
   id: number;
   code: string;
@@ -343,25 +521,25 @@ export type BlogCommentLikeResponse = {
 };
 
 const levelLabels: Record<string, string> = {
-  Beginner: "Sơ cấp",
-  Intermediate: "Trung cấp",
+  Beginner: "So c?p",
+  Intermediate: "Trung c?p",
   Advanced: "Nâng cao",
-  "All Levels": "Phù hợp mọi trình độ",
-  "All levels": "Phù hợp mọi trình độ",
+  "All Levels": "Phù h?p m?i trình d?",
+  "All levels": "Phù h?p m?i trình d?",
 };
 
 const languageLabels: Record<string, string> = {
-  English: "Tiếng Anh",
-  Vietnamese: "Tiếng Việt",
+  English: "Ti?ng Anh",
+  Vietnamese: "Ti?ng Vi?t",
 };
 
-export function formatLevel(level: string, locale: "vi" | "en" = "vi") {
-  if (locale === "en") return level;
+export function formatLevel(level: string, locale: AppLocale = "vi") {
+  if (locale !== "vi") return level;
   return levelLabels[level] ?? level;
 }
 
-export function formatLanguage(language: string, locale: "vi" | "en" = "vi") {
-  if (locale === "en") return language;
+export function formatLanguage(language: string, locale: AppLocale = "vi") {
+  if (locale !== "vi") return language;
   return languageLabels[language] ?? language;
 }
 
@@ -371,8 +549,8 @@ export function formatDuration(minutes?: number | null) {
   const h = Math.floor(total / 60);
   const m = total % 60;
   if (h <= 0) return `${m} phút`;
-  if (m === 0) return `${h} giờ`;
-  return `${h} giờ ${m} phút`;
+  if (m === 0) return `${h} gi?`;
+  return `${h} gi? ${m} phút`;
 }
 
 export function normalizeCurrency(amount: number) {
@@ -382,15 +560,15 @@ export function normalizeCurrency(amount: number) {
 
 export function formatPrice(amount: number, locale: string = "vi-VN") {
   const normalized = normalizeCurrency(amount);
-  return `${normalized.toLocaleString(locale)}đ`;
+  return `${normalized.toLocaleString(locale)}d`;
 }
 
 export function formatPriceCompact(amount: number, locale: string = "vi-VN") {
   const normalized = normalizeCurrency(amount);
   if (normalized >= 1000) {
-    return `${Math.round(normalized / 1000).toLocaleString(locale)}K₫`;
+    return `${Math.round(normalized / 1000).toLocaleString(locale)}K?`;
   }
-  return `${normalized.toLocaleString(locale)}đ`;
+  return `${normalized.toLocaleString(locale)}d`;
 }
 
 function splitLines(value?: string | null) {
@@ -416,7 +594,7 @@ function buildCurriculumFromLessons(lessons: LessonDto[]) {
     const chunk = sorted.slice(i, i + chunkSize);
     const duration = chunk.reduce((sum, l) => sum + (l.durationMinutes || 0), 0);
     sections.push({
-      title: `Phần ${Math.floor(i / chunkSize) + 1}`,
+      title: `Ph?n ${Math.floor(i / chunkSize) + 1}`,
       lessons: chunk.length,
       duration: formatDuration(duration),
       items: chunk.map((lesson) => ({
@@ -428,7 +606,57 @@ function buildCurriculumFromLessons(lessons: LessonDto[]) {
   return sections;
 }
 
-function mapCommonCourse(dto: CourseListDto, locale: "vi" | "en" = "vi") {
+export function buildLearningSections(lessons: LessonDto[]): LearningSection[] {
+  if (!lessons.length) return [] as LearningSection[];
+
+  const chunkSize = 8;
+  const sorted = [...lessons].sort((a, b) => a.sortOrder - b.sortOrder);
+
+  return Array.from({ length: Math.ceil(sorted.length / chunkSize) }).map((_, index) => {
+    const chunk = sorted.slice(index * chunkSize, index * chunkSize + chunkSize);
+    const minutes = chunk.reduce((sum, lesson) => sum + (lesson.durationMinutes || 0), 0);
+    const sectionId = `section-${index + 1}`;
+
+    return {
+      id: sectionId,
+      title: `Ph?n ${index + 1}`,
+      duration: formatDuration(minutes),
+      lessons: chunk.map((lesson) => ({
+        id: String(lesson.id),
+        numericId: lesson.id,
+        courseId: lesson.courseId,
+        sectionId,
+        title: lesson.title,
+        type: lesson.contentType === "exercise" ? "quiz" : "video",
+        duration: formatDuration(lesson.durationMinutes),
+        durationMinutes: lesson.durationMinutes,
+        videoUrl: lesson.videoUrl || "",
+        isPreview: false,
+        description:
+          lesson.contentType === "exercise" ? "Bài ki?m tra cu?i bài h?c." : "Video bài gi?ng.",
+        resources: [] as LearningLesson["resources"],
+        exercise: lesson.exercise
+          ? {
+              id: `exercise-${lesson.id}`,
+              title: lesson.title,
+              description: "Hoàn thành bài ki?m tra d? m? khóa ti?n d? h?c t?p.",
+              passingScore: lesson.exercise.passingPercent,
+              timeLimit: Math.round((lesson.exercise.timeLimitSeconds || 0) / 60),
+              maxTabSwitches: lesson.exercise.maxTabSwitches,
+              questions: lesson.exercise.questions.map((question) => ({
+                id: String(question.id),
+                numericId: question.id,
+                question: question.question,
+                options: [question.optionA, question.optionB, question.optionC, question.optionD],
+              })),
+            }
+          : undefined,
+      })),
+    };
+  });
+}
+
+function mapCommonCourse(dto: CourseListDto, locale: AppLocale = "vi") {
   const totalDuration = dto.totalDurationMinutes ?? 0;
   return {
     id: String(dto.id),
@@ -437,7 +665,7 @@ function mapCommonCourse(dto: CourseListDto, locale: "vi" | "en" = "vi") {
     price: Number(dto.effectivePrice ?? dto.price),
     originalPrice: dto.originalPrice ?? undefined,
     image: resolveApiAsset(dto.thumbnailUrl),
-    instructor: dto.instructorName?.trim() || "Đang cập nhật",
+    instructor: dto.instructorName?.trim() || "Ðang c?p nh?t",
     instructorAvatar: dto.instructorAvatarUrl ?? undefined,
     duration: formatDuration(totalDuration),
     level: formatLevel(dto.level, locale),
@@ -453,11 +681,11 @@ function mapCommonCourse(dto: CourseListDto, locale: "vi" | "en" = "vi") {
   } as Course;
 }
 
-export function mapCourseList(dto: CourseListDto, locale: "vi" | "en" = "vi") {
+export function mapCourseList(dto: CourseListDto, locale: AppLocale = "vi") {
   return mapCommonCourse(dto, locale);
 }
 
-export function mapCourseDetail(dto: CourseDetailDto, locale: "vi" | "en" = "vi") {
+export function mapCourseDetail(dto: CourseDetailDto, locale: AppLocale = "vi") {
   const base = mapCommonCourse(dto, locale);
   const lessons = dto.lessons ?? [];
   const totalDuration = dto.totalDurationMinutes ?? lessons.reduce((sum, l) => sum + (l.durationMinutes || 0), 0);
@@ -473,7 +701,7 @@ export function mapCourseDetail(dto: CourseDetailDto, locale: "vi" | "en" = "vi"
   } as Course;
 }
 
-export function mapCourseCompare(dto: CourseCompareDto, locale: "vi" | "en" = "vi") {
+export function mapCourseCompare(dto: CourseCompareDto, locale: AppLocale = "vi") {
   return {
     ...mapCommonCourse(dto, locale),
     description: dto.description ?? "",
@@ -485,6 +713,10 @@ export function mapCourseCompare(dto: CourseCompareDto, locale: "vi" | "en" = "v
 export async function fetchCategories() {
   const cats = await fetchJson<CategoryDto[]>("/api/categories");
   return cats;
+}
+
+export async function fetchLearningPaths() {
+  return fetchJson<LearningPathListDto[]>("/api/learning-paths");
 }
 
 export async function fetchCourses(params?: Record<string, string | number | undefined>) {
@@ -503,10 +735,22 @@ export async function fetchCourseBySlug(slug: string) {
   return fetchJson<CourseDetailDto>(`/api/courses/${slug}`);
 }
 
+export async function fetchCourseById(id: number | string) {
+  return fetchJson<CourseDetailDto>(`/api/courses/by-id/${id}`);
+}
+
 export async function fetchCoursesByIds(ids: number[]) {
   if (!ids.length) return [] as CourseCompareDto[];
   const qs = ids.join(",");
   return fetchJson<CourseCompareDto[]>(`/api/courses/compare?ids=${qs}`);
+}
+
+export async function fetchCourseCompare(ids: Array<number | string>) {
+  const normalized = ids
+    .map((id) => Number(id))
+    .filter((id) => Number.isFinite(id) && id > 0);
+  if (!normalized.length) return [] as CourseCompareDto[];
+  return fetchJson<CourseCompareDto[]>(`/api/courses/compare?ids=${normalized.join(",")}`);
 }
 
 export async function fetchCartItems() {
@@ -533,9 +777,24 @@ export async function fetchBlogPostDetail(slug: string) {
   return fetchJson<BlogPostDetailDto>(`/api/blog/posts/${slug}`);
 }
 
+export async function fetchCourseReviews(courseId: number | string) {
+  return fetchJson<ReviewDto[]>(`/api/reviews?courseId=${courseId}`);
+}
+
+export async function upsertCourseReview(courseId: number | string, rating: number, comment: string) {
+  return fetchJsonWithAuth<void>("/api/reviews", {
+    method: "POST",
+    body: JSON.stringify({ courseId: Number(courseId), rating, comment }),
+  });
+}
+
+export async function deleteCourseReview(courseId: number | string) {
+  return fetchJsonWithAuth<void>(`/api/reviews/${courseId}`, { method: "DELETE" });
+}
+
 export function mapBlogPostList(dto: BlogPostListDto): BlogPost {
   const dateValue = dto.publishedAt ?? dto.createdAt;
-  const category = dto.tags?.[0] ?? "Tin tức";
+  const category = dto.tags?.[0] ?? "Tin t?c";
   return {
     id: String(dto.id),
     title: dto.title,
@@ -555,7 +814,7 @@ export function mapBlogPostList(dto: BlogPostListDto): BlogPost {
 
 export function mapBlogPostDetail(dto: BlogPostDetailDto): BlogPost {
   const dateValue = dto.publishedAt ?? dto.createdAt;
-  const category = dto.tags?.[0] ?? "Tin tức";
+  const category = dto.tags?.[0] ?? "Tin t?c";
   return {
     id: String(dto.id),
     title: dto.title,
@@ -581,6 +840,18 @@ export async function fetchOrders() {
   return fetchJsonWithAuth<OrderDto[]>("/api/orders/my");
 }
 
+export async function fetchStatsSummary() {
+  return fetchJson<PublicStatsDto>("/api/stats/summary");
+}
+
+export async function fetchInstructorCourses() {
+  return fetchJsonWithAuth<CourseManageDto[]>("/api/instructor/courses");
+}
+
+export async function fetchInstructorCourseById(id: number | string) {
+  return fetchJsonWithAuth<CourseDetailDto>(`/api/instructor/courses/${id}`);
+}
+
 export async function fetchAddresses() {
   return fetchJsonWithAuth<AddressDto[]>("/api/addresses");
 }
@@ -601,6 +872,159 @@ export async function updateAddress(id: number, request: AddressUpdateRequest) {
 
 export async function deleteAddress(id: number) {
   return fetchJsonWithAuth<void>(`/api/addresses/${id}`, { method: "DELETE" });
+}
+
+export type CourseMutationInput = {
+  title: string;
+  categoryId?: number | null;
+  shortDescription: string;
+  description: string;
+  outcome: string;
+  requirements: string;
+  language: string;
+  price: number;
+  flashSalePrice?: number | null;
+  flashSaleStartsAt?: string | null;
+  flashSaleEndsAt?: string | null;
+  level: string;
+  previewVideoUrl?: string;
+  thumbnailUrl?: string;
+  isPublished: boolean;
+  thumbnailFile?: File | null;
+};
+
+function buildCourseFormData(input: CourseMutationInput) {
+  const formData = new FormData();
+  formData.append("Title", input.title);
+  if (input.categoryId) formData.append("CategoryId", String(input.categoryId));
+  formData.append("ShortDescription", input.shortDescription);
+  formData.append("Description", input.description);
+  formData.append("Outcome", input.outcome);
+  formData.append("Requirements", input.requirements);
+  formData.append("Language", input.language);
+  formData.append("Price", String(input.price));
+  if (input.flashSalePrice !== undefined && input.flashSalePrice !== null) {
+    formData.append("FlashSalePrice", String(input.flashSalePrice));
+  }
+  if (input.flashSaleStartsAt) formData.append("FlashSaleStartsAt", input.flashSaleStartsAt);
+  if (input.flashSaleEndsAt) formData.append("FlashSaleEndsAt", input.flashSaleEndsAt);
+  formData.append("Level", input.level);
+  formData.append("PreviewVideoUrl", input.previewVideoUrl ?? "");
+  formData.append("ThumbnailUrl", input.thumbnailUrl ?? "");
+  formData.append("IsPublished", String(input.isPublished));
+  if (input.thumbnailFile) formData.append("Thumbnail", input.thumbnailFile);
+  return formData;
+}
+
+export async function createCourse(input: CourseMutationInput) {
+  return fetchJsonWithAuth<CourseDetailDto>("/api/courses", {
+    method: "POST",
+    body: buildCourseFormData(input),
+  });
+}
+
+export async function updateCourse(id: number | string, input: CourseMutationInput) {
+  return fetchJsonWithAuth<void>(`/api/courses/${id}`, {
+    method: "PUT",
+    body: buildCourseFormData(input),
+  });
+}
+
+export async function deleteCourse(id: number | string) {
+  return fetchJsonWithAuth<void>(`/api/courses/${id}`, { method: "DELETE" });
+}
+
+export type LessonMutationInput = {
+  courseId: number;
+  title: string;
+  contentType: "video" | "exercise";
+  durationMinutes: number;
+  videoUrl?: string;
+  exerciseQuestion?: string;
+  exerciseOptionA?: string;
+  exerciseOptionB?: string;
+  exerciseOptionC?: string;
+  exerciseOptionD?: string;
+  exerciseCorrectOption?: number;
+  exerciseExplanation?: string;
+  exercisePassingPercent?: number;
+  exerciseTimeLimitMinutes?: number;
+  exerciseMaxTabSwitches?: number;
+  exerciseQuestions?: Array<{
+    question: string;
+    optionA: string;
+    optionB: string;
+    optionC: string;
+    optionD: string;
+    correctOption: number;
+    explanation?: string;
+    sortOrder?: number;
+  }>;
+  sortOrder?: number;
+};
+
+export async function fetchLessons(courseId: number | string) {
+  return fetchJsonWithAuth<LessonDto[]>(`/api/lessons?courseId=${courseId}`);
+}
+
+export async function createLesson(input: LessonMutationInput) {
+  return fetchJsonWithAuth<void>("/api/lessons", {
+    method: "POST",
+    body: JSON.stringify({
+      courseId: input.courseId,
+      title: input.title,
+      contentType: input.contentType,
+      durationMinutes: input.durationMinutes,
+      videoUrl: input.videoUrl ?? "",
+      exerciseQuestion: input.exerciseQuestion ?? "",
+      exerciseOptionA: input.exerciseOptionA ?? "",
+      exerciseOptionB: input.exerciseOptionB ?? "",
+      exerciseOptionC: input.exerciseOptionC ?? "",
+      exerciseOptionD: input.exerciseOptionD ?? "",
+      exerciseCorrectOption: input.exerciseCorrectOption,
+      exerciseExplanation: input.exerciseExplanation ?? "",
+      exercisePassingPercent: input.exercisePassingPercent ?? 80,
+      exerciseTimeLimitMinutes: input.exerciseTimeLimitMinutes ?? 0,
+      exerciseMaxTabSwitches: input.exerciseMaxTabSwitches ?? 2,
+      exerciseQuestions: input.exerciseQuestions ?? [],
+      sortOrder: input.sortOrder ?? 0,
+    }),
+  });
+}
+
+export async function fetchProgress(courseId: number | string) {
+  return fetchJsonWithAuth<ProgressSnapshotDto>(`/api/progress/${courseId}`);
+}
+
+export async function updateCourseProgress(payload: {
+  courseId: number;
+  lessonId: number;
+  isCompleted?: boolean;
+  setAsLast?: boolean;
+}) {
+  return fetchJsonWithAuth<ProgressSnapshotDto>("/api/progress", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function fetchLessonExerciseStatus(lessonId: number | string) {
+  return fetchJsonWithAuth<LessonExerciseStatusDto>(`/api/lessons/${lessonId}/exercise/status`);
+}
+
+export async function submitLessonExercise(
+  lessonId: number | string,
+  payload: {
+    selectedOption?: number;
+    answers?: LessonExerciseAnswerSubmissionDto[];
+    startedAtUtc?: string;
+    tabSwitchCount?: number;
+  },
+) {
+  return fetchJsonWithAuth<LessonExerciseResultDto>(`/api/lessons/${lessonId}/exercise/submit`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function fetchAdminStatsOverview() {
@@ -790,6 +1214,11 @@ export async function toggleBlogCommentLike(commentId: number) {
     method: "POST",
   });
 }
+
+
+
+
+
 
 
 

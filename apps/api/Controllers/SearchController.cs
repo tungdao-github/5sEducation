@@ -25,7 +25,8 @@ public class SearchController : ControllerBase
             return Ok(new List<SearchSuggestionDto>());
         }
 
-        var courseResults = await _db.Courses
+        var courseResultsTask = _db.Courses
+            .AsNoTracking()
             .Where(c => c.IsPublished && c.Title.Contains(term))
             .OrderByDescending(c => c.UpdatedAt)
             .Take(6)
@@ -38,7 +39,8 @@ public class SearchController : ControllerBase
             })
             .ToListAsync();
 
-        var pathResults = await _db.LearningPaths
+        var pathResultsTask = _db.LearningPaths
+            .AsNoTracking()
             .Where(p => p.IsPublished && p.Title.Contains(term))
             .OrderByDescending(p => p.UpdatedAt)
             .Take(4)
@@ -51,7 +53,9 @@ public class SearchController : ControllerBase
             })
             .ToListAsync();
 
-        var merged = courseResults.Concat(pathResults).Take(8).ToList();
+        await Task.WhenAll(courseResultsTask, pathResultsTask);
+
+        var merged = courseResultsTask.Result.Concat(pathResultsTask.Result).Take(8).ToList();
         return Ok(merged);
     }
 }

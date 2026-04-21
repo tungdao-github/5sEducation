@@ -6,7 +6,7 @@ import { useAuth } from "./AuthContext";
 import { useLanguage } from "./LanguageContext";
 import { fetchWishlistItems, fetchCoursesByIds, mapCourseCompare } from "../data/api";
 import type { WishlistItemDto } from "../data/api";
-import { fetchJsonWithAuth, resolveApiAsset } from "@/lib/api";
+import { fetchJsonWithAuth, getStoredToken, resolveApiAsset } from "@/lib/api";
 
 interface WishlistContextType {
   wishlistItems: Course[];
@@ -92,6 +92,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
       setWishlistItems(mapped);
     } catch (error) {
+      if (!getStoredToken()) {
+        setWishlistItems(readGuestWishlist());
+        return;
+      }
       console.error("Failed to load wishlist", error);
       setWishlistItems([]);
     }
