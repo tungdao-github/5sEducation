@@ -1,241 +1,507 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "@/figma/compat/router";
 import CourseCard from "../components/CourseCard";
-import { fetchCourses, mapCourseList, formatPriceCompact } from "../data/api";
+import { fetchCourses, mapCourseList } from "../data/api";
 import { useLanguage } from "../contexts/LanguageContext";
-import { Search, Zap, Star, Users, BookOpen, Award, ArrowRight, Play, ChevronLeft, ChevronRight, TrendingUp } from "lucide-react";
+import {
+  Search,
+  Play,
+  Star,
+  Users,
+  BookOpen,
+  Award,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Zap,
+  Clock,
+  CheckCircle2,
+  TrendingUp,
+  Shield,
+  Sparkles,
+  Target,
+  BarChart3,
+} from "lucide-react";
 import type { Course } from "../contexts/CartContext";
+import { cn } from "@/lib/utils";
 
+// Data
 const testimonials = [
   {
-    name: "Nguyễn Thị Mai",
-    role: "UX Designer tại FPT Software",
+    name: "Nguyen Thi Mai",
+    role: "UX Designer tai FPT Software",
     avatar: "M",
     rating: 5,
-    text: "Khóa học Gestalt Principles đã thay đổi cách tôi tiếp cận thiết kế. Tôi áp dụng ngay vào dự án và nhận được phản hồi rất tích cực từ khách hàng!",
+    text: "Khoa hoc Gestalt Principles da thay doi cach toi tiep can thiet ke. Toi ap dung ngay vao du an va nhan duoc phan hoi rat tich cuc tu khach hang!",
+    company: "FPT Software",
   },
   {
-    name: "Trần Văn Hùng",
-    role: "Product Designer tại VNG",
+    name: "Tran Van Hung",
+    role: "Product Designer tai VNG",
     avatar: "H",
     rating: 5,
-    text: "Nội dung chất lượng cao, giảng viên có kinh nghiệm thực tế. Sau 3 tháng học, tôi đã đạt được vị trí Senior UX Designer mà không cần bằng cấp.",
+    text: "Noi dung chat luong cao, giang vien co kinh nghiem thuc te. Sau 3 thang hoc, toi da dat duoc vi tri Senior UX Designer.",
+    company: "VNG",
   },
   {
-    name: "Lê Thị Hoa",
+    name: "Le Thi Hoa",
     role: "Freelance UX Writer",
     avatar: "H",
     rating: 5,
-    text: "Khóa Microcopy là một game-changer! Tôi đã tăng được tỷ lệ chuyển đổi của khách hàng lên 40% chỉ bằng cách viết lại button và form labels.",
+    text: "Khoa Microcopy la mot game-changer! Toi da tang duoc ty le chuyen doi cua khach hang len 40% chi bang cach viet lai button va form labels.",
+    company: "Freelance",
   },
   {
-    name: "Phạm Minh Đức",
-    role: "UI Designer tại Grab Vietnam",
-    avatar: "Đ",
+    name: "Pham Minh Duc",
+    role: "UI Designer tai Grab Vietnam",
+    avatar: "D",
     rating: 5,
-    text: "EduCourse là nền tảng học UX/UI tốt nhất tôi từng dùng. Nội dung cập nhật liên tục, cộng đồng học viên rất supportive và nhiệt tình.",
+    text: "EduCourse la nen tang hoc UX/UI tot nhat toi tung dung. Noi dung cap nhat lien tuc, cong dong hoc vien rat supportive.",
+    company: "Grab",
   },
 ];
 
 const instructors = [
-  { name: "Tanner Kohler", title: "UX Design Specialist", courses: 3, students: 8500, rating: 4.9, avatar: "T", color: "from-blue-500 to-indigo-500" },
-  { name: "Kate Moran", title: "UX Writer & Researcher", courses: 2, students: 6200, rating: 4.9, avatar: "K", color: "from-purple-500 to-pink-500" },
-  { name: "Jakob Nielsen", title: "Usability Expert", courses: 1, students: 5432, rating: 4.9, avatar: "J", color: "from-green-500 to-teal-500" },
-  { name: "Sarah Gibbons", title: "UX Strategy Lead", courses: 1, students: 2234, rating: 4.8, avatar: "S", color: "from-orange-500 to-red-500" },
+  {
+    name: "Tanner Kohler",
+    title: "UX Design Specialist",
+    courses: 3,
+    students: 8500,
+    rating: 4.9,
+    avatar: "T",
+  },
+  {
+    name: "Kate Moran",
+    title: "UX Writer & Researcher",
+    courses: 2,
+    students: 6200,
+    rating: 4.9,
+    avatar: "K",
+  },
+  {
+    name: "Jakob Nielsen",
+    title: "Usability Expert",
+    courses: 1,
+    students: 5432,
+    rating: 4.9,
+    avatar: "J",
+  },
+  {
+    name: "Sarah Gibbons",
+    title: "UX Strategy Lead",
+    courses: 1,
+    students: 2234,
+    rating: 4.8,
+    avatar: "S",
+  },
 ];
 
 const learningPaths = [
   {
-    title: "UX Designer từ Zero",
-    icon: "🎨",
-    duration: "6 tháng",
+    title: "UX Designer tu Zero",
+    duration: "6 thang",
     courses: 4,
-    level: "Sơ cấp → Trung cấp",
-    desc: "Lộ trình toàn diện từ cơ bản đến thành thạo UX Design",
-    color: "border-blue-200 bg-blue-50",
-    badge: "Phổ biến nhất",
+    level: "So cap - Trung cap",
+    desc: "Lo trinh toan dien tu co ban den thanh thao UX Design",
+    badge: "Pho bien nhat",
+    icon: Target,
   },
   {
-    title: "UX Writer Chuyên nghiệp",
-    icon: "✍️",
-    duration: "3 tháng",
+    title: "UX Writer Chuyen nghiep",
+    duration: "3 thang",
     courses: 2,
-    level: "Trung cấp",
-    desc: "Viết microcopy và nội dung UX hiệu quả cho sản phẩm số",
-    color: "border-purple-200 bg-purple-50",
-    badge: "Mới",
+    level: "Trung cap",
+    desc: "Viet microcopy va noi dung UX hieu qua cho san pham so",
+    badge: "Moi",
+    icon: Sparkles,
   },
   {
     title: "UX Research Master",
-    icon: "🔬",
-    duration: "4 tháng",
+    duration: "4 thang",
     courses: 3,
-    level: "Trung cấp → Nâng cao",
-    desc: "Thành thạo nghiên cứu người dùng và phân tích dữ liệu",
-    color: "border-green-200 bg-green-50",
+    level: "Trung cap - Nang cao",
+    desc: "Thanh thao nghien cuu nguoi dung va phan tich du lieu",
     badge: "",
+    icon: BarChart3,
   },
 ];
 
-const categories = [
-  "Tất cả",
-  "Thiết kế UX/UI",
-  "Nghiên cứu UX",
-  "Viết nội dung UX",
-  "Quản lý UX",
-  "Phân tích UX",
+const features = [
+  {
+    icon: Target,
+    title: "Hoc thuc chien",
+    desc: "Noi dung duoc thiet ke tu du an thuc te, ap dung ngay vao cong viec",
+  },
+  {
+    icon: Clock,
+    title: "Truy cap tron doi",
+    desc: "Mua mot lan, hoc mai mai. Cap nhat noi dung moi mien phi",
+  },
+  {
+    icon: Award,
+    title: "Chung chi co gia tri",
+    desc: "Chung chi duoc cong nhan boi hon 200 cong ty trong nganh",
+  },
+  {
+    icon: Shield,
+    title: "Ho tro 24/7",
+    desc: "Doi ngu ho tro luon san sang giai dap moi thac mac cua ban",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Hoan tien 30 ngay",
+    desc: "Khong hai long? Hoan lai 100% hoc phi trong vong 30 ngay",
+  },
+  {
+    icon: Zap,
+    title: "Hoc moi thiet bi",
+    desc: "Xem tren laptop, tablet hay dien thoai theo lich cua ban",
+  },
 ];
 
-function FlashSaleCountdown({ courses }: { courses: Course[] }) {
-  const endTime = useRef(Date.now() + 8 * 3600 * 1000 + 23 * 60 * 1000 + 45 * 1000);
-  const [timeLeft, setTimeLeft] = useState({ h: 8, m: 23, s: 45 });
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const diff = Math.max(0, endTime.current - Date.now());
-      setTimeLeft({
-        h: Math.floor(diff / 3600000),
-        m: Math.floor((diff % 3600000) / 60000),
-        s: Math.floor((diff % 60000) / 1000),
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const pad = (value: number) => String(value).padStart(2, "0");
-  const flashCourses = courses.filter((course) => course.originalPrice && course.originalPrice > course.price).slice(0, 4);
-
+// Hero Section Component
+function HeroSection({
+  searchQuery,
+  setSearchQuery,
+  onSearch,
+}: {
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+  onSearch: (e: React.FormEvent) => void;
+}) {
   return (
-    <section style={{backgroundColor: "blue"}}className="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 py-10">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-white/20">
-              <Zap className="size-6 fill-white text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-white">Flash Sale</h2>
-              <p className="text-sm text-red-100">Ưu đãi đặc biệt - Giảm đến 30%</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-white">Kết thúc sau:</span>
-            <div className="flex items-center gap-1.5">
-              {[
-                { label: "GIỜ", value: pad(timeLeft.h) },
-                { label: "PHÚT", value: pad(timeLeft.m) },
-                { label: "GIÂY", value: pad(timeLeft.s) },
-              ].map((unit, index) => (
-                <div key={unit.label} className="flex items-center gap-1.5">
-                  <div className="min-w-[50px] rounded-lg bg-white/20 px-3 py-2 text-center backdrop-blur">
-                    <div className="font-mono text-xl font-bold leading-none text-white">{unit.value}</div>
-                    <div className="mt-0.5 text-[9px] text-red-100">{unit.label}</div>
-                  </div>
-                  {index < 2 && <span className="text-lg font-bold text-white">:</span>}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+    <section className="relative bg-gradient-hero overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm-30 30v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
+      </div>
 
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {flashCourses.map((course) => (
-            <Link key={course.id} to={`/courses/${course.slug ?? course.id}`} className="group">
-              <div className="overflow-hidden rounded-xl bg-white shadow-lg transition-shadow hover:shadow-xl">
-                <div className="relative overflow-hidden">
-                  <img
-                    src={course.image}
-                    alt={course.title}
-                    className="h-28 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute left-2 top-2 rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white animate-pulse">
-                    -{Math.round((1 - (course.price * 0.7) / course.price) * 100)}%
+      <div className="container-main relative">
+        <div className="grid lg:grid-cols-2 gap-12 items-center py-16 md:py-24 lg:py-32">
+          {/* Left Content */}
+          <div className="text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-6">
+              <Zap className="size-4" />
+              <span>Hon 50,000 hoc vien dang hoc</span>
+            </div>
+
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
+              Lam chu{" "}
+              <span className="text-accent">UX/UI Design</span>
+              <br />
+              tu hom nay
+            </h1>
+
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0">
+              Hoc tu nhung chuyen gia hang dau the gioi. Noi dung thuc chien, 
+              chung chi co gia tri, hoc moi luc moi noi.
+            </p>
+
+            {/* Search Form */}
+            <form onSubmit={onSearch} className="flex gap-3 max-w-lg mx-auto lg:mx-0 mb-8">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Tim kiem khoa hoc, giang vien..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="input-lg pl-12 w-full"
+                />
+              </div>
+              <button type="submit" className="btn btn-accent btn-lg">
+                Tim ngay
+              </button>
+            </form>
+
+            {/* Quick Tags */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 text-sm">
+              <span className="text-muted-foreground">Xu huong:</span>
+              <Link to="/search?q=gestalt" className="px-3 py-1.5 bg-secondary rounded-full hover:bg-muted transition-colors">
+                Gestalt Principles
+              </Link>
+              <Link to="/search?q=microcopy" className="px-3 py-1.5 bg-secondary rounded-full hover:bg-muted transition-colors">
+                Microcopy
+              </Link>
+              <Link to="/search?q=analytics" className="px-3 py-1.5 bg-secondary rounded-full hover:bg-muted transition-colors">
+                UX Analytics
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Content - Stats Cards */}
+          <div className="hidden lg:block">
+            <div className="relative">
+              {/* Main Card */}
+              <div className="card card-elevated p-8 bg-card">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="size-16 rounded-2xl bg-accent/10 flex items-center justify-center">
+                    <Play className="size-8 text-accent" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground">Bat dau hoc ngay</h3>
+                    <p className="text-muted-foreground">200+ khoa hoc chat luong</p>
                   </div>
                 </div>
-                <div className="p-3">
-                  <p className="mb-2 line-clamp-2 text-xs font-semibold text-gray-900">{course.title}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-red-600">{formatPriceCompact(Math.round(course.price * 0.7))}</span>
-                    <span className="text-xs text-gray-400 line-through">{formatPriceCompact(course.price)}</span>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-secondary rounded-xl">
+                    <div className="text-3xl font-bold text-accent mb-1">98%</div>
+                    <div className="text-sm text-muted-foreground">Ty le hai long</div>
                   </div>
-                  <div className="mt-1.5 flex items-center gap-2 text-xs text-gray-500">
-                    <span className="text-yellow-500">★{course.rating}</span>
-                    <span>·</span>
-                    <span>{course.students.toLocaleString()} học viên</span>
+                  <div className="p-4 bg-secondary rounded-xl">
+                    <div className="text-3xl font-bold text-foreground mb-1">50K+</div>
+                    <div className="text-sm text-muted-foreground">Hoc vien</div>
+                  </div>
+                  <div className="p-4 bg-secondary rounded-xl">
+                    <div className="text-3xl font-bold text-foreground mb-1">4.9</div>
+                    <div className="text-sm text-muted-foreground">Danh gia trung binh</div>
+                  </div>
+                  <div className="p-4 bg-secondary rounded-xl">
+                    <div className="text-3xl font-bold text-foreground mb-1">50+</div>
+                    <div className="text-sm text-muted-foreground">Giang vien</div>
                   </div>
                 </div>
               </div>
-            </Link>
-          ))}
-        </div>
 
-        <div className="mt-6 text-center">
-          <Link to="/search" className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50">
-            Xem tất cả Flash Sale <ArrowRight className="size-4" />
-          </Link>
+              {/* Floating Badge */}
+              <div className="absolute -top-4 -right-4 px-4 py-2 bg-accent text-accent-foreground rounded-full font-semibold shadow-lg animate-pulse">
+                Giam 30% hom nay
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-function Testimonials() {
+// Featured Courses Section
+function FeaturedCoursesSection({ courses }: { courses: Course[] }) {
+  return (
+    <section className="section bg-background">
+      <div className="container-main">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+              Khoa hoc noi bat
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Nhung khoa hoc duoc danh gia cao nhat tu hoc vien
+            </p>
+          </div>
+          <Link
+            to="/courses"
+            className="btn btn-outline btn-md group"
+          >
+            Xem tat ca
+            <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {courses.slice(0, 8).map((course) => (
+            <CourseCard key={course.id} course={course} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Learning Paths Section
+function LearningPathsSection() {
+  return (
+    <section className="section bg-muted">
+      <div className="container-main">
+        <div className="section-header">
+          <h2 className="section-title">Lo trinh hoc tap</h2>
+          <p className="section-subtitle">
+            Hoc theo lo trinh de dat muc tieu nhanh nhat
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {learningPaths.map((path) => (
+            <div
+              key={path.title}
+              className="card card-elevated p-6 hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
+            >
+              {path.badge && (
+                <span className="badge badge-accent mb-4">{path.badge}</span>
+              )}
+
+              <div className="size-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-5 group-hover:bg-accent/20 transition-colors">
+                <path.icon className="size-7 text-accent" />
+              </div>
+
+              <h3 className="text-xl font-bold text-foreground mb-2">
+                {path.title}
+              </h3>
+              <p className="text-muted-foreground mb-5">{path.desc}</p>
+
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-5">
+                <span className="flex items-center gap-1.5">
+                  <BookOpen className="size-4" />
+                  {path.courses} khoa hoc
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="size-4" />
+                  {path.duration}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between pt-5 border-t border-border">
+                <span className="text-sm font-medium text-muted-foreground">
+                  {path.level}
+                </span>
+                <Link
+                  to="/paths"
+                  className="text-accent font-semibold flex items-center gap-1 group-hover:gap-2 transition-all"
+                >
+                  Bat dau
+                  <ArrowRight className="size-4" />
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Instructors Section
+function InstructorsSection() {
+  return (
+    <section className="section bg-background">
+      <div className="container-main">
+        <div className="section-header">
+          <h2 className="section-title">Giang vien hang dau</h2>
+          <p className="section-subtitle">
+            Hoc tu nhung chuyen gia UX/UI Design voi kinh nghiem thuc chien
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {instructors.map((instructor) => (
+            <div
+              key={instructor.name}
+              className="card card-elevated p-6 text-center hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
+            >
+              <div className="size-20 mx-auto mb-4 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-primary-foreground group-hover:scale-105 transition-transform">
+                {instructor.avatar}
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-1">
+                {instructor.name}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {instructor.title}
+              </p>
+              <div className="flex items-center justify-center gap-4 text-sm">
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  <BookOpen className="size-4" />
+                  {instructor.courses}
+                </span>
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  <Users className="size-4" />
+                  {(instructor.students / 1000).toFixed(1)}K
+                </span>
+                <span className="flex items-center gap-1">
+                  <Star className="size-4 star-filled" />
+                  {instructor.rating}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Testimonials Section
+function TestimonialsSection() {
   const [current, setCurrent] = useState(0);
 
+  const next = () => setCurrent((c) => (c + 1) % testimonials.length);
+  const prev = () => setCurrent((c) => (c - 1 + testimonials.length) % testimonials.length);
+
   return (
-    <section className="bg-gradient-to-br from-blue-50 to-indigo-50 py-14">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <h2 className="mb-3 text-3xl font-bold text-gray-900">Học viên nói gì về chúng tôi</h2>
-          <p className="text-gray-500">Hơn 50,000 học viên đã tin tưởng EduCourse</p>
+    <section className="section bg-primary text-primary-foreground">
+      <div className="container-main">
+        <div className="section-header">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">
+            Hoc vien noi gi ve chung toi
+          </h2>
+          <p className="text-lg text-primary-foreground/70">
+            Hon 50,000 hoc vien da tin tuong EduCourse
+          </p>
         </div>
-        <div className="relative mx-auto max-w-3xl">
-          <div className="rounded-2xl bg-white p-8 text-center shadow-lg">
-            <div className="mb-4 flex justify-center">
-              {Array.from({ length: testimonials[current].rating }).map((_, index) => (
-                <Star key={index} className="size-5 fill-yellow-400 text-yellow-400" />
+
+        <div className="relative max-w-3xl mx-auto">
+          <div className="card bg-white/10 backdrop-blur-sm border-white/10 p-8 md:p-10 text-center">
+            {/* Stars */}
+            <div className="flex justify-center gap-1 mb-6">
+              {Array.from({ length: testimonials[current].rating }).map((_, i) => (
+                <Star key={i} className="size-5 star-filled" />
               ))}
             </div>
-            <blockquote className="mb-6 text-lg italic leading-relaxed text-gray-700">
-              "{testimonials[current].text}"
+
+            {/* Quote */}
+            <blockquote className="text-xl md:text-2xl font-medium mb-8 leading-relaxed">
+              &ldquo;{testimonials[current].text}&rdquo;
             </blockquote>
-            <div className="flex items-center justify-center gap-3">
-              <div className="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 text-lg font-bold text-white">
+
+            {/* Author */}
+            <div className="flex items-center justify-center gap-4">
+              <div className="size-14 rounded-full bg-accent flex items-center justify-center text-xl font-bold text-accent-foreground">
                 {testimonials[current].avatar}
               </div>
               <div className="text-left">
-                <p className="font-semibold text-gray-900">{testimonials[current].name}</p>
-                <p className="text-sm text-gray-500">{testimonials[current].role}</p>
+                <p className="font-semibold">{testimonials[current].name}</p>
+                <p className="text-sm text-primary-foreground/70">
+                  {testimonials[current].role}
+                </p>
               </div>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setCurrent((value) => (value - 1 + testimonials.length) % testimonials.length)}
-            className="absolute left-0 top-1/2 size-10 -translate-x-4 -translate-y-1/2 rounded-full bg-white shadow-md transition hover:text-blue-600"
-          >
-            <ChevronLeft className="mx-auto size-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setCurrent((value) => (value + 1) % testimonials.length)}
-            className="absolute right-0 top-1/2 size-10 translate-x-4 -translate-y-1/2 rounded-full bg-white shadow-md transition hover:text-blue-600"
-          >
-            <ChevronRight className="mx-auto size-5" />
-          </button>
+          {/* Navigation */}
+          <div className="flex items-center justify-center gap-4 mt-8">
+            <button
+              onClick={prev}
+              className="size-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+            >
+              <ChevronLeft className="size-5" />
+            </button>
 
-          <div className="mt-4 flex justify-center gap-2">
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => setCurrent(index)}
-                className={`h-2 rounded-full transition-all ${index === current ? "w-6 bg-blue-600" : "w-2 bg-gray-300"}`}
-              />
-            ))}
+            <div className="flex gap-2">
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrent(i)}
+                  className={cn(
+                    "h-2 rounded-full transition-all",
+                    i === current ? "w-8 bg-accent" : "w-2 bg-white/30"
+                  )}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={next}
+              className="size-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+            >
+              <ChevronRight className="size-5" />
+            </button>
           </div>
         </div>
       </div>
@@ -243,109 +509,32 @@ function Testimonials() {
   );
 }
 
-function Instructors() {
+// Features Section
+function FeaturesSection() {
   return (
-    <section className="bg-white py-14">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <h2 className="mb-3 text-3xl font-bold text-gray-900">Giảng viên hàng đầu</h2>
-          <p className="text-gray-500">Học từ những chuyên gia UX/UI Design với kinh nghiệm thực chiến</p>
+    <section className="section bg-muted">
+      <div className="container-main">
+        <div className="section-header">
+          <h2 className="section-title">Tai sao chon EduCourse?</h2>
+          <p className="section-subtitle">
+            Chung toi cam ket mang lai trai nghiem hoc tot nhat
+          </p>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {instructors.map((item) => (
-            <div key={item.name} className="group cursor-pointer text-center">
-              <div className={`mx-auto mb-4 flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color} text-3xl font-bold text-white shadow-lg transition-transform group-hover:scale-105`}>
-                {item.avatar}
-              </div>
-              <h3 className="mb-0.5 font-bold text-gray-900">{item.name}</h3>
-              <p className="mb-3 text-sm text-gray-500">{item.title}</p>
-              <div className="flex items-center justify-center gap-3 text-xs text-gray-600">
-                <span className="flex items-center gap-1">
-                  <BookOpen className="size-3" />{item.courses} KH
-                </span>
-                <span className="flex items-center gap-1">
-                  <Users className="size-3" />{item.students.toLocaleString()}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Star className="size-3 fill-yellow-400 text-yellow-400" />{item.rating}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
-function LearningPaths() {
-  return (
-    <section className="bg-gray-50 py-14">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 className="mb-2 text-3xl font-bold text-gray-900">Lộ trình học tập</h2>
-            <p className="text-gray-500">Học theo lộ trình để đạt mục tiêu nhanh nhất</p>
-          </div>
-          <Link to="/search" className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700">
-            Xem tất cả <ArrowRight className="size-4" />
-          </Link>
-        </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          {learningPaths.map((path) => (
-            <div key={path.title} className={`cursor-pointer rounded-2xl border-2 ${path.color} p-6 transition hover:shadow-md`}>
-              {path.badge && (
-                <span className="mb-3 inline-block rounded-full bg-blue-600 px-2.5 py-0.5 text-xs font-bold text-white">
-                  {path.badge}
-                </span>
-              )}
-              <div className="mb-4 text-4xl">{path.icon}</div>
-              <h3 className="mb-2 text-lg font-bold text-gray-900">{path.title}</h3>
-              <p className="mb-4 text-sm text-gray-600">{path.desc}</p>
-              <div className="mb-5 flex items-center gap-4 text-sm text-gray-500">
-                <span className="flex items-center gap-1">
-                  <BookOpen className="size-4" />{path.courses} khóa học
-                </span>
-                <span className="flex items-center gap-1">
-                  <TrendingUp className="size-4" />{path.level}
-                </span>
-              </div>
-              <p className="mb-4 text-xs text-gray-400">⏱ Hoàn thành trong ~{path.duration}</p>
-              <Link to="/search" className="block w-full rounded-xl border border-current bg-white py-2.5 text-center text-sm font-medium text-blue-600 transition hover:bg-blue-600 hover:text-white">
-                Bắt đầu lộ trình →
-              </Link>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function WhyChooseUs() {
-  const features = [
-    { icon: "🎯", title: "Học thực chiến", desc: "Nội dung được thiết kế từ dự án thực tế, áp dụng ngay vào công việc" },
-    { icon: "♾️", title: "Trọn đời", desc: "Mua một lần, học mãi mãi. Cập nhật nội dung mới miễn phí" },
-    { icon: "🏆", title: "Chứng chỉ có giá trị", desc: "Chứng chỉ được công nhận bởi hơn 200 công ty trong ngành" },
-    { icon: "💬", title: "Hỗ trợ 24/7", desc: "Đội ngũ hỗ trợ luôn sẵn sàng giải đáp mọi thắc mắc của bạn" },
-    { icon: "🔁", title: "Hoàn tiền 30 ngày", desc: "Không hài lòng? Hoàn lại 100% học phí trong vòng 30 ngày" },
-    { icon: "📱", title: "Học mọi thiết bị", desc: "Xem trên laptop, tablet hay điện thoại theo lịch của bạn" },
-  ];
-
-  return (
-    <section className="bg-white py-14">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <h2 className="mb-3 text-3xl font-bold text-gray-900">Tại sao chọn EduCourse?</h2>
-          <p className="text-gray-500">Chúng tôi cam kết mang lại trải nghiệm học tốt nhất</p>
-        </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature) => (
-            <div key={feature.title} className="flex gap-4 rounded-xl p-5 transition hover:bg-gray-50">
-              <div className="flex-shrink-0 text-3xl">{feature.icon}</div>
+            <div
+              key={feature.title}
+              className="flex gap-5 p-6 rounded-2xl bg-card hover:shadow-lg transition-shadow"
+            >
+              <div className="size-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0">
+                <feature.icon className="size-7 text-accent" />
+              </div>
               <div>
-                <h3 className="mb-1 font-bold text-gray-900">{feature.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-500">{feature.desc}</p>
+                <h3 className="text-lg font-bold text-foreground mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-muted-foreground">{feature.desc}</p>
               </div>
             </div>
           ))}
@@ -355,15 +544,45 @@ function WhyChooseUs() {
   );
 }
 
+// CTA Section
+function CTASection() {
+  return (
+    <section className="section bg-background">
+      <div className="container-main">
+        <div className="card gradient-accent p-10 md:p-16 text-center text-accent-foreground">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            San sang bat dau hanh trinh hoc tap?
+          </h2>
+          <p className="text-lg mb-8 opacity-90 max-w-2xl mx-auto">
+            Tham gia cung 50,000+ hoc vien va bat dau hoc cac khoa hoc chat luong cao ngay hom nay.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link to="/courses" className="btn bg-white text-primary hover:bg-white/90 btn-lg">
+              Kham pha khoa hoc
+              <ArrowRight className="size-5" />
+            </Link>
+            <Link to="/paths" className="btn btn-outline border-white/30 text-white hover:bg-white/10 btn-lg">
+              Xem lo trinh
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Main Home Component
 export default function Home() {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const [selectedCategory, setSelectedCategory] = useState("Tất cả");
   const [searchQuery, setSearchQuery] = useState("");
   const [courses, setCourses] = useState<Course[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
+    setIsLoading(true);
+
     fetchCourses({ pageSize: 24, sort: "popular" })
       .then((courseDtos) => {
         if (!active) return;
@@ -373,6 +592,9 @@ export default function Home() {
         console.error("Failed to load homepage courses", error);
         if (!active) return;
         setCourses([]);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
       });
 
     return () => {
@@ -380,222 +602,26 @@ export default function Home() {
     };
   }, [language]);
 
-  const filteredCourses = courses.filter((course) => {
-    const matchesCategory = selectedCategory === "Tất cả" || course.category === selectedCategory;
-    const matchesSearch =
-      searchQuery === "" ||
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.instructor.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
-  const handleSearch = (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
   };
 
-  const featuredCourses = courses.slice(0, 3);
-  const topRatedCourses = [...courses].sort((a, b) => b.rating - a.rating).slice(0, 3);
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <section className="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 py-20 text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
-            <div>
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm">
-                <Zap className="size-4 fill-yellow-300 text-yellow-300" />
-                <span className="text-blue-100">Hơn 50,000 học viên đang học</span>
-              </div>
-              <h1 className="mb-6 text-4xl font-bold leading-tight md:text-5xl">
-                Làm chủ UX/UI Design <span className="text-yellow-300">từ hôm nay</span>
-              </h1>
-              <p className="mb-8 text-xl leading-relaxed text-blue-100">
-                Học từ những chuyên gia hàng đầu thế giới. Nội dung thực chiến, chứng chỉ có giá trị, học mọi lúc mọi nơi.
-              </p>
-              <form onSubmit={handleSearch} className="mb-6 flex gap-3">
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm khóa học, giảng viên..."
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    className="w-full rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50"
-                  />
-                </div>
-                <button type="submit" className="whitespace-nowrap rounded-xl bg-yellow-400 px-6 py-4 font-bold text-yellow-900 transition hover:bg-yellow-300">
-                  Tìm ngay
-                </button>
-              </form>
-              <div className="flex items-center gap-6 text-sm text-blue-200">
-                <span>🔥 Gestalt Principles</span>
-                <span>✍️ Microcopy</span>
-                <span>📊 UX Analytics</span>
-              </div>
-            </div>
-
-            <div className="hidden lg:block">
-              <div className="relative">
-                <div className="space-y-4 rounded-2xl bg-white/10 p-6 backdrop-blur">
-                  {featuredCourses.map((course) => (
-                    <Link key={course.id} to={`/courses/${course.slug ?? course.id}`} className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-white/10">
-                      <img src={course.image} alt={course.title} className="h-10 w-14 shrink-0 rounded-lg object-cover" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{course.title}</p>
-                        <p className="text-xs text-blue-300">{course.instructor}</p>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p className="text-sm font-bold text-yellow-300">{formatPriceCompact(course.price)}</p>
-                        <p className="text-xs text-blue-300">★{course.rating}</p>
-                      </div>
-                    </Link>
-                  ))}
-                  <Link to="/search" className="flex items-center justify-center gap-2 py-2 text-sm text-blue-200 transition hover:text-white">
-                    Xem tất cả {courses.length} khóa học <ArrowRight className="size-4" />
-                  </Link>
-                </div>
-
-                <div className="absolute -right-4 -top-4 rounded-2xl bg-yellow-400 px-4 py-2 text-yellow-900 shadow-xl">
-                  <div className="flex items-center gap-2">
-                    <Award className="size-5" />
-                    <div>
-                      <p className="text-sm font-bold">4.8★ Đánh giá</p>
-                      <p className="text-xs">Từ 1,284 học viên</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-gray-100 bg-white py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            {[
-              { icon: <BookOpen className="size-6 text-blue-600" />, value: "500+", label: "Khóa học" },
-              { icon: <Users className="size-6 text-green-600" />, value: "50K+", label: "Học viên" },
-              { icon: <Star className="size-6 fill-yellow-500 text-yellow-500" />, value: "4.8★", label: "Đánh giá TB" },
-              { icon: <Award className="size-6 text-purple-600" />, value: "100+", label: "Giảng viên" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-gray-50">
-                  {stat.icon}
-                </div>
-                <div className="mb-1 text-3xl font-bold text-gray-900">{stat.value}</div>
-                <div className="text-sm text-gray-500">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <FlashSaleCountdown courses={courses} />
-
-      <section className="py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="mb-2 text-3xl font-bold text-gray-900">Khóa học phổ biến</h2>
-              <p className="text-gray-500">Được học viên yêu thích và đánh giá cao nhất</p>
-            </div>
-          <Link to="/search" className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700">
-              Xem tất cả <ArrowRight className="size-4" />
-            </Link>
-          </div>
-
-          <div className="mb-6 overflow-x-auto">
-            <div className="flex w-max gap-2 pb-2">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  onClick={() => setSelectedCategory(category)}
-                  className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                    selectedCategory === category
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <p className="mb-6 text-sm text-gray-500">
-            Tìm thấy <span className="font-semibold text-gray-900">{filteredCourses.length}</span> khóa học
-          </p>
-
-          {filteredCourses.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredCourses.map((course) => (
-                <CourseCard key={course.id} course={course} />
-              ))}
-            </div>
-          ) : (
-            <div className="py-12 text-center">
-              <BookOpen className="mx-auto mb-3 size-12 text-gray-200" />
-              <p className="text-gray-500">Không tìm thấy khóa học nào phù hợp</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <LearningPaths />
-
-      <section className="bg-white py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h2 className="mb-2 text-3xl font-bold text-gray-900">Đánh giá cao nhất</h2>
-              <p className="text-gray-500">Các khóa học được yêu thích nhất từ học viên</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {topRatedCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <Instructors />
-      <Testimonials />
-      <WhyChooseUs />
-
-      <section className="border-y border-blue-100 bg-blue-50 py-10">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <h3 className="mb-2 text-xl font-bold text-gray-900">Chưa biết chọn khóa học nào?</h3>
-          <p className="mb-5 text-gray-600">Sử dụng tính năng so sánh để tìm khóa học phù hợp nhất với bạn</p>
-          <Link to="/compare" className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700">
-            <TrendingUp className="size-5" />
-            So sánh khóa học
-          </Link>
-        </div>
-      </section>
-
-      <section className="bg-gradient-to-r from-blue-600 to-indigo-700 py-16 text-white">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-white/20">
-            <Play className="size-8 fill-white" />
-          </div>
-          <h2 className="mb-4 text-3xl font-bold md:text-4xl">Bắt đầu hành trình học tập ngay hôm nay</h2>
-          <p className="mb-8 text-xl text-blue-100">Tham gia cùng 50,000+ học viên đang phát triển sự nghiệp UX/UI Design</p>
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link to="/search" className="rounded-xl bg-white px-8 py-3.5 text-sm font-bold text-blue-600 transition hover:bg-blue-50">
-              Khám phá khóa học
-            </Link>
-            <Link to="/compare" className="rounded-xl border-2 border-white px-8 py-3.5 text-sm font-bold text-white transition hover:bg-white/10">
-              So sánh khóa học
-            </Link>
-          </div>
-        </div>
-      </section>
+    <div className="min-h-screen bg-background">
+      <HeroSection
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onSearch={handleSearch}
+      />
+      <FeaturedCoursesSection courses={courses} />
+      <LearningPathsSection />
+      <InstructorsSection />
+      <TestimonialsSection />
+      <FeaturesSection />
+      <CTASection />
     </div>
   );
 }

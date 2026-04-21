@@ -1,17 +1,28 @@
-﻿"use client";
+"use client";
 
 import { Link } from "@/figma/compat/router";
-import { Clock, BarChart3, Star, ShoppingCart, Check, Heart } from "lucide-react";
-import { Course } from "../contexts/CartContext";
+import {
+  Clock,
+  BarChart3,
+  Star,
+  ShoppingCart,
+  Check,
+  Heart,
+  Users,
+  Play,
+} from "lucide-react";
+import type { Course } from "../contexts/CartContext";
 import { useCart } from "../contexts/CartContext";
 import { useWishlist } from "../contexts/WishlistContext";
 import { toast } from "@/figma/compat/sonner";
+import { cn, formatPrice, formatCompactNumber } from "@/lib/utils";
 
 interface CourseCardProps {
   course: Course;
+  variant?: "default" | "compact" | "horizontal";
 }
 
-export default function CourseCard({ course }: CourseCardProps) {
+export default function CourseCard({ course, variant = "default" }: CourseCardProps) {
   const { addToCart, isInCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const inCart = isInCart(course.id);
@@ -22,7 +33,7 @@ export default function CourseCard({ course }: CourseCardProps) {
     e.stopPropagation();
     if (!inCart) {
       addToCart(course);
-      toast.success("Đã thêm vào giỏ hàng!");
+      toast.success("Da them vao gio hang!");
     }
   };
 
@@ -31,9 +42,9 @@ export default function CourseCard({ course }: CourseCardProps) {
     e.stopPropagation();
     toggleWishlist(course);
     if (inWishlist) {
-      toast("Đã xóa khỏi yêu thích", { icon: "💔" });
+      toast("Da xoa khoi yeu thich");
     } else {
-      toast.success("Đã thêm vào yêu thích!");
+      toast.success("Da them vao yeu thich!");
     }
   };
 
@@ -41,79 +52,152 @@ export default function CourseCard({ course }: CourseCardProps) {
     ? Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100)
     : 0;
 
+  if (variant === "horizontal") {
+    return (
+      <Link
+        to={`/courses/${course.slug ?? course.id}`}
+        className="group flex gap-4 p-4 rounded-2xl border border-border bg-card hover:shadow-lg transition-all duration-300"
+      >
+        {/* Image */}
+        <div className="relative w-40 h-24 rounded-xl overflow-hidden flex-shrink-0">
+          <img
+            src={course.image}
+            alt={course.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          {discount > 0 && (
+            <span className="absolute top-2 left-2 badge badge-danger text-[10px]">
+              -{discount}%
+            </span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <span className="text-xs font-semibold text-accent uppercase tracking-wide">
+            {course.category}
+          </span>
+          <h3 className="font-semibold text-foreground line-clamp-1 mt-1 group-hover:text-accent transition-colors">
+            {course.title}
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">{course.instructor}</p>
+          <div className="flex items-center gap-3 mt-2 text-sm">
+            <span className="flex items-center gap-1">
+              <Star className="size-4 star-filled" />
+              <span className="font-semibold text-foreground">{course.rating}</span>
+            </span>
+            <span className="text-muted-foreground">
+              {formatCompactNumber(course.students)} hoc vien
+            </span>
+          </div>
+        </div>
+
+        {/* Price */}
+        <div className="text-right flex-shrink-0">
+          <div className="text-lg font-bold text-accent">
+            {formatPrice(course.price)}
+          </div>
+          {course.originalPrice && (
+            <div className="text-sm text-muted-foreground line-through">
+              {formatPrice(course.originalPrice)}
+            </div>
+          )}
+        </div>
+      </Link>
+    );
+  }
+
   return (
     <Link
-      to={`/course/${course.slug ?? course.id}`}
-      className="group flex w-full max-w-full min-w-0 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md transition-all duration-300 hover:shadow-xl"
+      to={`/courses/${course.slug ?? course.id}`}
+      className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
     >
-      {/* Image */}
-      <div className="max-w-40 relative aspect-video flex-shrink-0 overflow-hidden">
+      {/* Image Container */}
+      <div className="relative aspect-video overflow-hidden">
         <img
           src={course.image}
           alt={course.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        {discount > 0 && (
-          <div className="absolute top-3 left-3 bg-red-500 text-white px-2.5 py-0.5 rounded-full text-xs font-bold">
-            -{discount}%
+
+        {/* Overlay on hover */}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <div className="size-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg scale-90 group-hover:scale-100 transition-transform">
+            <Play className="size-6 text-primary ml-1" />
           </div>
-        )}
-        {/* Wishlist button */}
+        </div>
+
+        {/* Badges */}
+        <div className="absolute top-3 left-3 flex gap-2">
+          {discount > 0 && (
+            <span className="badge bg-destructive text-destructive-foreground">
+              -{discount}%
+            </span>
+          )}
+          {course.isBestseller && (
+            <span className="badge badge-warning">Bestseller</span>
+          )}
+        </div>
+
+        {/* Wishlist Button */}
         <button
           onClick={handleWishlist}
-          className={`absolute top-3 right-3 size-8 rounded-full flex items-center justify-center shadow-md transition-all ${
+          className={cn(
+            "absolute top-3 right-3 size-9 rounded-full flex items-center justify-center shadow-md transition-all",
             inWishlist
-              ? "bg-red-500 text-white"
-              : "bg-white/90 text-gray-500 hover:bg-red-50 hover:text-red-500"
-          }`}
+              ? "bg-destructive text-destructive-foreground"
+              : "bg-white/90 text-muted-foreground hover:text-destructive hover:bg-white"
+          )}
         >
-          <Heart className={`size-4 ${inWishlist ? "fill-current" : ""}`} />
+          <Heart className={cn("size-4", inWishlist && "fill-current")} />
         </button>
       </div>
 
       {/* Content */}
-      <div className="flex min-w-0 flex-1 flex-col p-4">
+      <div className="flex flex-col flex-1 p-5">
         {/* Category */}
-        <div className="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-1.5">
+        <span className="text-xs font-semibold text-accent uppercase tracking-wide mb-2">
           {course.category}
-        </div>
+        </span>
 
         {/* Title */}
-        <h3 className="mb-2 flex-1 text-sm font-semibold text-gray-900 line-clamp-2 transition-colors group-hover:text-blue-600">
+        <h3 className="text-base font-semibold text-foreground line-clamp-2 mb-2 group-hover:text-accent transition-colors">
           {course.title}
         </h3>
 
         {/* Instructor */}
-        <p className="mb-2 text-xs text-gray-500">
-          Giảng viên: <span className="text-gray-700 font-medium">{course.instructor}</span>
+        <p className="text-sm text-muted-foreground mb-3">
+          {course.instructor}
         </p>
 
-        {/* Stats row */}
-        <div className="mb-3 flex items-center gap-3 text-xs text-gray-500">
-          <div className="flex items-center gap-1">
-            <Star className="size-3.5 fill-yellow-400 text-yellow-400" />
-            <span className="font-semibold text-gray-800">{course.rating}</span>
-            <span className="whitespace-nowrap">({course.students.toLocaleString()})</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Clock className="size-3.5" />
-            <span>{course.duration}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <BarChart3 className="size-3.5" />
-            <span className="truncate max-w-[60px]">{course.level.split(" ")[0]}</span>
-          </div>
+        {/* Stats */}
+        <div className="flex items-center gap-3 text-sm text-muted-foreground mb-4">
+          <span className="flex items-center gap-1">
+            <Star className="size-4 star-filled" />
+            <span className="font-semibold text-foreground">{course.rating}</span>
+            <span>({formatCompactNumber(course.students)})</span>
+          </span>
+          <span className="flex items-center gap-1">
+            <Clock className="size-4" />
+            {course.duration}
+          </span>
+        </div>
+
+        {/* Level */}
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="size-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">{course.level}</span>
         </div>
 
         {/* Price and Action */}
-        <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-100">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-blue-600">
-              {(course.price * 1000).toLocaleString("vi-VN")}đ
+        <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
+          <div>
+            <span className="text-xl font-bold text-accent">
+              {formatPrice(course.price)}
             </span>
             {course.originalPrice && (
-              <span className="text-xs text-gray-400 line-through">
-                {(course.originalPrice * 1000).toLocaleString("vi-VN")}đ
+              <span className="text-sm text-muted-foreground line-through ml-2">
+                {formatPrice(course.originalPrice)}
               </span>
             )}
           </div>
@@ -121,21 +205,20 @@ export default function CourseCard({ course }: CourseCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={inCart}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              inCart
-                ? "bg-green-100 text-green-700 cursor-default"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            }`}
+            className={cn(
+              "btn btn-sm",
+              inCart ? "btn-secondary cursor-default" : "btn-accent"
+            )}
           >
             {inCart ? (
               <>
-                <Check className="size-3.5" />
-                Đã thêm
+                <Check className="size-4" />
+                Da them
               </>
             ) : (
               <>
-                <ShoppingCart className="size-3.5" />
-                Thêm giỏ
+                <ShoppingCart className="size-4" />
+                Them
               </>
             )}
           </button>

@@ -1,17 +1,43 @@
-﻿"use client";
+"use client";
 
-import { Link, useNavigate } from '@/figma/compat/router';
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "@/figma/compat/router";
 import {
-  ShoppingCart, Search, Menu, BookOpen, Heart, X,
-  User, LogOut, Settings, BookMarked, ChevronDown, Globe, GraduationCap,
-  TrendingUp, Package,
-} from 'lucide-react';
-import { useCart } from '../contexts/CartContext';
-import { useAuth } from '../contexts/AuthContext';
-import { useWishlist } from '../contexts/WishlistContext';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useState, useRef, useEffect } from 'react';
-import { toast } from '@/figma/compat/sonner';
+  Search,
+  Menu,
+  X,
+  ShoppingCart,
+  Heart,
+  Bell,
+  ChevronDown,
+  User,
+  LogOut,
+  Settings,
+  BookOpen,
+  GraduationCap,
+  LayoutDashboard,
+  Globe,
+} from "lucide-react";
+import { useCart } from "../contexts/CartContext";
+import { useAuth } from "../contexts/AuthContext";
+import { useWishlist } from "../contexts/WishlistContext";
+import { useLanguage } from "../contexts/LanguageContext";
+import { toast } from "@/figma/compat/sonner";
+import { cn } from "@/lib/utils";
+
+const navLinks = [
+  { href: "/courses", label: "Khoa hoc" },
+  { href: "/paths", label: "Lo trinh" },
+  { href: "/blog", label: "Blog" },
+  { href: "/about", label: "Ve chung toi" },
+];
+
+const targetAudiences = [
+  { label: "Danh cho hoc sinh", href: "/for-students" },
+  { label: "Danh cho ca nhan", href: "/for-individuals" },
+  { label: "Danh cho doanh nghiep", href: "/for-business" },
+  { label: "Danh cho truong hoc", href: "/for-schools" },
+];
 
 export default function Header() {
   const { cartItems } = useCart();
@@ -22,31 +48,45 @@ export default function Header() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  // Close user dropdown on outside click
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Close user menu on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setIsUserMenuOpen(false);
       }
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Focus search input when opened
   useEffect(() => {
-    if (isSearchOpen) searchRef.current?.focus();
+    if (isSearchOpen) {
+      searchInputRef.current?.focus();
+    }
   }, [isSearchOpen]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
+      setSearchQuery("");
       setIsSearchOpen(false);
     }
   };
@@ -54,295 +94,361 @@ export default function Header() {
   const handleLogout = () => {
     logout();
     setIsUserMenuOpen(false);
-    toast.success('Đã đăng xuất thành công!');
-    navigate('/');
-  };
-
-  const levelColors: Record<string, string> = {
-    Bronze: 'text-amber-600',
-    Silver: 'text-gray-400',
-    Gold: 'text-yellow-500',
-    Platinum: 'text-sky-400',
+    toast.success("Da dang xuat thanh cong!");
+    navigate("/");
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-max mx-auto px-1 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full transition-all duration-300",
+        isScrolled
+          ? "bg-background/95 backdrop-blur-md shadow-sm border-b border-border"
+          : "bg-background border-b border-transparent"
+      )}
+    >
+      {/* Top Bar - Target Audiences */}
+      <div className="hidden lg:block bg-muted border-b border-border">
+        <div className="container-main">
+          <div className="flex items-center justify-between h-10 text-sm">
+            <div className="flex items-center gap-6">
+              {targetAudiences.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+            <button
+              onClick={() => setLanguage(language === "vi" ? "en" : "vi")}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Globe className="size-4" />
+              <span>{language === "vi" ? "Tieng Viet" : "English"}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Header */}
+      <div className="container-main">
+        <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
-            <BookOpen className="size-8 text-blue-600" />
-            <span className="text-xl font-bold text-gray-900">EduCourse</span>
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 flex-shrink-0 group"
+          >
+            <div className="size-9 rounded-xl bg-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+              <GraduationCap className="size-5 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold text-foreground hidden sm:block">
+              EduCourse
+            </span>
           </Link>
 
-         
-
-          {/* Right side actions */}
-          <div className="flex items-center gap-1 sm:gap-2">
-
-            {/* Search */}
-            {isSearchOpen ? (
-              <form onSubmit={handleSearch} className="flex items-center gap-2">
-                <input
-                  ref={searchRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Tìm khóa học..."
-                  className="min-w-90 sm:w-52 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button type="button" onClick={() => setIsSearchOpen(false)} className="text-gray-500 hover:text-gray-800 p-1">
-                  <X className="size-4" />
-                </button>
-              </form>
-            ) : (
-              <button
-                onClick={() => setIsSearchOpen(true)}
-                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                title="Tìm kiếm"
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
               >
-                <Search className="size-5" />
-              </button>
-            )}
-
-             <nav className="hidden md:flex items-center gap-6">
-            <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors text-sm font-medium">
-              {t('Trường Học', 'Trường Học')}
-            </Link>
-            {/* <Link to="/compare" className="text-gray-700 hover:text-blue-600 transition-colors text-sm font-medium flex items-center gap-1">
-              <TrendingUp className="size-3.5" />So sánh
-            </Link> */}
-            <Link to="/blog" className="text-gray-700 hover:text-blue-600 transition-colors text-sm font-medium">
-              {t('Trường Học', 'Giảng viên')}
-            </Link>
-            <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors text-sm font-medium">
-              {t('Việc học của tôi', 'Việc học của tôi')}
-            </a>
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
-             {/* Desktop Navigation */}
-          {/* <nav className="hidden md:flex items-center gap-6">
-            <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors text-sm font-medium">
-              {t('nav', 'courses')}
-            </Link>
-            <Link to="/compare" className="text-gray-700 hover:text-blue-600 transition-colors text-sm font-medium flex items-center gap-1">
-              <TrendingUp className="size-3.5" />So sánh
-            </Link>
-            <Link to="/blog" className="text-gray-700 hover:text-blue-600 transition-colors text-sm font-medium">
-              {t('nav', 'blog')}
-            </Link>
-            <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors text-sm font-medium">
-              {t('nav', 'about')}
-            </a>
-          </nav> */}
+          {/* Search Bar - Desktop */}
+          <div className="hidden md:flex flex-1 max-w-md">
+            <form onSubmit={handleSearch} className="relative w-full">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Tim kiem khoa hoc..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="input pl-10 pr-4 h-10 bg-secondary border-0 focus:ring-2 focus:ring-primary"
+              />
+            </form>
+          </div>
 
-            {/* Language switcher */}
+          {/* Right Actions */}
+          <div className="flex items-center gap-1">
+            {/* Mobile Search Toggle */}
             <button
-              onClick={() => setLanguage(language === 'vi' ? 'en' : 'vi')}
-              className="ml-8 hidden sm:flex items-center gap-1 p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-xs font-medium"
-              title="Chuyển ngôn ngữ"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="md:hidden p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
+              aria-label="Tim kiem"
             >
-              <p><Globe className="size-4" /></p>
-             <div style={{display:'flex', flexDirection: 'column'}}>
-                  <span>{language === 'vi' ? 'EN' : 'VI'}</span>
-                  <span>Tiếng trung</span>
-                  <span>Tiếng tây ban nha</span>
-             </div>
+              <Search className="size-5" />
             </button>
 
             {/* Wishlist */}
             <Link
               to="/wishlist"
-              className="relative p-2 text-gray-600 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-              title="Thông báo"
+              className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
+              aria-label="Yeu thich"
             >
-                Thông báo
-              {/* <Heart className="size-5" />
+              <Heart className="size-5" />
               {wishlistItems.length > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] rounded-full size-4 flex items-center justify-center font-bold">
-                  {wishlistItems.length}
+                <span className="absolute -top-0.5 -right-0.5 size-4 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {wishlistItems.length > 9 ? "9+" : wishlistItems.length}
                 </span>
-              )} */}
+              )}
             </Link>
 
             {/* Cart */}
-            {/* <Link
+            <Link
               to="/cart"
-              className="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-              title="Giỏ hàng"
+              className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
+              aria-label="Gio hang"
             >
               <ShoppingCart className="size-5" />
               {cartItems.length > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-blue-600 text-white text-[10px] rounded-full size-4 flex items-center justify-center font-bold">
-                  {cartItems.length}
+                <span className="absolute -top-0.5 -right-0.5 size-4 bg-accent text-accent-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {cartItems.length > 9 ? "9+" : cartItems.length}
                 </span>
               )}
-            </Link> */}
+            </Link>
 
-            {/* Auth */}
+            {/* Notifications - Only for authenticated users */}
+            {isAuthenticated && (
+              <button
+                className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
+                aria-label="Thong bao"
+              >
+                <Bell className="size-5" />
+                <span className="absolute top-1.5 right-1.5 size-2 bg-accent rounded-full" />
+              </button>
+            )}
+
+            {/* Auth Section */}
             {isLoading ? (
-              <div className="hidden sm:flex items-center gap-2">
-                <div className="h-9 w-28 animate-pulse rounded-lg bg-gray-100" />
-                <div className="h-9 w-24 animate-pulse rounded-lg bg-gray-100" />
+              <div className="flex items-center gap-2">
+                <div className="h-10 w-24 animate-pulse bg-muted rounded-lg" />
               </div>
             ) : isAuthenticated && user ? (
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-2 p-1.5 pl-1.5 pr-3 rounded-full hover:bg-secondary transition-colors"
                 >
-                  <div className="size-7 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  <div className="size-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-semibold">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
-                  {/* <span className="text-sm font-medium text-gray-700 max-w-[80px] truncate">{user.name.split(' ')[0]}</span> */}
-                  {/* <ChevronDown className={`size-4 text-gray-500 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} /> */}
+                  <ChevronDown
+                    className={cn(
+                      "size-4 text-muted-foreground transition-transform hidden sm:block",
+                      isUserMenuOpen && "rotate-180"
+                    )}
+                  />
                 </button>
 
-                {/* Mobile user button */}
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="sm:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <div className="size-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
-                </button>
-
-                {/* Dropdown */}
+                {/* User Dropdown */}
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
-                    {/* User info */}
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="font-semibold text-gray-900 text-sm">{user.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <span className={`text-xs font-semibold ${levelColors[user.level] || 'text-gray-500'}`}>
-                          ⭐ {user.level}
-                        </span>
-                        <span className="text-xs text-gray-400">·</span>
-                        <span className="text-xs text-blue-600 font-medium">{user.points} điểm</span>
-                      </div>
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-card rounded-xl shadow-xl border border-border py-2 animate-scale-in origin-top-right">
+                    {/* User Info */}
+                    <div className="px-4 py-3 border-b border-border">
+                      <p className="font-semibold text-foreground truncate">
+                        {user.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {user.email}
+                      </p>
+                      {user.level && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="badge badge-accent text-xs">
+                            {user.level}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {user.points} diem
+                          </span>
+                        </div>
+                      )}
                     </div>
 
-                    <Link to="/my-learning" onClick={() => setIsUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                      <GraduationCap className="size-4" />
-                      Khóa học của tôi
-                    </Link>
-                    <Link to="/account" onClick={() => setIsUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                      <User className="size-4" />
-                      Tài khoản của tôi
-                    </Link>
-                    <Link to="/order-tracking" onClick={() => setIsUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                      <Package className="size-4" />
-                      Theo dõi đơn hàng
-                    </Link>
-                    <Link to="/account?tab=orders" onClick={() => setIsUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                      <BookMarked className="size-4" />
-                      Đơn hàng của tôi
-                    </Link>
-                    <Link to="/wishlist" onClick={() => setIsUserMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                      <Heart className="size-4" />
-                      Khóa học yêu thích
-                    </Link>
-                    {user.role === 'admin' && (
-                      <Link to="/admin" onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-purple-600 hover:bg-purple-50 transition-colors">
-                        <Settings className="size-4" />
-                        Quản trị Admin
+                    {/* Menu Items */}
+                    <div className="py-1">
+                      <Link
+                        to="/my-learning"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary transition-colors"
+                      >
+                        <BookOpen className="size-4 text-muted-foreground" />
+                        Khoa hoc cua toi
                       </Link>
-                    )}
-                    <hr className="my-1 border-gray-100" />
-                    <button onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                      <LogOut className="size-4" />
-                      Đăng xuất
-                    </button>
+                      <Link
+                        to="/account"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary transition-colors"
+                      >
+                        <User className="size-4 text-muted-foreground" />
+                        Tai khoan
+                      </Link>
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-secondary transition-colors"
+                      >
+                        <LayoutDashboard className="size-4 text-muted-foreground" />
+                        Dashboard
+                      </Link>
+                      {user.role === "admin" && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-accent hover:bg-accent/10 transition-colors"
+                        >
+                          <Settings className="size-4" />
+                          Quan tri Admin
+                        </Link>
+                      )}
+                    </div>
+
+                    <div className="border-t border-border pt-1">
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                      >
+                        <LogOut className="size-4" />
+                        Dang xuat
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
             ) : (
               <div className="hidden sm:flex items-center gap-2">
                 <button
-                  onClick={() => openAuthModal('login')}
-                  className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                  onClick={() => openAuthModal("login")}
+                  className="btn btn-ghost btn-sm"
                 >
-                  {t('nav', 'login')}
+                  Dang nhap
                 </button>
                 <button
-                  onClick={() => openAuthModal('register')}
-                  className="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                  onClick={() => openAuthModal("register")}
+                  className="btn btn-primary btn-sm"
                 >
-                  {t('nav', 'register')}
+                  Dang ky
                 </button>
               </div>
             )}
 
-            {/* Mobile menu toggle */}
+            {/* Mobile Menu Toggle */}
             <button
-              className="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="lg:hidden p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
+              aria-label="Menu"
             >
               {isMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
           </div>
         </div>
 
+        {/* Mobile Search */}
+        {isSearchOpen && (
+          <div className="md:hidden py-3 border-t border-border animate-fade-in">
+            <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Tim kiem khoa hoc..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="input pl-10 pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen(false)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-4" />
+              </button>
+            </form>
+          </div>
+        )}
+
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-gray-200 space-y-1">
-            <Link to="/" onClick={() => setIsMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors">
-              Khóa học
-            </Link>
-            <Link to="/compare" onClick={() => setIsMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors">
-              So sánh khóa học
-            </Link>
-            <Link to="/order-tracking" onClick={() => setIsMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors">
-              Theo dõi đơn hàng
-            </Link>
-            <Link to="/blog" onClick={() => setIsMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors">
-              Blog
-            </Link>
-            <a href="#" className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors">
-              Về chúng tôi
-            </a>
-            <hr className="border-gray-200 my-2" />
+          <nav className="lg:hidden py-4 border-t border-border animate-fade-in">
+            <div className="space-y-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block px-4 py-3 text-foreground hover:bg-secondary rounded-lg font-medium transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="my-4 border-t border-border" />
+
+            {/* Target Audiences - Mobile */}
+            <div className="space-y-1 mb-4">
+              <p className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Danh cho
+              </p>
+              {targetAudiences.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="my-4 border-t border-border" />
+
+            {/* Language - Mobile */}
             <button
-              onClick={() => { setLanguage(language === 'vi' ? 'en' : 'vi'); setIsMenuOpen(false); }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-sm"
+              onClick={() => {
+                setLanguage(language === "vi" ? "en" : "vi");
+                setIsMenuOpen(false);
+              }}
+              className="flex items-center gap-2 w-full px-4 py-3 text-foreground hover:bg-secondary rounded-lg transition-colors"
             >
               <Globe className="size-4" />
-              Chuyển sang {language === 'vi' ? 'English' : 'Tiếng Việt'}
+              <span>
+                Chuyen sang {language === "vi" ? "English" : "Tieng Viet"}
+              </span>
             </button>
+
+            {/* Auth - Mobile */}
             {!isLoading && !isAuthenticated && (
-              <div className="flex gap-2 pt-1">
-                <button onClick={() => { openAuthModal('login'); setIsMenuOpen(false); }}
-                  className="flex-1 py-2 border border-blue-600 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
-                  Đăng nhập
+              <div className="flex gap-2 mt-4 px-4">
+                <button
+                  onClick={() => {
+                    openAuthModal("login");
+                    setIsMenuOpen(false);
+                  }}
+                  className="btn btn-outline btn-md flex-1"
+                >
+                  Dang nhap
                 </button>
-                <button onClick={() => { openAuthModal('register'); setIsMenuOpen(false); }}
-                  className="flex-1 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-                  Đăng ký
+                <button
+                  onClick={() => {
+                    openAuthModal("register");
+                    setIsMenuOpen(false);
+                  }}
+                  className="btn btn-primary btn-md flex-1"
+                >
+                  Dang ky
                 </button>
               </div>
             )}
           </nav>
         )}
-      </div>
-
-      <div className='' style={{display: 'flex', justifyContent:'flex-start', paddingLeft:'100px', gap: '20px'}}>
-        <h5 >Dành cho học sinh</h5>
-        <h5 >Dành cho cá nhân</h5>
-        <h5 >Dàng cho trường đại học</h5>
-        <h5 >Dàng cho Chính phủ</h5>
       </div>
     </header>
   );
