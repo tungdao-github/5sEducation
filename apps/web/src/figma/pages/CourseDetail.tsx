@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
-import { useParams, Link } from "@/figma/compat/router";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 import {
   Clock,
   BarChart3,
@@ -43,7 +44,8 @@ function safeImage(src?: string | null) {
 }
 
 export default function CourseDetail() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = (params?.slug || params?.id) as string;
   const { language } = useLanguage();
   const { addToCart, isInCart } = useCart();
   const {
@@ -105,7 +107,7 @@ export default function CourseDetail() {
         <h1 className="text-2xl font-bold text-gray-900 mb-4">
           {error || "Không tìm thấy khóa học"}
         </h1>
-        <Link to="/" className="text-blue-600 hover:underline">
+        <Link href="/" className="text-blue-600 hover:underline">
           Quay về trang chủ
         </Link>
       </div>
@@ -223,7 +225,7 @@ export default function CourseDetail() {
 
                   {inCart && (
                     <Link
-                      to="/cart"
+                      href="/cart"
                       className="block w-full rounded-2xl bg-slate-900 py-3.5 text-center font-semibold text-white transition-colors hover:bg-slate-700"
                     >
                       Xem giỏ hàng
@@ -231,7 +233,7 @@ export default function CourseDetail() {
                   )}
 
                   <Link
-                    to={`/learn/${course.slug ?? course.id}`}
+                    href={`/learn/${course.slug ?? course.id}`}
                     className="mt-3 block w-full rounded-2xl border border-slate-200 bg-white py-3 text-center text-sm font-semibold text-slate-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
                   >
                     🎓 Vào học ngay
