@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "@/figma/compat/router";
+import { useSearchParams as useNextSearchParams, useRouter } from "next/navigation";
 import {
   BookOpen,
   ChevronLeft,
@@ -34,11 +34,21 @@ const LEVELS = [
 ] as const;
 
 export default function SearchPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const router = useRouter();
+  const searchParams = useNextSearchParams();
   const { t, language } = useLanguage();
-  const [query, setQuery] = useState(searchParams.get("q") || "");
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
-  const [selectedLevel, setSelectedLevel] = useState(searchParams.get("level") || "all");
+  const [query, setQuery] = useState(searchParams?.get("q") || "");
+
+  const setSearchParams = (params: Record<string, string>) => {
+    const urlParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) urlParams.set(key, value);
+    });
+    const queryString = urlParams.toString();
+    router.push(queryString ? `?${queryString}` : window.location.pathname);
+  };
+  const [selectedCategory, setSelectedCategory] = useState(searchParams?.get("category") || "all");
+  const [selectedLevel, setSelectedLevel] = useState(searchParams?.get("level") || "all");
   const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
   const [durationFilter, setDurationFilter] = useState<DurationFilter>("all");
   const [languageFilter, setLanguageFilter] = useState<LanguageFilter>("all");
@@ -53,7 +63,7 @@ export default function SearchPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setQuery(searchParams.get("q") || "");
+    setQuery(searchParams?.get("q") || "");
   }, [searchParams]);
 
   useEffect(() => {
@@ -337,7 +347,7 @@ export default function SearchPage() {
                 <FilterGroup title="Mức giá">
                   {[
                     { value: "all", label: "Tất cả" },
-                    { value: "free", label: "Miễn phí" },
+                    { value: "free", label: "Miễn ph��" },
                     { value: "under200", label: "Dưới 200Kđ" },
                     { value: "200-400", label: "200Kđ - 400Kđ" },
                     { value: "over400", label: "Trên 400Kđ" },

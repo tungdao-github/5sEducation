@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { Link } from "@/figma/compat/router";
+import Link from "next/link";
 import { Clock, BarChart3, Star, ShoppingCart, Check, Heart } from "lucide-react";
 import { Course } from "../contexts/CartContext";
 import { useCart } from "../contexts/CartContext";
@@ -43,7 +43,7 @@ export default function CourseCard({ course }: CourseCardProps) {
 
   return (
     <Link
-      to={`/course/${course.slug ?? course.id}`}
+      href={`/courses/${course.slug ?? course.id}`}
       className="group flex w-full max-w-full min-w-0 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md transition-all duration-300 hover:shadow-xl"
     >
       {/* Image */}

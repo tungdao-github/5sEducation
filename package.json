@@ -6,5 +6,9 @@
     "build": "npm --prefix apps/web run build",
     "start": "npm --prefix apps/web run start",
     "lint": "npm --prefix apps/web run lint"
+  },
+  "dependencies": {
+    "lucide-react": "^1.8.0",
+    "react": "^19.2.5"
   }
 }
