@@ -307,13 +307,19 @@ export default function AdminPathDetailPage() {
           <div className="space-y-3">
             <input
               value={sectionForm.title}
-              onChange={(e) => setSectionForm((prev) => ({ ...prev, title: e.currentTarget.value }))}
+              onChange={(e) => {
+                const value = e.currentTarget.value;
+                setSectionForm((prev) => ({ ...prev, title: value }));
+              }}
               placeholder={tx("Section title", "Ten chuong")}
               className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm"
             />
             <textarea
               value={sectionForm.description}
-              onChange={(e) => setSectionForm((prev) => ({ ...prev, description: e.currentTarget.value }))}
+              onChange={(e) => {
+                const value = e.currentTarget.value;
+                setSectionForm((prev) => ({ ...prev, description: value }));
+              }}
               placeholder={tx("Description", "Mo ta")}
               className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
               rows={3}
@@ -321,7 +327,10 @@ export default function AdminPathDetailPage() {
             <input
               type="number"
               value={sectionForm.sortOrder}
-              onChange={(e) => setSectionForm((prev) => ({ ...prev, sortOrder: Number(e.currentTarget.value) }))}
+              onChange={(e) => {
+                const value = Number(e.currentTarget.value);
+                setSectionForm((prev) => ({ ...prev, sortOrder: value }));
+              }}
               placeholder={tx("Sort order", "Thu tu")}
               className="w-full rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm"
             />
@@ -394,7 +403,10 @@ export default function AdminPathDetailPage() {
           <div className="space-y-3">
             <select
               value={courseForm.courseId}
-              onChange={(e) => setCourseForm((prev) => ({ ...prev, courseId: Number(e.currentTarget.value) }))}
+              onChange={(e) => {
+                const value = Number(e.currentTarget.value);
+                setCourseForm((prev) => ({ ...prev, courseId: value }));
+              }}
               className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             >
               <option value={0}>{tx("Select course", "Chon khoa hoc")}</option>
@@ -406,7 +418,10 @@ export default function AdminPathDetailPage() {
             </select>
             <select
               value={courseForm.sectionId}
-              onChange={(e) => setCourseForm((prev) => ({ ...prev, sectionId: Number(e.currentTarget.value) }))}
+              onChange={(e) => {
+                const value = Number(e.currentTarget.value);
+                setCourseForm((prev) => ({ ...prev, sectionId: value }));
+              }}
               className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-4 py-3 text-sm"
             >
               <option value={0}>{tx("No section", "Khong co chuong")}</option>
@@ -420,7 +435,10 @@ export default function AdminPathDetailPage() {
               <input
                 type="number"
                 value={courseForm.sortOrder}
-                onChange={(e) => setCourseForm((prev) => ({ ...prev, sortOrder: Number(e.currentTarget.value) }))}
+                onChange={(e) => {
+                  const value = Number(e.currentTarget.value);
+                  setCourseForm((prev) => ({ ...prev, sortOrder: value }));
+                }}
                 placeholder={tx("Sort order", "Thu tu")}
                 className="rounded-full border border-[color:var(--stroke)] bg-white px-4 py-2 text-sm"
               />
@@ -428,7 +446,10 @@ export default function AdminPathDetailPage() {
                 <input
                   type="checkbox"
                   checked={courseForm.isRequired}
-                  onChange={(e) => setCourseForm((prev) => ({ ...prev, isRequired: e.currentTarget.checked }))}
+                  onChange={(e) => {
+                    const checked = e.currentTarget.checked;
+                    setCourseForm((prev) => ({ ...prev, isRequired: checked }));
+                  }}
                 />
                 {tx("Required", "Bat buoc")}
               </label>

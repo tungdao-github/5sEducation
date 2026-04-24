@@ -49,6 +49,9 @@ const defaultConfig: SystemConfig = {
 
 function mapSettings(settings: SystemSettingDto[]): Partial<SystemConfig> {
   const dict = new Map(settings.map((s) => [s.key, s.value]));
+  const pointsPerUnitRaw = dict.get("loyalty:pointsPerUnit");
+  const pointsPerUnit = pointsPerUnitRaw ? Number(pointsPerUnitRaw) : undefined;
+
   return {
     siteName: dict.get("siteName") || undefined,
     siteDescription: dict.get("siteDescription") || undefined,
@@ -67,7 +70,7 @@ function mapSettings(settings: SystemSettingDto[]): Partial<SystemConfig> {
     enableZaloPay: dict.get("payment:zaloPay") === "true",
     enableCard: dict.get("payment:card") === "true",
     maintenanceMode: dict.get("system:maintenance") === "true",
-    pointsPerUnit: dict.get("loyalty:pointsPerUnit") ? Number(dict.get("loyalty:pointsPerUnit")) : undefined,
+    pointsPerUnit: Number.isFinite(pointsPerUnit) ? pointsPerUnit : undefined,
   };
 }
 
@@ -293,8 +296,11 @@ export default function SystemConfigTab() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Điểm thưởng / đơn vị</label>
             <input
               type="number"
-              value={config.pointsPerUnit}
-              onChange={(e) => set("pointsPerUnit", Number(e.target.value))}
+              value={Number.isFinite(config.pointsPerUnit) ? config.pointsPerUnit : ""}
+              onChange={(e) => {
+                const nextValue = e.target.value;
+                set("pointsPerUnit", nextValue === "" ? 0 : Number(nextValue));
+              }}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

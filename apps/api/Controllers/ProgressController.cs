@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using UdemyClone.Api.Data;
 using UdemyClone.Api.Dtos;
-using UdemyClone.Api.Models;
+using UdemyClone.Api.Services;
 
 namespace UdemyClone.Api.Controllers;
 
@@ -12,11 +10,11 @@ namespace UdemyClone.Api.Controllers;
 [Authorize]
 public class ProgressController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
+    private readonly UserProgressService _progress;
 
-    public ProgressController(ApplicationDbContext db)
+    public ProgressController(UserProgressService progress)
     {
-        _db = db;
+        _progress = progress;
     }
 
     [HttpGet("{courseId:int}")]
@@ -28,34 +26,13 @@ public class ProgressController : ControllerBase
             return Unauthorized();
         }
 
-        var snapshot = await _db.Enrollments
-            .AsNoTracking()
-            .Where(e => e.UserId == userId && e.CourseId == courseId)
-            .Select(e => new
-            {
-                e.Id,
-                e.CourseId,
-                e.LastLessonId
-            })
-            .FirstOrDefaultAsync();
-
+        var snapshot = await _progress.GetProgressAsync(userId, courseId);
         if (snapshot is null)
         {
             return Forbid();
         }
 
-        var completedLessonIds = await _db.LessonProgresses
-            .AsNoTracking()
-            .Where(lp => lp.EnrollmentId == snapshot.Id)
-            .Select(lp => lp.LessonId)
-            .Distinct()
-            .ToListAsync();
-
-        var totalLessons = await _db.Lessons
-            .AsNoTracking()
-            .CountAsync(l => l.CourseId == snapshot.CourseId);
-
-        return Ok(BuildSnapshot(snapshot.CourseId, snapshot.LastLessonId, totalLessons, completedLessonIds));
+        return Ok(snapshot);
     }
 
     [HttpPost]
@@ -67,111 +44,13 @@ public class ProgressController : ControllerBase
             return Unauthorized();
         }
 
-        var enrollment = await _db.Enrollments
-            .Include(e => e.LessonProgresses)
-            .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == request.CourseId);
-
-        if (enrollment is null)
+        var result = await _progress.UpdateProgressAsync(userId, request);
+        return result.Status switch
         {
-            return Forbid();
-        }
-
-        var lessonBelongsToCourse = await _db.Lessons
-            .AsNoTracking()
-            .AnyAsync(l => l.Id == request.LessonId && l.CourseId == request.CourseId);
-
-        if (!lessonBelongsToCourse)
-        {
-            return BadRequest("Lesson does not belong to this course.");
-        }
-
-        if (request.SetAsLast)
-        {
-            enrollment.LastLessonId = request.LessonId;
-            enrollment.UpdatedAt = DateTime.UtcNow;
-        }
-
-        if (request.IsCompleted.HasValue)
-        {
-            var existing = enrollment.LessonProgresses.FirstOrDefault(lp => lp.LessonId == request.LessonId);
-            if (request.IsCompleted.Value)
-            {
-                if (existing is null)
-                {
-                    var progress = new LessonProgress
-                    {
-                        EnrollmentId = enrollment.Id,
-                        LessonId = request.LessonId,
-                        CompletedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    };
-                    enrollment.LessonProgresses.Add(progress);
-                }
-                else
-                {
-                    existing.CompletedAt = DateTime.UtcNow;
-                    existing.UpdatedAt = DateTime.UtcNow;
-                }
-            }
-            else if (existing is not null)
-            {
-                enrollment.LessonProgresses.Remove(existing);
-                _db.LessonProgresses.Remove(existing);
-            }
-        }
-
-        await _db.SaveChangesAsync();
-        return Ok(await BuildSnapshotAsync(enrollment.Id));
-    }
-
-    private async Task<ProgressSnapshotDto> BuildSnapshotAsync(int enrollmentId)
-    {
-        var snapshot = await _db.Enrollments
-            .AsNoTracking()
-            .Where(e => e.Id == enrollmentId)
-            .Select(e => new
-            {
-                e.CourseId,
-                e.LastLessonId
-            })
-            .FirstAsync();
-
-        var completedLessonIds = await _db.LessonProgresses
-            .AsNoTracking()
-            .Where(lp => lp.EnrollmentId == enrollmentId)
-            .Select(lp => lp.LessonId)
-            .Distinct()
-            .ToListAsync();
-
-        var totalLessons = await _db.Lessons
-            .AsNoTracking()
-            .CountAsync(l => l.CourseId == snapshot.CourseId);
-
-        return BuildSnapshot(
-            snapshot.CourseId,
-            snapshot.LastLessonId,
-            totalLessons,
-            completedLessonIds);
-    }
-
-    private static ProgressSnapshotDto BuildSnapshot(
-        int courseId,
-        int? lastLessonId,
-        int totalLessons,
-        List<int> completedLessonIds)
-    {
-        var progressPercent = totalLessons == 0
-            ? 0
-            : Math.Round(completedLessonIds.Count * 100d / totalLessons, 1);
-
-        return new ProgressSnapshotDto
-        {
-            CourseId = courseId,
-            LastLessonId = lastLessonId,
-            TotalLessons = totalLessons,
-            CompletedLessons = completedLessonIds.Count,
-            ProgressPercent = progressPercent,
-            CompletedLessonIds = completedLessonIds
+            AdminCrudStatus.Success => Ok(result.Value),
+            AdminCrudStatus.NotFound => Forbid(),
+            AdminCrudStatus.BadRequest => BadRequest(result.Error),
+            _ => Problem("Unable to update progress.")
         };
     }
 }

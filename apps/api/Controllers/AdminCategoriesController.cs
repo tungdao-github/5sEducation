@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using UdemyClone.Api.Data;
 using UdemyClone.Api.Dtos;
 using UdemyClone.Api.Services;
 
@@ -12,98 +10,53 @@ namespace UdemyClone.Api.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminCategoriesController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
+    private readonly AdminCategoriesService _categories;
 
-    public AdminCategoriesController(ApplicationDbContext db)
+    public AdminCategoriesController(AdminCategoriesService categories)
     {
-        _db = db;
+        _categories = categories;
     }
 
     [HttpGet]
     public async Task<ActionResult<List<CategoryAdminDto>>> GetAll()
     {
-        var categories = await _db.Categories
-            .OrderBy(c => c.Title)
-            .Select(c => new CategoryAdminDto
-            {
-                Id = c.Id,
-                Title = c.Title,
-                Slug = c.Slug,
-                CourseCount = c.Courses.Count
-            })
-            .ToListAsync();
-
-        return Ok(categories);
+        return Ok(await _categories.GetAllAsync());
     }
 
     [HttpPost]
     public async Task<ActionResult<CategoryAdminDto>> Create(CategoryCreateRequest request)
     {
-        var slug = SlugHelper.Slugify(request.Title);
-        var exists = await _db.Categories.AnyAsync(c => c.Slug == slug);
-        if (exists)
+        var result = await _categories.CreateAsync(request);
+        return result.Status switch
         {
-            return Conflict("Category already exists.");
-        }
-
-        var category = new Models.Category
-        {
-            Title = request.Title,
-            Slug = slug
+            AdminCrudStatus.Success => CreatedAtAction(nameof(GetAll), new { id = result.Value!.Id }, result.Value),
+            AdminCrudStatus.Conflict => Conflict(result.Error),
+            _ => BadRequest(result.Error)
         };
-
-        _db.Categories.Add(category);
-        await _db.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetAll), new { id = category.Id }, new CategoryAdminDto
-        {
-            Id = category.Id,
-            Title = category.Title,
-            Slug = category.Slug,
-            CourseCount = 0
-        });
     }
 
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, CategoryUpdateRequest request)
     {
-        var category = await _db.Categories.FindAsync(id);
-        if (category is null)
+        var result = await _categories.UpdateAsync(id, request);
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        var slug = SlugHelper.Slugify(request.Title);
-        var slugExists = await _db.Categories.AnyAsync(c => c.Slug == slug && c.Id != id);
-        if (slugExists)
-        {
-            return Conflict("Category slug already exists.");
-        }
-
-        category.Title = request.Title;
-        category.Slug = slug;
-        await _db.SaveChangesAsync();
-
-        return NoContent();
+            AdminCrudStatus.Success => NoContent(),
+            AdminCrudStatus.NotFound => NotFound(),
+            AdminCrudStatus.Conflict => Conflict(result.Error),
+            _ => BadRequest(result.Error)
+        };
     }
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var categoryExists = await _db.Categories.AsNoTracking().AnyAsync(c => c.Id == id);
-        if (!categoryExists)
+        var result = await _categories.DeleteAsync(id);
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        if (await _db.Courses.AsNoTracking().AnyAsync(c => c.CategoryId == id))
-        {
-            return BadRequest("Cannot delete category with courses.");
-        }
-
-        _db.Categories.Remove(new Models.Category { Id = id });
-        await _db.SaveChangesAsync();
-
-        return NoContent();
+            AdminCrudStatus.Success => NoContent(),
+            AdminCrudStatus.NotFound => NotFound(),
+            _ => BadRequest(result.Error)
+        };
     }
 }

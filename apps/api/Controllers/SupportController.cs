@@ -1,12 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.SignalR;
-using UdemyClone.Api.Data;
 using UdemyClone.Api.Dtos;
-using UdemyClone.Api.Hubs;
-using UdemyClone.Api.Models;
 using UdemyClone.Api.Services;
 
 namespace UdemyClone.Api.Controllers;
@@ -16,90 +11,27 @@ namespace UdemyClone.Api.Controllers;
 [EnableRateLimiting("auth")]
 public class SupportController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
-    private readonly IEmailSender _emailSender;
-    private readonly IHubContext<SupportHub> _hub;
+    private readonly SupportService _support;
 
-    public SupportController(
-        ApplicationDbContext db,
-        IEmailSender emailSender,
-        IHubContext<SupportHub> hub)
+    public SupportController(SupportService support)
     {
-        _db = db;
-        _emailSender = emailSender;
-        _hub = hub;
+        _support = support;
     }
 
     [HttpPost]
     [AllowAnonymous]
     public async Task<ActionResult<SupportMessageDto>> Create(SupportMessageCreateRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Message))
-        {
-            return BadRequest("Message is required.");
-        }
-
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var emailClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        var result = await _support.CreateAsync(userId, emailClaim, request);
 
-        var name = request.Name?.Trim() ?? string.Empty;
-        var email = request.Email?.Trim() ?? string.Empty;
-
-        if (!string.IsNullOrWhiteSpace(userId))
+        return result.Status switch
         {
-            var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
-            if (user != null)
-            {
-                name = $"{user.FirstName} {user.LastName}".Trim();
-                email = user.Email ?? emailClaim ?? email;
-            }
-        }
-
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return BadRequest("Email is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            name = email.Split('@')[0];
-        }
-
-        var message = new SupportMessage
-        {
-            UserId = userId,
-            Name = name,
-            Email = email,
-            Message = request.Message.Trim(),
-            Status = "open",
-            CreatedAt = DateTime.UtcNow
+            SupportMutationStatus.Success => Ok(result.Value),
+            SupportMutationStatus.BadRequest => BadRequest(result.Error),
+            _ => Problem("Unable to create support message.")
         };
-
-        _db.SupportMessages.Add(message);
-        await _db.SaveChangesAsync();
-
-        var dto = new SupportMessageDto
-        {
-            Id = message.Id,
-            UserId = message.UserId,
-            UserEmail = emailClaim,
-            Name = message.Name,
-            Email = message.Email,
-            Message = message.Message,
-            Status = message.Status,
-            CreatedAt = message.CreatedAt
-        };
-
-        await _hub.Clients.Group(SupportHub.AdminGroup)
-            .SendAsync("support:message:new", dto);
-
-        if (!string.IsNullOrWhiteSpace(message.UserId))
-        {
-            await _hub.Clients.Group(SupportHub.UserGroup(message.UserId))
-                .SendAsync("support:message:new", dto);
-        }
-
-        return Ok(dto);
     }
 
     [Authorize]
@@ -112,25 +44,7 @@ public class SupportController : ControllerBase
             return Unauthorized();
         }
 
-        var items = await _db.SupportMessages.AsNoTracking()
-            .Where(m => m.UserId == userId)
-            .OrderByDescending(m => m.CreatedAt)
-            .Select(m => new SupportMessageDto
-            {
-                Id = m.Id,
-                UserId = m.UserId,
-                UserEmail = m.User != null ? m.User.Email : null,
-                Name = m.Name,
-                Email = m.Email,
-                Message = m.Message,
-                Status = m.Status,
-                AdminNote = m.AdminNote,
-                CreatedAt = m.CreatedAt,
-                UpdatedAt = m.UpdatedAt
-            })
-            .ToListAsync();
-
-        return Ok(items);
+        return Ok(await _support.ListMineAsync(userId));
     }
 
     [Authorize]
@@ -139,32 +53,15 @@ public class SupportController : ControllerBase
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isAdmin = User.IsInRole("Admin");
-        var message = await _db.SupportMessages.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
-        if (message == null)
+        var result = await _support.ListRepliesAsync(id, userId, isAdmin);
+
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        if (!isAdmin && message.UserId != userId)
-        {
-            return Forbid();
-        }
-
-        var replies = await _db.SupportReplies.AsNoTracking()
-            .Where(r => r.SupportMessageId == id)
-            .OrderBy(r => r.CreatedAt)
-            .Select(r => new SupportReplyDto
-            {
-                Id = r.Id,
-                SupportMessageId = r.SupportMessageId,
-                AuthorRole = r.AuthorRole,
-                AuthorName = r.AuthorName,
-                Message = r.Message,
-                CreatedAt = r.CreatedAt
-            })
-            .ToListAsync();
-
-        return Ok(replies);
+            SupportMutationStatus.Success => Ok(result.Value),
+            SupportMutationStatus.NotFound => NotFound(),
+            SupportMutationStatus.Forbidden => Forbid(),
+            _ => Problem("Unable to list support replies.")
+        };
     }
 
     [Authorize]
@@ -173,76 +70,15 @@ public class SupportController : ControllerBase
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         var isAdmin = User.IsInRole("Admin");
-        var message = await _db.SupportMessages.FirstOrDefaultAsync(m => m.Id == id);
-        if (message == null)
-        {
-            return NotFound();
-        }
+        var result = await _support.AddReplyAsync(id, userId, isAdmin, request);
 
-        if (!isAdmin && message.UserId != userId)
+        return result.Status switch
         {
-            return Forbid();
-        }
-
-        var authorName = "User";
-        if (isAdmin)
-        {
-            authorName = "Admin";
-        }
-        else if (!string.IsNullOrWhiteSpace(userId))
-        {
-            var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
-            if (user != null)
-            {
-                authorName = $"{user.FirstName} {user.LastName}".Trim();
-                if (string.IsNullOrWhiteSpace(authorName))
-                {
-                    authorName = user.Email ?? "User";
-                }
-            }
-        }
-
-        var reply = new SupportReply
-        {
-            SupportMessageId = message.Id,
-            AuthorRole = isAdmin ? "admin" : "user",
-            AuthorName = authorName,
-            Message = request.Message.Trim(),
-            CreatedAt = DateTime.UtcNow
+            SupportMutationStatus.Success => Ok(result.Value),
+            SupportMutationStatus.NotFound => NotFound(),
+            SupportMutationStatus.Forbidden => Forbid(),
+            SupportMutationStatus.BadRequest => BadRequest(result.Error),
+            _ => Problem("Unable to add support reply.")
         };
-
-        _db.SupportReplies.Add(reply);
-        message.Status = isAdmin ? "answered" : "open";
-        message.UpdatedAt = DateTime.UtcNow;
-        await _db.SaveChangesAsync();
-
-        var replyDto = new SupportReplyDto
-        {
-            Id = reply.Id,
-            SupportMessageId = reply.SupportMessageId,
-            AuthorRole = reply.AuthorRole,
-            AuthorName = reply.AuthorName,
-            Message = reply.Message,
-            CreatedAt = reply.CreatedAt
-        };
-
-        await _hub.Clients.Group(SupportHub.AdminGroup)
-            .SendAsync("support:reply:new", replyDto);
-
-        if (!string.IsNullOrWhiteSpace(message.UserId))
-        {
-            await _hub.Clients.Group(SupportHub.UserGroup(message.UserId))
-                .SendAsync("support:reply:new", replyDto);
-        }
-
-        if (isAdmin && !string.IsNullOrWhiteSpace(message.Email))
-        {
-            await _emailSender.SendAsync(
-                message.Email,
-                "Support reply",
-                $"Admin replied: {reply.Message}");
-        }
-
-        return Ok(replyDto);
     }
 }

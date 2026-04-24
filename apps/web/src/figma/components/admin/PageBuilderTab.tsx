@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -148,6 +148,7 @@ function cloneContent<T>(value: T): T {
 }
 
 export default function PageBuilderTab() {
+  const nextBlockIdRef = useRef(DEFAULT_BLOCKS.length + 1);
   const [blocks, setBlocks] = useState<Block[]>(DEFAULT_BLOCKS);
   const [previewMode, setPreviewMode] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -182,7 +183,7 @@ export default function PageBuilderTab() {
     const config = BLOCK_TYPES.find((item) => item.type === type);
     if (!config) return;
     const next: Block = {
-      id: `block-${Date.now()}`,
+      id: `block-${nextBlockIdRef.current++}`,
       type,
       order: blocks.length,
       content: cloneContent(config.defaultContent),

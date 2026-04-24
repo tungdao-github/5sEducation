@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using UdemyClone.Api.Data;
 using UdemyClone.Api.Dtos;
+using UdemyClone.Api.Services;
 
 namespace UdemyClone.Api.Controllers;
 
@@ -9,41 +8,16 @@ namespace UdemyClone.Api.Controllers;
 [Route("api/homepage/blocks")]
 public class HomePageBlocksController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
+    private readonly PublicContentService _content;
 
-    public HomePageBlocksController(ApplicationDbContext db)
+    public HomePageBlocksController(PublicContentService content)
     {
-        _db = db;
+        _content = content;
     }
 
     [HttpGet]
     public async Task<ActionResult<List<HomePageBlockDto>>> GetAll([FromQuery] string? locale)
     {
-        var normalizedLocale = (locale ?? string.Empty).Trim().ToLowerInvariant();
-
-        var blocks = await _db.HomePageBlocks
-            .AsNoTracking()
-            .Where(b => b.IsPublished)
-            .Where(b => string.IsNullOrEmpty(b.Locale) || b.Locale == normalizedLocale)
-            .OrderBy(b => b.SortOrder)
-            .ThenBy(b => b.Id)
-            .Select(b => new HomePageBlockDto
-            {
-                Id = b.Id,
-                Key = b.Key,
-                Type = b.Type,
-                Title = b.Title,
-                Subtitle = b.Subtitle,
-                ImageUrl = b.ImageUrl,
-                CtaText = b.CtaText,
-                CtaUrl = b.CtaUrl,
-                ItemsJson = b.ItemsJson,
-                Locale = b.Locale,
-                SortOrder = b.SortOrder,
-                IsPublished = b.IsPublished
-            })
-            .ToListAsync();
-
-        return Ok(blocks);
+        return Ok(await _content.GetHomePageBlocksAsync(locale));
     }
 }

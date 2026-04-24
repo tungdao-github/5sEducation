@@ -12,8 +12,6 @@ import {
 } from "@/lib/google-auth";
 
 const DISABLED_PATHS = new Set([
-  "/login",
-  "/register",
   "/forgot-password",
   "/reset-password",
 ]);
@@ -34,7 +32,10 @@ export function GoogleOneTap() {
       return;
     }
 
-    if (DISABLED_PATHS.has(pathname) || authMode) {
+    if (
+      DISABLED_PATHS.has(pathname) ||
+      (authMode && authMode !== "login" && authMode !== "register")
+    ) {
       return;
     }
 
@@ -58,7 +59,6 @@ export function GoogleOneTap() {
             context: "signin",
             auto_select: false,
             cancel_on_tap_outside: true,
-            use_fedcm_for_prompt: false,
             callback: async (response) => {
               const credential = response.credential;
               if (!credential) {
@@ -77,8 +77,10 @@ export function GoogleOneTap() {
         }
 
         const prompt = () => {
-          window.google?.accounts?.id?.prompt(() => {
-            // Ignore prompt moment notifications; we only need user auth.
+          window.google?.accounts?.id?.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              return;
+            }
           });
         };
 

@@ -4,6 +4,14 @@ type GoogleCredentialResponse = {
   credential?: string;
 };
 
+type GooglePromptMomentNotification = {
+  isNotDisplayed: () => boolean;
+  isSkippedMoment: () => boolean;
+  isDismissedMoment?: () => boolean;
+  getNotDisplayedReason?: () => string;
+  getSkippedReason?: () => string;
+};
+
 type GoogleAccountsId = {
   initialize: (options: {
     client_id: string;
@@ -11,7 +19,9 @@ type GoogleAccountsId = {
     context?: "signin" | "signup";
     auto_select?: boolean;
     cancel_on_tap_outside?: boolean;
+    use_fedcm_for_button?: boolean;
     use_fedcm_for_prompt?: boolean;
+    button_auto_select?: boolean;
   }) => void;
   renderButton: (
     parent: HTMLElement,
@@ -22,9 +32,10 @@ type GoogleAccountsId = {
       text?: "signin_with" | "signup_with" | "continue_with";
       width?: number | string;
       locale?: string;
+      click_listener?: () => void;
     }
   ) => void;
-  prompt: (callback?: () => void) => void;
+  prompt: (callback?: (notification: GooglePromptMomentNotification) => void) => void;
   cancel: () => void;
 };
 
@@ -134,6 +145,14 @@ export function isGoogleAuthAllowedOrigin() {
   }
 
   const origin = getBrowserOrigin();
+  if (process.env.NODE_ENV !== "production") {
+    return (
+      origin.startsWith("http://localhost:") ||
+      origin.startsWith("http://127.0.0.1:") ||
+      origin.startsWith("http://[::1]:")
+    );
+  }
+
   if (explicitAllowedOrigins.length > 0) {
     return explicitAllowedOrigins.includes(origin);
   }
@@ -142,7 +161,7 @@ export function isGoogleAuthAllowedOrigin() {
     return true;
   }
 
-  return origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:");
+  return false;
 }
 
 export function hasInitializedGoogleIdentity(clientId: string) {

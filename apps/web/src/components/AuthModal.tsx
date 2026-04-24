@@ -535,7 +535,10 @@ export default function AuthModal() {
                       placeholder={tx("Họ và tên", "Ho va ten")}
                       required
                       value={form.name}
-                      onChange={(e) => setForm((current) => ({ ...current, name: e.currentTarget.value }))}
+                      onChange={(e) => {
+                        const value = e.currentTarget.value;
+                        setForm((current) => ({ ...current, name: value }));
+                      }}
                       className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -548,7 +551,10 @@ export default function AuthModal() {
                     placeholder="Email"
                     required
                     value={form.email}
-                    // onChange={(e) => setForm((current) => ({ ...current, email: e.currentTarget.value }))}
+                    onChange={(e) => {
+                      const value = e.currentTarget.value;
+                      setForm((current) => ({ ...current, email: value }));
+                    }}
                     className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -561,7 +567,10 @@ export default function AuthModal() {
                       placeholder={tx("Mật khẩu", "Mat khau")}
                       required
                       value={form.password}
-                      onChange={(e) => setForm((current) => ({ ...current, password: e.currentTarget.value }))}
+                      onChange={(e) => {
+                        const value = e.currentTarget.value;
+                        setForm((current) => ({ ...current, password: value }));
+                      }}
                       className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <button
@@ -582,7 +591,10 @@ export default function AuthModal() {
                       placeholder={tx("Xác nhận mật khẩu", "Xac nhan mat khau")}
                       required
                       value={form.confirm}
-                      onChange={(e) => setForm((current) => ({ ...current, confirm: e.currentTarget.value }))}
+                      onChange={(e) => {
+                        const value = e.currentTarget.value;
+                        setForm((current) => ({ ...current, confirm: value }));
+                      }}
                       className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -597,7 +609,10 @@ export default function AuthModal() {
                         placeholder={tx("Mật khẩu mới", "Mat khau moi")}
                         required
                         value={form.resetPassword}
-                        onChange={(e) => setForm((current) => ({ ...current, resetPassword: e.currentTarget.value }))}
+                        onChange={(e) => {
+                          const value = e.currentTarget.value;
+                          setForm((current) => ({ ...current, resetPassword: value }));
+                        }}
                         className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                       <button
@@ -615,7 +630,10 @@ export default function AuthModal() {
                         placeholder={tx("Xác nhận mật khẩu", "Xac nhan mat khau")}
                         required
                         value={form.confirm}
-                        onChange={(e) => setForm((current) => ({ ...current, confirm: e.currentTarget.value }))}
+                        onChange={(e) => {
+                          const value = e.currentTarget.value;
+                          setForm((current) => ({ ...current, confirm: value }));
+                        }}
                         className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>

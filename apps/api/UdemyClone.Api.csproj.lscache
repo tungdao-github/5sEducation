@@ -53,6 +53,9 @@ TemporaryDependencyNodeTargetIdentifier=net9.0
 /warnaserror+:NU1605,SYSLIB0011
 
 [sourceFiles]
+Common/
+ BlogLocaleHelper.cs
+ CoursePriceHelper.cs
 Controllers/
  AddressesController.cs
  AdminAuditLogsController.cs
@@ -92,6 +95,8 @@ Controllers/
  WishlistController.cs
 Data/
  ApplicationDbContext.cs
+ DatabaseConfigurationExtensions.cs
+ DatabaseProvider.cs
  PostgresApplicationDbContext.cs
  SeedData.cs
 Dtos/
@@ -278,17 +283,120 @@ obj/Debug/net9.0/
  UdemyClone.Api.AssemblyInfo.cs
  UdemyClone.Api.GlobalUsings.g.cs
 Program.cs
+Repositories/
+ AdminAuditLogsRepository.cs
+ AdminBlogPostsRepository.cs
+ AdminCategoriesRepository.cs
+ AdminCouponsRepository.cs
+ AdminHomePageBlocksRepository.cs
+ AdminLearningPathsRepository.cs
+ AdminOrdersRepository.cs
+ AdminReviewsRepository.cs
+ AdminSettingsRepository.cs
+ AdminStatsRepository.cs
+ AdminSupportRepository.cs
+ AdminUsersRepository.cs
+ BlogCommentsRepository.cs
+ CartRepository.cs
+ CourseCatalogRepository.cs
+ HistoryRepository.cs
+ InstructorCoursesRepository.cs
+ LearningPathsRepository.cs
+ LessonsRepository.cs
+ PublicContentRepository.cs
+ SupportRepository.cs
+ UserAddressesRepository.cs
+ UserEnrollmentsRepository.cs
+ UserOrdersRepository.cs
+ UserProgressRepository.cs
+ UserReviewsRepository.cs
+ UserWishlistRepository.cs
 Services/
+ AdminAuditLogsService.cs
+ AdminBlogPostsService.cs
+ AdminCategoriesService.cs
+ AdminCouponsService.cs
+ AdminHomePageBlocksService.cs
+ AdminLearningPathCrudService.cs
+ AdminLearningPathsService.cs
+ AdminLearningPathsStructureService.cs
+ AdminOrdersService.cs
+ AdminReviewHelper.cs
+ AdminReviewsService.cs
+ AdminSettingsService.cs
+ AdminStatsService.cs
+ AdminSupportService.cs
+ AdminUsersMutationService.cs
+ AdminUsersQueryService.cs
+ AdminUsersService.cs
+ AuthAccountFlowService.cs
+ AuthAccountService.cs
+ AuthEmailConfirmationService.cs
+ AuthEmailService.cs
+ AuthPasswordRecoveryService.cs
+ AuthProfileService.cs
+ AuthSocialService.cs
+ AuthWorkflowService.cs
+ BlogCommentsService.cs
+ BlogPostDraft.cs
+ BlogPostHelper.cs
+ CartCheckoutFlowService.cs
+ CartCheckoutHelper.cs
+ CartCheckoutNotificationService.cs
+ CartCheckoutService.cs
+ CartService.cs
  CloudflareStreamOptions.cs
  CloudflareStreamService.cs
  ConsoleEmailSender.cs
+ CouponHelper.cs
+ CouponValidationService.cs
+ CourseCatalogContracts.cs
+ CourseCatalogLessonMappingHelper.cs
+ CourseCatalogMappingHelper.cs
+ CourseCatalogService.Commands.cs
+ CourseCatalogService.cs
+ CourseCatalogService.Display.cs
+ CourseCatalogService.Query.cs
+ CourseThumbnailStorageService.cs
  FacebookAuthOptions.cs
+ FacebookAuthService.cs
  FrontendOptions.cs
  GoogleAuthOptions.cs
+ GoogleAuthService.cs
+ HistoryService.cs
  IEmailSender.cs
+ InstructorCoursesService.cs
  JwtOptions.cs
+ LearningPathAdminHelper.cs
+ LearningPathsService.cs
+ LessonExerciseHelper.Builders.cs
+ LessonExerciseHelper.Configuration.cs
+ LessonExerciseHelper.cs
+ LessonExerciseService.cs
+ LessonExerciseStatusService.cs
+ LessonExerciseSubmissionHelper.cs
+ LessonExerciseSubmissionService.cs
+ LessonMutationService.cs
+ LessonReadService.cs
+ LessonsService.cs
+ LocalVideoUploadService.cs
+ PublicContentService.cs
  SlugHelper.cs
+ SupportMessageService.cs
+ SupportNotificationService.cs
+ SupportReplyService.cs
+ SupportService.cs
  TokenService.cs
+ UploadsService.cs
+ UserAddressesMutationService.cs
+ UserAddressesQueryService.cs
+ UserAddressesService.cs
+ UserEnrollmentsService.cs
+ UserOrdersService.cs
+ UserProgressService.cs
+ UserReviewsService.cs
+ UserWishlistService.cs
+ VideoUploadSessionService.cs
 
 [metadataReferences]
 ../../../../../Program Files/dotnet/packs/Microsoft.AspNetCore.App.Ref/9.0.11/ref/net9.0/
@@ -595,7 +703,7 @@ Services/
  System.Xml.XPath.dll
  System.Xml.XPath.XDocument.dll
  WindowsBase.dll
-<NUGET>/
+../../tmp/dotnet-home/.nuget/packages/
  azure.core/1.38.0/lib/net6.0/Azure.Core.dll
  azure.identity/1.11.4/lib/netstandard2.0/Azure.Identity.dll
  google.apis.auth/1.70.0/lib/net6.0/Google.Apis.Auth.dll
@@ -665,10 +773,10 @@ Services/
 ../../../../../Program Files/dotnet/sdk/10.0.101/Sdks/Microsoft.NET.Sdk/analyzers/
  Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll
  Microsoft.CodeAnalysis.NetAnalyzers.dll
-<NUGET>/microsoft.codeanalysis.analyzers/3.3.4/analyzers/dotnet/cs/
+../../tmp/dotnet-home/.nuget/packages/microsoft.codeanalysis.analyzers/3.3.4/analyzers/dotnet/cs/
  Microsoft.CodeAnalysis.Analyzers.dll
  Microsoft.CodeAnalysis.CSharp.Analyzers.dll
-<NUGET>/microsoft.entityframeworkcore.analyzers/9.0.0/analyzers/dotnet/cs/Microsoft.EntityFrameworkCore.Analyzers.dll
+../../tmp/dotnet-home/.nuget/packages/microsoft.entityframeworkcore.analyzers/9.0.0/analyzers/dotnet/cs/Microsoft.EntityFrameworkCore.Analyzers.dll
 
 [analyzerConfigFiles]
 ../../../../../Program Files/dotnet/sdk/10.0.101/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_9_default.globalconfig

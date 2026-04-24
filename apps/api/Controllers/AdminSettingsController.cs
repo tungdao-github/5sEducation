@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using UdemyClone.Api.Data;
 using UdemyClone.Api.Dtos;
-using UdemyClone.Api.Models;
+using UdemyClone.Api.Services;
 
 namespace UdemyClone.Api.Controllers;
 
@@ -12,66 +10,28 @@ namespace UdemyClone.Api.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminSettingsController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
+    private readonly AdminSettingsService _settings;
 
-    public AdminSettingsController(ApplicationDbContext db)
+    public AdminSettingsController(AdminSettingsService settings)
     {
-        _db = db;
+        _settings = settings;
     }
 
     [HttpGet]
     public async Task<ActionResult<List<SystemSettingDto>>> GetAll()
     {
-        var settings = await _db.SystemSettings
-            .AsNoTracking()
-            .OrderBy(s => s.Group)
-            .ThenBy(s => s.Key)
-            .Select(s => new SystemSettingDto
-            {
-                Key = s.Key,
-                Value = s.Value,
-                Group = s.Group,
-                Description = s.Description,
-                UpdatedAt = s.UpdatedAt
-            })
-            .ToListAsync();
-
-        return Ok(settings);
+        return Ok(await _settings.GetAllAsync());
     }
 
     [HttpPut("{key}")]
     public async Task<ActionResult<SystemSettingDto>> Upsert(string key, SystemSettingUpdateRequest request)
     {
-        var normalizedKey = key.Trim();
-        if (string.IsNullOrWhiteSpace(normalizedKey))
+        var result = await _settings.UpsertAsync(key, request);
+        return result.Status switch
         {
-            return BadRequest("Key is required.");
-        }
-
-        var setting = await _db.SystemSettings.FirstOrDefaultAsync(s => s.Key == normalizedKey);
-        if (setting is null)
-        {
-            setting = new SystemSetting
-            {
-                Key = normalizedKey
-            };
-            _db.SystemSettings.Add(setting);
-        }
-
-        setting.Value = request.Value?.Trim() ?? string.Empty;
-        setting.Group = request.Group?.Trim() ?? string.Empty;
-        setting.Description = request.Description?.Trim();
-        setting.UpdatedAt = DateTime.UtcNow;
-
-        await _db.SaveChangesAsync();
-
-        return Ok(new SystemSettingDto
-        {
-            Key = setting.Key,
-            Value = setting.Value,
-            Group = setting.Group,
-            Description = setting.Description,
-            UpdatedAt = setting.UpdatedAt
-        });
+            AdminCrudStatus.Success => Ok(result.Value),
+            AdminCrudStatus.BadRequest => BadRequest(result.Error),
+            _ => Problem("Unable to update setting.")
+        };
     }
 }

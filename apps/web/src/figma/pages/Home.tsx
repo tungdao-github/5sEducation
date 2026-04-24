@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@/figma/compat/router";
 import CourseCard from "../components/CourseCard";
 import { fetchCourses, mapCourseList, formatPriceCompact } from "../data/api";
@@ -89,12 +89,12 @@ const categories = [
 ];
 
 function FlashSaleCountdown({ courses }: { courses: Course[] }) {
-  const endTime = useRef(Date.now() + 8 * 3600 * 1000 + 23 * 60 * 1000 + 45 * 1000);
+  const [endTime] = useState(() => Date.now() + 8 * 3600 * 1000 + 23 * 60 * 1000 + 45 * 1000);
   const [timeLeft, setTimeLeft] = useState({ h: 8, m: 23, s: 45 });
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const diff = Math.max(0, endTime.current - Date.now());
+      const diff = Math.max(0, endTime - Date.now());
       setTimeLeft({
         h: Math.floor(diff / 3600000),
         m: Math.floor((diff % 3600000) / 60000),
@@ -102,13 +102,13 @@ function FlashSaleCountdown({ courses }: { courses: Course[] }) {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [endTime]);
 
   const pad = (value: number) => String(value).padStart(2, "0");
   const flashCourses = courses.filter((course) => course.originalPrice && course.originalPrice > course.price).slice(0, 4);
 
   return (
-    <section style={{backgroundColor: "blue"}}className="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 py-10">
+    <section className="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -198,9 +198,9 @@ function Testimonials() {
                 <Star key={index} className="size-5 fill-yellow-400 text-yellow-400" />
               ))}
             </div>
-            <blockquote className="mb-6 text-lg italic leading-relaxed text-gray-700">
-              "{testimonials[current].text}"
-            </blockquote>
+              <blockquote className="mb-6 text-lg italic leading-relaxed text-gray-700">
+                &quot;{testimonials[current].text}&quot;
+              </blockquote>
             <div className="flex items-center justify-center gap-3">
               <div className="flex size-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 text-lg font-bold text-white">
                 {testimonials[current].avatar}
@@ -369,8 +369,7 @@ export default function Home() {
         if (!active) return;
         setCourses(courseDtos.map((dto) => mapCourseList(dto, language)));
       })
-      .catch((error) => {
-        console.error("Failed to load homepage courses", error);
+      .catch(() => {
         if (!active) return;
         setCourses([]);
       });

@@ -15,6 +15,7 @@ using UdemyClone.Api.Filters;
 using UdemyClone.Api.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using UdemyClone.Api.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,44 +58,7 @@ builder.Services.AddProblemDetails(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var dbProvider = builder.Configuration["DbProvider"] ?? "SqlServer";
-if (dbProvider.Equals("Postgres", StringComparison.OrdinalIgnoreCase)
-    || dbProvider.Equals("PostgreSql", StringComparison.OrdinalIgnoreCase))
-{
-    builder.Services.AddDbContext<ApplicationDbContext, PostgresApplicationDbContext>(options =>
-    {
-        var pgConnection = builder.Configuration.GetConnectionString("Postgres")
-            ?? builder.Configuration["DATABASE_URL"]
-            ?? builder.Configuration.GetConnectionString("DefaultConnection");
-        if (string.IsNullOrWhiteSpace(pgConnection))
-        {
-            throw new InvalidOperationException("Postgres connection string is missing.");
-        }
-        options.UseNpgsql(pgConnection);
-    });
-}
-else
-{
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    {
-        if (dbProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
-        {
-            var sqlConnection = builder.Configuration.GetConnectionString("SqlServer");
-            if (string.IsNullOrWhiteSpace(sqlConnection))
-            {
-                throw new InvalidOperationException("SqlServer connection string is missing.");
-            }
-            options.UseSqlServer(sqlConnection);
-            return;
-        }
-
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-            ?? "Data Source=udemyclone-api.db";
-        options.UseSqlite(connectionString);
-        options.ConfigureWarnings(warnings =>
-            warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
-    });
-}
+builder.Services.AddApplicationDatabase(builder.Configuration);
 
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<ApplicationDbContext>("db");
@@ -189,6 +153,92 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<IAdminStatsRepository, AdminStatsRepository>();
+builder.Services.AddScoped<IAdminBlogPostsRepository, AdminBlogPostsRepository>();
+builder.Services.AddScoped<IAdminAuditLogsRepository, AdminAuditLogsRepository>();
+builder.Services.AddScoped<IAdminCategoriesRepository, AdminCategoriesRepository>();
+builder.Services.AddScoped<IAdminReviewsRepository, AdminReviewsRepository>();
+builder.Services.AddScoped<IAdminOrdersRepository, AdminOrdersRepository>();
+builder.Services.AddScoped<IAdminCouponsRepository, AdminCouponsRepository>();
+builder.Services.AddScoped<IAdminSettingsRepository, AdminSettingsRepository>();
+builder.Services.AddScoped<IAdminSupportRepository, AdminSupportRepository>();
+builder.Services.AddScoped<IAdminHomePageBlocksRepository, AdminHomePageBlocksRepository>();
+builder.Services.AddScoped<IAdminLearningPathsRepository, AdminLearningPathsRepository>();
+builder.Services.AddScoped<IAdminUsersRepository, AdminUsersRepository>();
+builder.Services.AddScoped<ICourseCatalogRepository, CourseCatalogRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IInstructorCoursesRepository, InstructorCoursesRepository>();
+builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
+builder.Services.AddScoped<IBlogCommentsRepository, BlogCommentsRepository>();
+builder.Services.AddScoped<ILearningPathsRepository, LearningPathsRepository>();
+builder.Services.AddScoped<ILessonsRepository, LessonsRepository>();
+builder.Services.AddScoped<IPublicContentRepository, PublicContentRepository>();
+builder.Services.AddScoped<ISupportRepository, SupportRepository>();
+builder.Services.AddScoped<IUserAddressesRepository, UserAddressesRepository>();
+builder.Services.AddScoped<IUserEnrollmentsRepository, UserEnrollmentsRepository>();
+builder.Services.AddScoped<IUserOrdersRepository, UserOrdersRepository>();
+builder.Services.AddScoped<IUserProgressRepository, UserProgressRepository>();
+builder.Services.AddScoped<IUserReviewsRepository, UserReviewsRepository>();
+builder.Services.AddScoped<IUserWishlistRepository, UserWishlistRepository>();
+builder.Services.AddScoped<AuthAccountService>();
+builder.Services.AddScoped<AuthAccountFlowService>();
+builder.Services.AddScoped<AuthProfileService>();
+builder.Services.AddScoped<AuthPasswordRecoveryService>();
+builder.Services.AddScoped<AuthEmailConfirmationService>();
+builder.Services.AddScoped<GoogleAuthService>();
+builder.Services.AddScoped<FacebookAuthService>();
+builder.Services.AddScoped<AuthWorkflowService>();
+builder.Services.AddScoped<AdminBlogPostsService>();
+builder.Services.AddScoped<AdminAuditLogsService>();
+builder.Services.AddScoped<AdminCategoriesService>();
+builder.Services.AddScoped<AdminReviewsService>();
+builder.Services.AddScoped<AdminOrdersService>();
+builder.Services.AddScoped<AdminCouponsService>();
+builder.Services.AddScoped<AdminSettingsService>();
+builder.Services.AddScoped<AdminHomePageBlocksService>();
+builder.Services.AddScoped<AdminLearningPathCrudService>();
+builder.Services.AddScoped<AdminLearningPathsService>();
+builder.Services.AddScoped<AdminLearningPathsStructureService>();
+builder.Services.AddScoped<CouponValidationService>();
+builder.Services.AddScoped<CourseCatalogService>();
+builder.Services.AddScoped<CourseThumbnailStorageService>();
+builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<CartCheckoutFlowService>();
+builder.Services.AddScoped<CartCheckoutNotificationService>();
+builder.Services.AddScoped<CartCheckoutService>();
+builder.Services.AddScoped<BlogCommentsService>();
+builder.Services.AddScoped<AdminStatsService>();
+builder.Services.AddScoped<AdminSupportService>();
+builder.Services.AddScoped<AdminUsersService>();
+builder.Services.AddScoped<AdminUsersQueryService>();
+builder.Services.AddScoped<AdminUsersMutationService>();
+builder.Services.AddScoped<SupportMessageService>();
+builder.Services.AddScoped<SupportReplyService>();
+builder.Services.AddScoped<InstructorCoursesService>();
+builder.Services.AddScoped<HistoryService>();
+builder.Services.AddScoped<LearningPathsService>();
+builder.Services.AddScoped<LessonReadService>();
+builder.Services.AddScoped<LessonMutationService>();
+builder.Services.AddScoped<LessonsService>();
+builder.Services.AddScoped<LessonExerciseService>();
+builder.Services.AddScoped<LessonExerciseStatusService>();
+builder.Services.AddScoped<LessonExerciseSubmissionService>();
+builder.Services.AddScoped<PublicContentService>();
+builder.Services.AddScoped<SupportService>();
+builder.Services.AddScoped<SupportNotificationService>();
+builder.Services.AddScoped<UserAddressesService>();
+builder.Services.AddScoped<UserEnrollmentsService>();
+builder.Services.AddScoped<UserOrdersService>();
+builder.Services.AddScoped<UserProgressService>();
+builder.Services.AddScoped<UserReviewsService>();
+builder.Services.AddScoped<UserWishlistService>();
+builder.Services.AddScoped<UserAddressesQueryService>();
+builder.Services.AddScoped<UserAddressesMutationService>();
+builder.Services.AddScoped<UploadsService>();
+builder.Services.AddScoped<VideoUploadSessionService>();
+builder.Services.AddScoped<LocalVideoUploadService>();
+builder.Services.AddScoped<AuthSocialService>();
+builder.Services.AddScoped<AuthEmailService>();
 builder.Services.Configure<CloudflareStreamOptions>(builder.Configuration.GetSection("CloudflareStream"));
 builder.Services.Configure<GoogleAuthOptions>(builder.Configuration.GetSection("GoogleAuth"));
 builder.Services.Configure<FacebookAuthOptions>(builder.Configuration.GetSection("FacebookAuth"));
@@ -241,3 +291,5 @@ app.MapHealthChecks("/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.
 await SeedData.InitializeAsync(app.Services);
 
 app.Run();
+
+public partial class Program { }

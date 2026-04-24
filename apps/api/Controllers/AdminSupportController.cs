@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using UdemyClone.Api.Data;
 using UdemyClone.Api.Dtos;
+using UdemyClone.Api.Services;
 
 namespace UdemyClone.Api.Controllers;
 
@@ -11,76 +10,28 @@ namespace UdemyClone.Api.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminSupportController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
+    private readonly AdminSupportService _support;
 
-    public AdminSupportController(ApplicationDbContext db)
+    public AdminSupportController(AdminSupportService support)
     {
-        _db = db;
+        _support = support;
     }
 
     [HttpGet]
     public async Task<ActionResult<List<SupportMessageDto>>> List([FromQuery] string? status)
     {
-        var query = _db.SupportMessages.AsNoTracking();
-        if (!string.IsNullOrWhiteSpace(status))
-        {
-            query = query.Where(m => m.Status == status);
-        }
-
-        var items = await query
-            .OrderByDescending(m => m.CreatedAt)
-            .Select(m => new SupportMessageDto
-            {
-                Id = m.Id,
-                UserId = m.UserId,
-                UserEmail = m.User != null ? m.User.Email : null,
-                Name = m.Name,
-                Email = m.Email,
-                Message = m.Message,
-                Status = m.Status,
-                AdminNote = m.AdminNote,
-                CreatedAt = m.CreatedAt,
-                UpdatedAt = m.UpdatedAt
-            })
-            .ToListAsync();
-
-        return Ok(items);
+        return Ok(await _support.GetAllAsync(status));
     }
 
     [HttpPut("{id:int}")]
     public async Task<ActionResult<SupportMessageDto>> Update(int id, SupportMessageAdminUpdateRequest request)
     {
-        var message = await _db.SupportMessages.FirstOrDefaultAsync(m => m.Id == id);
-        if (message == null)
+        var result = await _support.UpdateAsync(id, request);
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.Status))
-        {
-            message.Status = request.Status.Trim();
-        }
-
-        if (request.AdminNote != null)
-        {
-            message.AdminNote = request.AdminNote.Trim();
-        }
-
-        message.UpdatedAt = DateTime.UtcNow;
-        await _db.SaveChangesAsync();
-
-        return Ok(new SupportMessageDto
-        {
-            Id = message.Id,
-            UserId = message.UserId,
-            UserEmail = message.User?.Email,
-            Name = message.Name,
-            Email = message.Email,
-            Message = message.Message,
-            Status = message.Status,
-            AdminNote = message.AdminNote,
-            CreatedAt = message.CreatedAt,
-            UpdatedAt = message.UpdatedAt
-        });
+            AdminCrudStatus.Success => Ok(result.Value),
+            AdminCrudStatus.NotFound => NotFound(),
+            _ => Problem("Unable to update support message.")
+        };
     }
 }

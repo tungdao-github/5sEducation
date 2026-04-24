@@ -131,16 +131,18 @@ export function ProfileSkeleton() {
 
 // Chart Skeleton
 export function ChartSkeleton() {
+  const barHeights = ["64%", "88%", "72%", "94%", "58%", "81%", "69%"];
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       <div className="space-y-4">
         <Skeleton className="h-6 w-48" />
         <div className="h-64 flex items-end justify-between gap-2">
-          {Array.from({ length: 7 }).map((_, i) => (
+          {barHeights.map((height, i) => (
             <Skeleton
               key={i}
               className="flex-1"
-              style={{ height: `${Math.random() * 100 + 50}%` }}
+              style={{ height }}
             />
           ))}
         </div>

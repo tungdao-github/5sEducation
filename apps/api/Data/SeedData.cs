@@ -26,12 +26,12 @@ public static class SeedData
         var instructorEmail = configuration["Seed:InstructorEmail"] ?? "instructor@udemyclone.dev";
         var userEmail = configuration["Seed:UserEmail"] ?? "tungdao123pzo@gmail.com";
         var autoConfirmEmails = string.Equals(configuration["Seed:AutoConfirmEmails"], "true", StringComparison.OrdinalIgnoreCase);
-        var dbProvider = configuration["DbProvider"] ?? "SqlServer";
+        var dbProvider = configuration.GetDatabaseProvider();
 
         var resetPasswords = string.Equals(configuration["Seed:ResetPasswords"], "true", StringComparison.OrdinalIgnoreCase);
         var resetDefaultAccounts = resetPasswords;
 
-        if (dbProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+        if (dbProvider == DatabaseProvider.Sqlite)
         {
             await db.Database.EnsureCreatedAsync();
         }

@@ -1,10 +1,8 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using UdemyClone.Api.Data;
 using UdemyClone.Api.Dtos;
-using UdemyClone.Api.Models;
+using UdemyClone.Api.Services;
 
 namespace UdemyClone.Api.Controllers;
 
@@ -12,37 +10,17 @@ namespace UdemyClone.Api.Controllers;
 [Route("api/reviews")]
 public class ReviewsController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
+    private readonly UserReviewsService _reviews;
 
-    public ReviewsController(ApplicationDbContext db)
+    public ReviewsController(UserReviewsService reviews)
     {
-        _db = db;
+        _reviews = reviews;
     }
 
     [HttpGet]
     public async Task<ActionResult<List<ReviewDto>>> GetByCourse([FromQuery] int courseId)
     {
-        var reviews = await _db.Reviews
-            .AsNoTracking()
-            .Where(r => r.CourseId == courseId)
-            .OrderByDescending(r => r.CreatedAt)
-            .Select(r => new ReviewDto
-            {
-                Id = r.Id,
-                CourseId = r.CourseId,
-                Rating = r.Rating,
-                Comment = r.Comment,
-                CreatedAt = r.CreatedAt,
-                UserId = r.UserId,
-                UserName = r.User == null
-                    ? "Learner"
-                    : string.IsNullOrWhiteSpace(r.User.FirstName)
-                        ? r.User.Email ?? "Learner"
-                        : $"{r.User.FirstName} {r.User.LastName}".Trim()
-            })
-            .ToListAsync();
-
-        return Ok(reviews);
+        return Ok(await _reviews.GetByCourseAsync(courseId));
     }
 
     [Authorize]
@@ -55,40 +33,13 @@ public class ReviewsController : ControllerBase
             return Unauthorized();
         }
 
-        var course = await _db.Courses.FindAsync(request.CourseId);
-        if (course is null)
+        var result = await _reviews.UpsertAsync(userId, request);
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        var enrolled = await _db.Enrollments.AnyAsync(e => e.UserId == userId && e.CourseId == request.CourseId);
-        if (!enrolled)
-        {
-            return BadRequest("Enroll in the course before leaving a review.");
-        }
-
-        var existing = await _db.Reviews.FirstOrDefaultAsync(r => r.UserId == userId && r.CourseId == request.CourseId);
-        if (existing is null)
-        {
-            _db.Reviews.Add(new Review
-            {
-                UserId = userId,
-                CourseId = request.CourseId,
-                Rating = request.Rating,
-                Comment = request.Comment,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
-        }
-        else
-        {
-            existing.Rating = request.Rating;
-            existing.Comment = request.Comment;
-            existing.UpdatedAt = DateTime.UtcNow;
-        }
-
-        await _db.SaveChangesAsync();
-        return Ok();
+            AdminCrudStatus.Success => Ok(),
+            AdminCrudStatus.NotFound => NotFound(),
+            _ => BadRequest(result.Error)
+        };
     }
 
     [Authorize]
@@ -101,15 +52,12 @@ public class ReviewsController : ControllerBase
             return Unauthorized();
         }
 
-        var review = await _db.Reviews.FirstOrDefaultAsync(r => r.CourseId == courseId && r.UserId == userId);
-        if (review is null)
+        var result = await _reviews.DeleteAsync(userId, courseId);
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        _db.Reviews.Remove(review);
-        await _db.SaveChangesAsync();
-
-        return NoContent();
+            AdminCrudStatus.Success => NoContent(),
+            AdminCrudStatus.NotFound => NotFound(),
+            _ => Problem("Unable to delete review.")
+        };
     }
 }

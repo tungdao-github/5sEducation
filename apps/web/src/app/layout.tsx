@@ -63,6 +63,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
       style={{
         ["--font-body" as string]:

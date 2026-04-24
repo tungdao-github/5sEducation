@@ -1,8 +1,7 @@
 using System.Diagnostics;
 using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
-using UdemyClone.Api.Data;
 using UdemyClone.Api.Models;
+using UdemyClone.Api.Repositories;
 
 namespace UdemyClone.Api.Middleware;
 
@@ -53,8 +52,8 @@ public class AdminAuditMiddleware
 
             try
             {
-                var db = context.RequestServices.GetRequiredService<ApplicationDbContext>();
-                db.AdminAuditLogs.Add(new AdminAuditLog
+                var repository = context.RequestServices.GetRequiredService<IAdminAuditLogsRepository>();
+                await repository.AddAsync(new AdminAuditLog
                 {
                     UserId = userId,
                     UserEmail = email,
@@ -68,9 +67,8 @@ public class AdminAuditMiddleware
                     DurationMs = stopwatch.ElapsedMilliseconds,
                     CreatedAt = DateTime.UtcNow
                 });
-                await db.SaveChangesAsync();
             }
-            catch (DbUpdateException)
+            catch
             {
                 // Ignore audit failures to avoid breaking admin requests.
             }
