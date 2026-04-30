@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { API_URL } from "@/lib/api";
+import { addCourseToCart, addCourseToWishlist, enrollInCourse } from "@/services/api";
 import { notify } from "@/lib/notify";
 import { useI18n } from "@/app/providers";
 
@@ -40,19 +40,8 @@ export function CourseActions({
     if (!token) return;
 
     try {
-      setLoading("wishlist");
-      const res = await fetch(`${API_URL}/api/cart`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ courseId, quantity: 1 }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Cart request failed");
-      }
+      setLoading("cart");
+      await addCourseToCart(courseId, 1);
 
       notify({
         title: tx("Added to cart", "Da them vao gio"),
@@ -77,18 +66,7 @@ export function CourseActions({
 
     try {
       setLoading("enroll");
-      const res = await fetch(`${API_URL}/api/enrollments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ courseId }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Enroll request failed");
-      }
+      await enrollInCourse(courseId);
 
       notify({
         title: tx("Enrollment confirmed", "Dang ky thanh cong"),
@@ -113,19 +91,8 @@ export function CourseActions({
     if (!token) return;
 
     try {
-      setLoading("cart");
-      const res = await fetch(`${API_URL}/api/wishlist`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ courseId }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Wishlist request failed");
-      }
+      setLoading("wishlist");
+      await addCourseToWishlist(courseId);
 
       notify({
         title: tx("Saved to wishlist", "Da luu yeu thich"),

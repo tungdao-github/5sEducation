@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Home from "@/figma/pages/Home";
+import Home from "@/views/Home";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildMetadata({
@@ -14,3 +14,6 @@ export const metadata: Metadata = buildMetadata({
 export default function Page() {
   return <Home />;
 }
+
+
+

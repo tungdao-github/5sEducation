@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useI18n, type AppLocale } from "@/app/providers";
+import { SUPPORTED_LOCALES } from "@/lib/i18n";
 
 type LanguageSwitcherProps = {
   compact?: boolean;
@@ -11,7 +12,8 @@ type LanguageSwitcherProps = {
 
 export function LanguageSwitcher({ compact, variant = "pill" }: LanguageSwitcherProps) {
   const router = useRouter();
-  const { locale, setLocale, tx } = useI18n();
+  const pathname = usePathname() ?? "/";
+  const { locale, setLocale, t } = useI18n();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -21,7 +23,11 @@ export function LanguageSwitcher({ compact, variant = "pill" }: LanguageSwitcher
     }
 
     setLocale(nextLocale);
-    router.refresh();
+    const segments = pathname.split("/");
+    const hasLocale = SUPPORTED_LOCALES.includes(segments[1] as AppLocale);
+    const rest = hasLocale ? `/${segments.slice(2).join("/")}`.replace(/\/+$/, "") : pathname;
+    const nextPath = rest === "/" || rest === "" ? `/${nextLocale}` : `/${nextLocale}${rest}`;
+    router.replace(nextPath);
     setOpen(false);
   };
 
@@ -51,11 +57,11 @@ export function LanguageSwitcher({ compact, variant = "pill" }: LanguageSwitcher
   if (variant === "icon") {
     return (
       <div ref={menuRef} className="ml-3 relative flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-500">
-        {!compact && <span>{tx("Language", "Ngon ngu", "Idioma", "Langue")}</span>}
+        {!compact && <span>{t("common", "language")}</span>}
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
-          aria-label={tx("Language", "Ngon ngu", "Idioma", "Langue")}
+          aria-label={t("common", "language")}
           className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -112,7 +118,7 @@ export function LanguageSwitcher({ compact, variant = "pill" }: LanguageSwitcher
     <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700">
       {!compact && (
         <span className="px-1 text-[10px] uppercase tracking-[0.16em] text-slate-500">
-          {tx("Lang", "Ngon ngu", "Idioma", "Langue")}
+          {t("common", "language")}
         </span>
       )}
       <button

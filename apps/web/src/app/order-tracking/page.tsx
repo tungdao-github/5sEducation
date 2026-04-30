@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import OrderTracking from "@/figma/pages/OrderTracking";
+import OrderTracking from "@/views/OrderTracking";
 import { buildNoIndexMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildNoIndexMetadata({
@@ -10,3 +10,5 @@ export const metadata: Metadata = buildNoIndexMetadata({
 export default function Page() {
   return <OrderTracking />;
 }
+
+

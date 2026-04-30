@@ -1,26 +1,21 @@
 using Google.Apis.Auth;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using UdemyClone.Api.Dtos;
-using UdemyClone.Api.Models;
 
 namespace UdemyClone.Api.Services;
 
 public class GoogleAuthService
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly AuthAccountService _authAccountService;
     private readonly GoogleAuthOptions _googleAuthOptions;
     private readonly ILogger<GoogleAuthService> _logger;
+    private readonly ExternalAuthUserService _externalAuthUserService;
 
     public GoogleAuthService(
-        UserManager<ApplicationUser> userManager,
-        AuthAccountService authAccountService,
+        ExternalAuthUserService externalAuthUserService,
         IOptions<GoogleAuthOptions> googleAuthOptions,
         ILogger<GoogleAuthService> logger)
     {
-        _userManager = userManager;
-        _authAccountService = authAccountService;
+        _externalAuthUserService = externalAuthUserService;
         _googleAuthOptions = googleAuthOptions.Value;
         _logger = logger;
     }
@@ -60,70 +55,12 @@ public class GoogleAuthService
             return AuthWorkflowResult<AuthResponse>.Unauthorized("Google account has no email.");
         }
 
-        var user = await _userManager.FindByEmailAsync(payload.Email);
-        if (user is null)
-        {
-            user = new ApplicationUser
-            {
-                UserName = payload.Email,
-                Email = payload.Email,
-                EmailConfirmed = payload.EmailVerified,
-                FirstName = ResolveExternalFirstName(payload.GivenName, payload.Name, "Google"),
-                LastName = ResolveExternalLastName(payload.FamilyName, payload.GivenName, payload.Name, "Google"),
-                AvatarUrl = payload.Picture,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            var createResult = await _userManager.CreateAsync(user);
-            if (!createResult.Succeeded)
-            {
-                return AuthWorkflowResult<AuthResponse>.BadRequest(JoinErrors(createResult));
-            }
-
-            await EnsureUserRoleAsync(user);
-        }
-        else
-        {
-            var needsUpdate = false;
-            if (payload.EmailVerified && !user.EmailConfirmed)
-            {
-                user.EmailConfirmed = true;
-                needsUpdate = true;
-            }
-
-            if (!string.IsNullOrWhiteSpace(payload.Picture) && string.IsNullOrWhiteSpace(user.AvatarUrl))
-            {
-                user.AvatarUrl = payload.Picture;
-                needsUpdate = true;
-            }
-
-            if (needsUpdate)
-            {
-                var updateResult = await _userManager.UpdateAsync(user);
-                if (!updateResult.Succeeded)
-                {
-                    return AuthWorkflowResult<AuthResponse>.BadRequest(JoinErrors(updateResult));
-                }
-            }
-
-            await EnsureUserRoleAsync(user);
-        }
-
-        return AuthWorkflowResult<AuthResponse>.Success(await _authAccountService.BuildAuthResponseAsync(user));
-    }
-
-    private async Task EnsureUserRoleAsync(ApplicationUser user)
-    {
-        var roles = await _userManager.GetRolesAsync(user);
-        if (roles.Count == 0)
-        {
-            await _userManager.AddToRoleAsync(user, "User");
-        }
-    }
-
-    private static string JoinErrors(IdentityResult result)
-    {
-        return string.Join(", ", result.Errors.Select(error => error.Description));
+        return await _externalAuthUserService.UpsertAndBuildResponseAsync(new ExternalAuthProfile(
+            payload.Email,
+            payload.EmailVerified,
+            ResolveExternalFirstName(payload.GivenName, payload.Name, "Google"),
+            ResolveExternalLastName(payload.FamilyName, payload.GivenName, payload.Name, "Google"),
+            payload.Picture));
     }
 
     private static string ResolveExternalFirstName(string? firstName, string? fullName, string fallback)

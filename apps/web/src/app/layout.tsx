@@ -5,7 +5,8 @@ import { Providers } from "./providers";
 import { AppChrome } from "@/components/AppChrome";
 import { GoogleOneTap } from "@/components/GoogleOneTap";
 import { getServerLocale } from "@/lib/server-locale";
-import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/seo";
+import { SUPPORTED_LOCALES } from "@/lib/i18n";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -27,6 +28,9 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: siteUrl,
+    languages: Object.fromEntries(
+      SUPPORTED_LOCALES.map((locale) => [locale, `${SITE_URL}/${locale}`])
+    ),
   },
   openGraph: {
     title: "EduCourse",
@@ -73,7 +77,7 @@ export default async function RootLayout({
       }}
     >
       <body className="page-shell">
-        <Providers>
+        <Providers initialLocale={locale}>
           <GoogleOneTap />
           <AppChrome>{children}</AppChrome>
         </Providers>

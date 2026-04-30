@@ -26,7 +26,7 @@ public class UploadsService
     public async Task<AdminCrudResult<LocalVideoUploadResponseDto>> UploadVideoLocalAsync(
         string userId,
         bool isAdmin,
-        int courseId,
+        int? courseId,
         IFormFile? file,
         CancellationToken cancellationToken = default)
     {

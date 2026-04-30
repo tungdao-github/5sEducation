@@ -1,26 +1,21 @@
 using System.Text.Json;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using UdemyClone.Api.Dtos;
-using UdemyClone.Api.Models;
 
 namespace UdemyClone.Api.Services;
 
 public class FacebookAuthService
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly AuthAccountService _authAccountService;
     private readonly FacebookAuthOptions _facebookAuthOptions;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ExternalAuthUserService _externalAuthUserService;
 
     public FacebookAuthService(
-        UserManager<ApplicationUser> userManager,
-        AuthAccountService authAccountService,
+        ExternalAuthUserService externalAuthUserService,
         IOptions<FacebookAuthOptions> facebookAuthOptions,
         IHttpClientFactory httpClientFactory)
     {
-        _userManager = userManager;
-        _authAccountService = authAccountService;
+        _externalAuthUserService = externalAuthUserService;
         _facebookAuthOptions = facebookAuthOptions.Value;
         _httpClientFactory = httpClientFactory;
     }
@@ -71,73 +66,15 @@ public class FacebookAuthService
             return AuthWorkflowResult<AuthResponse>.Unauthorized("Facebook account has no email.");
         }
 
-        var user = await _userManager.FindByEmailAsync(payload.Email);
-        if (user is null)
-        {
-            var firstName = string.IsNullOrWhiteSpace(payload.FirstName) ? "Facebook" : payload.FirstName;
-            var lastName = string.IsNullOrWhiteSpace(payload.LastName) ? firstName : payload.LastName;
+        var firstName = string.IsNullOrWhiteSpace(payload.FirstName) ? "Facebook" : payload.FirstName;
+        var lastName = string.IsNullOrWhiteSpace(payload.LastName) ? firstName : payload.LastName;
 
-            user = new ApplicationUser
-            {
-                UserName = payload.Email,
-                Email = payload.Email,
-                EmailConfirmed = true,
-                FirstName = firstName,
-                LastName = lastName,
-                AvatarUrl = payload.Picture?.Data?.Url,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            var createResult = await _userManager.CreateAsync(user);
-            if (!createResult.Succeeded)
-            {
-                return AuthWorkflowResult<AuthResponse>.BadRequest(JoinErrors(createResult));
-            }
-
-            await EnsureUserRoleAsync(user);
-        }
-        else
-        {
-            var needsUpdate = false;
-            if (!user.EmailConfirmed)
-            {
-                user.EmailConfirmed = true;
-                needsUpdate = true;
-            }
-
-            if (!string.IsNullOrWhiteSpace(payload.Picture?.Data?.Url) && string.IsNullOrWhiteSpace(user.AvatarUrl))
-            {
-                user.AvatarUrl = payload.Picture!.Data!.Url;
-                needsUpdate = true;
-            }
-
-            if (needsUpdate)
-            {
-                var updateResult = await _userManager.UpdateAsync(user);
-                if (!updateResult.Succeeded)
-                {
-                    return AuthWorkflowResult<AuthResponse>.BadRequest(JoinErrors(updateResult));
-                }
-            }
-
-            await EnsureUserRoleAsync(user);
-        }
-
-        return AuthWorkflowResult<AuthResponse>.Success(await _authAccountService.BuildAuthResponseAsync(user));
-    }
-
-    private async Task EnsureUserRoleAsync(ApplicationUser user)
-    {
-        var roles = await _userManager.GetRolesAsync(user);
-        if (roles.Count == 0)
-        {
-            await _userManager.AddToRoleAsync(user, "User");
-        }
-    }
-
-    private static string JoinErrors(IdentityResult result)
-    {
-        return string.Join(", ", result.Errors.Select(error => error.Description));
+        return await _externalAuthUserService.UpsertAndBuildResponseAsync(new ExternalAuthProfile(
+            payload.Email,
+            true,
+            firstName,
+            lastName,
+            payload.Picture?.Data?.Url));
     }
 
     private sealed class FacebookProfileResponse

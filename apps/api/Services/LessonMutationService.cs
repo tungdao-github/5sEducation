@@ -21,50 +21,12 @@ public class LessonMutationService
             return AdminCrudResult<object?>.NotFound();
         }
 
-        if (!isAdmin && course.InstructorId != userId)
+        if (!LessonMutationHelper.CanEditCourse(userId, isAdmin, course.InstructorId))
         {
             return AdminCrudResult<object?>.Forbidden();
         }
 
-        if (!LessonExerciseHelper.TryNormalizeContentType(request.ContentType, out var contentType, out var contentTypeError))
-        {
-            return AdminCrudResult<object?>.BadRequest(contentTypeError);
-        }
-
-        if (contentType == "video" && string.IsNullOrWhiteSpace(request.VideoUrl))
-        {
-            return AdminCrudResult<object?>.BadRequest("Video URL is required for video lessons.");
-        }
-
-        if (contentType == "video"
-            && LessonExerciseHelper.HasAnyExerciseInput(
-                request.ExerciseQuestion,
-                request.ExerciseOptionA,
-                request.ExerciseOptionB,
-                request.ExerciseOptionC,
-                request.ExerciseOptionD,
-                request.ExerciseCorrectOption,
-                request.ExerciseExplanation,
-                request.ExerciseQuestions))
-        {
-            return AdminCrudResult<object?>.BadRequest("Video lessons cannot contain exercise fields.");
-        }
-
-        if (!LessonExerciseHelper.TryBuildExerciseConfiguration(
-                request.ExerciseQuestion,
-                request.ExerciseOptionA,
-                request.ExerciseOptionB,
-                request.ExerciseOptionC,
-                request.ExerciseOptionD,
-                request.ExerciseCorrectOption,
-                request.ExerciseExplanation,
-                request.ExerciseQuestions,
-                request.ExercisePassingPercent,
-                request.ExerciseTimeLimitMinutes,
-                request.ExerciseMaxTabSwitches,
-                contentType == "exercise",
-                out var exerciseConfiguration,
-                out var error))
+        if (!LessonMutationHelper.TryBuildDraft(request, out var draft, out var error))
         {
             return AdminCrudResult<object?>.BadRequest(error);
         }
@@ -72,16 +34,16 @@ public class LessonMutationService
         var lesson = new Lesson
         {
             CourseId = request.CourseId,
-            Title = request.Title.Trim(),
-            ContentType = contentType,
-            DurationMinutes = request.DurationMinutes,
-            VideoUrl = contentType == "video" ? request.VideoUrl.Trim() : string.Empty,
-            SortOrder = request.SortOrder,
+            Title = draft.Title,
+            ContentType = draft.ContentType,
+            DurationMinutes = draft.DurationMinutes,
+            VideoUrl = draft.VideoUrl,
+            SortOrder = draft.SortOrder,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
 
-        LessonExerciseHelper.ApplyExerciseConfiguration(lesson, exerciseConfiguration);
+        LessonMutationHelper.ApplyDraft(lesson, draft);
         await _repository.AddLessonAsync(lesson, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);
         return AdminCrudResult<object?>.Success();
@@ -95,62 +57,17 @@ public class LessonMutationService
             return AdminCrudResult<object?>.NotFound();
         }
 
-        if (!isAdmin && lesson.Course?.InstructorId != userId)
+        if (!LessonMutationHelper.CanEditCourse(userId, isAdmin, lesson.Course?.InstructorId))
         {
             return AdminCrudResult<object?>.Forbidden();
         }
 
-        if (!LessonExerciseHelper.TryNormalizeContentType(request.ContentType, out var contentType, out var contentTypeError))
-        {
-            return AdminCrudResult<object?>.BadRequest(contentTypeError);
-        }
-
-        if (contentType == "video" && string.IsNullOrWhiteSpace(request.VideoUrl))
-        {
-            return AdminCrudResult<object?>.BadRequest("Video URL is required for video lessons.");
-        }
-
-        if (contentType == "video"
-            && LessonExerciseHelper.HasAnyExerciseInput(
-                request.ExerciseQuestion,
-                request.ExerciseOptionA,
-                request.ExerciseOptionB,
-                request.ExerciseOptionC,
-                request.ExerciseOptionD,
-                request.ExerciseCorrectOption,
-                request.ExerciseExplanation,
-                request.ExerciseQuestions))
-        {
-            return AdminCrudResult<object?>.BadRequest("Video lessons cannot contain exercise fields.");
-        }
-
-        if (!LessonExerciseHelper.TryBuildExerciseConfiguration(
-                request.ExerciseQuestion,
-                request.ExerciseOptionA,
-                request.ExerciseOptionB,
-                request.ExerciseOptionC,
-                request.ExerciseOptionD,
-                request.ExerciseCorrectOption,
-                request.ExerciseExplanation,
-                request.ExerciseQuestions,
-                request.ExercisePassingPercent,
-                request.ExerciseTimeLimitMinutes,
-                request.ExerciseMaxTabSwitches,
-                contentType == "exercise",
-                out var exerciseConfiguration,
-                out var error))
+        if (!LessonMutationHelper.TryBuildDraft(request, out var draft, out var error))
         {
             return AdminCrudResult<object?>.BadRequest(error);
         }
 
-        lesson.Title = request.Title.Trim();
-        lesson.ContentType = contentType;
-        lesson.DurationMinutes = request.DurationMinutes;
-        lesson.VideoUrl = contentType == "video" ? request.VideoUrl.Trim() : string.Empty;
-        lesson.SortOrder = request.SortOrder;
-        lesson.UpdatedAt = DateTime.UtcNow;
-
-        LessonExerciseHelper.ApplyExerciseConfiguration(lesson, exerciseConfiguration);
+        LessonMutationHelper.ApplyDraft(lesson, draft);
         await _repository.SaveChangesAsync(cancellationToken);
         return AdminCrudResult<object?>.Success();
     }

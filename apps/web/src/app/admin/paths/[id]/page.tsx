@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { API_URL } from "@/lib/api";
+import { fetchJsonWithAuth } from "@/lib/api";
 import { notify } from "@/lib/notify";
 import { useI18n } from "@/app/providers";
+import { fetchInstructorCourses } from "@/services/api";
 
 type PathSection = {
   id: number;
@@ -65,21 +66,18 @@ export default function AdminPathDetailPage() {
   });
   const [editingCourseId, setEditingCourseId] = useState<number | null>(null);
 
-  const loadPath = async (token: string) => {
-    const res = await fetch(`${API_URL}/api/admin/learning-paths/${pathId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) {
-      setPath(await res.json());
+  const loadPath = async () => {
+    try {
+      const data = await fetchJsonWithAuth<LearningPathDetail>(`/api/admin/learning-paths/${pathId}`);
+      setPath(data);
+    } catch {
+      setNeedsAuth(true);
     }
   };
 
-  const loadCourses = async (token: string) => {
-    const res = await fetch(`${API_URL}/api/instructor/courses`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) {
-      const data = await res.json();
+  const loadCourses = async () => {
+    try {
+      const data = await fetchInstructorCourses();
       setAllCourses(
         (data as CourseOption[]).map((course) => ({
           id: course.id,
@@ -87,6 +85,8 @@ export default function AdminPathDetailPage() {
           slug: course.slug,
         }))
       );
+    } catch {
+      setNeedsAuth(true);
     }
   };
 
@@ -98,8 +98,8 @@ export default function AdminPathDetailPage() {
     }
 
     if (!pathId) return;
-    loadPath(token);
-    loadCourses(token);
+    loadPath();
+    loadCourses();
   }, [pathId]);
 
   const resetSectionForm = () => {
@@ -127,27 +127,25 @@ export default function AdminPathDetailPage() {
       sortOrder: Number(sectionForm.sortOrder) || 1,
     };
 
-    const res = await fetch(
-      editingSectionId
-        ? `${API_URL}/api/admin/learning-paths/sections/${editingSectionId}`
-        : `${API_URL}/api/admin/learning-paths/${pathId}/sections`,
-      {
-        method: editingSectionId ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      }
-    );
+    try {
+      await fetchJsonWithAuth<void>(
+        editingSectionId
+          ? `/api/admin/learning-paths/sections/${editingSectionId}`
+          : `/api/admin/learning-paths/${pathId}/sections`,
+        {
+          method: editingSectionId ? "PUT" : "POST",
+          body: JSON.stringify(payload),
+        }
+      );
 
-    if (res.ok) {
       notify({
         title: tx("Section saved", "Da luu chuong"),
         message: tx("Changes saved.", "Da luu thay doi."),
       });
       resetSectionForm();
-      loadPath(token);
+      loadPath();
+    } catch {
+      setNeedsAuth(true);
     }
   };
 
@@ -167,17 +165,18 @@ export default function AdminPathDetailPage() {
       return;
     }
 
-    const res = await fetch(`${API_URL}/api/admin/learning-paths/sections/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      await fetchJsonWithAuth<void>(`/api/admin/learning-paths/sections/${id}`, {
+        method: "DELETE",
+      });
 
-    if (res.ok) {
       notify({
         title: tx("Section removed", "Da xoa chuong"),
         message: tx("Section deleted.", "Da xoa chuong."),
       });
-      loadPath(token);
+      loadPath();
+    } catch {
+      setNeedsAuth(true);
     }
   };
 
@@ -197,27 +196,25 @@ export default function AdminPathDetailPage() {
       isRequired: courseForm.isRequired,
     };
 
-    const res = await fetch(
-      editingCourseId
-        ? `${API_URL}/api/admin/learning-paths/courses/${editingCourseId}`
-        : `${API_URL}/api/admin/learning-paths/${pathId}/courses`,
-      {
-        method: editingCourseId ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      }
-    );
+    try {
+      await fetchJsonWithAuth<void>(
+        editingCourseId
+          ? `/api/admin/learning-paths/courses/${editingCourseId}`
+          : `/api/admin/learning-paths/${pathId}/courses`,
+        {
+          method: editingCourseId ? "PUT" : "POST",
+          body: JSON.stringify(payload),
+        }
+      );
 
-    if (res.ok) {
       notify({
         title: tx("Course saved", "Da luu khoa hoc"),
         message: tx("Changes saved.", "Da luu thay doi."),
       });
       resetCourseForm();
-      loadPath(token);
+      loadPath();
+    } catch {
+      setNeedsAuth(true);
     }
   };
 
@@ -238,17 +235,18 @@ export default function AdminPathDetailPage() {
       return;
     }
 
-    const res = await fetch(`${API_URL}/api/admin/learning-paths/courses/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      await fetchJsonWithAuth<void>(`/api/admin/learning-paths/courses/${id}`, {
+        method: "DELETE",
+      });
 
-    if (res.ok) {
       notify({
         title: tx("Course removed", "Da xoa khoa hoc"),
         message: tx("Course removed from path.", "Da xoa khoa hoc khoi lo trinh."),
       });
-      loadPath(token);
+      loadPath();
+    } catch {
+      setNeedsAuth(true);
     }
   };
 
@@ -517,4 +515,5 @@ export default function AdminPathDetailPage() {
     </div>
   );
 }
+
 

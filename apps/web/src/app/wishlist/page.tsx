@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Wishlist from "@/figma/pages/Wishlist";
+import Wishlist from "@/views/Wishlist";
 import { buildNoIndexMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildNoIndexMetadata({
@@ -10,3 +10,5 @@ export const metadata: Metadata = buildNoIndexMetadata({
 export default function Page() {
   return <Wishlist />;
 }
+
+

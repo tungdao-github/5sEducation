@@ -1,7 +1,9 @@
 "use client";
 
-import NotFound from "@/figma/pages/NotFound";
+import NotFound from "@/views/NotFound";
 
 export default function Page() {
   return <NotFound />;
 }
+
+

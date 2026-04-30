@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/app/providers";
-import { API_URL } from "@/lib/api";
+import { fetchSiteSettings } from "@/services/api";
 
 export function SiteFooter() {
   const { tx } = useI18n();
@@ -13,12 +13,17 @@ export function SiteFooter() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(
-          `${API_URL}/api/settings?keys=siteName,footerTagline,footerNote,contactEmail,contactPhone,contactAddress,socialFacebook,socialLinkedIn,socialYoutube`,
-          { cache: "no-store" }
-        );
-        if (!res.ok) return;
-        const data = (await res.json()) as { key: string; value: string }[];
+        const data = await fetchSiteSettings([
+          "siteName",
+          "footerTagline",
+          "footerNote",
+          "contactEmail",
+          "contactPhone",
+          "contactAddress",
+          "socialFacebook",
+          "socialLinkedIn",
+          "socialYoutube",
+        ]);
         const map: Record<string, string> = {};
         data.forEach((item) => {
           map[item.key] = item.value;

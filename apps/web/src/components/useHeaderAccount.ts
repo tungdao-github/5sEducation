@@ -1,20 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { API_URL, getStoredToken } from "@/lib/api";
+import { fetchCurrentUser } from "@/services/api";
+import { getStoredToken } from "@/lib/api";
 
-export type HeaderUserProfile = {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl?: string | null;
-  isAdmin: boolean;
-  roles?: string[];
-  loyaltyPoints?: number;
-  loyaltyTier?: string | null;
-  instructorStatus?: "pending" | "approved" | "rejected";
-};
+export type HeaderUserProfile = Awaited<ReturnType<typeof fetchCurrentUser>>;
 
 export function useHeaderAccount() {
   const [isAuthed, setIsAuthed] = useState(false);
@@ -27,21 +17,13 @@ export function useHeaderAccount() {
     [user]
   );
 
-  const loadProfile = useCallback(async (token: string) => {
+  const loadProfile = useCallback(async () => {
     const requestId = ++profileRequestId.current;
     try {
-      const res = await fetch(`${API_URL}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
       if (requestId !== profileRequestId.current || !mountedRef.current) {
         return;
       }
-      if (!res.ok) {
-        setUser(null);
-        setIsAuthed(false);
-        return;
-      }
-      const data = (await res.json()) as HeaderUserProfile;
+      const data = await fetchCurrentUser();
       if (requestId !== profileRequestId.current || !mountedRef.current) {
         return;
       }
@@ -64,9 +46,7 @@ export function useHeaderAccount() {
       setUser(null);
       return;
     }
-    if (token) {
-      loadProfile(token);
-    }
+    loadProfile();
   }, [loadProfile]);
 
   useEffect(() => {

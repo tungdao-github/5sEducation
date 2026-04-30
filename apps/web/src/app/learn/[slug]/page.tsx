@@ -1,5 +1,6 @@
-import CourseLearn from "@/figma/pages/CourseLearn";
+import CourseLearn from "@/views/CourseLearn";
 
 export default function LearnPage() {
   return <CourseLearn />;
 }
+

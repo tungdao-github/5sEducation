@@ -10,8 +10,8 @@ public interface IPublicContentRepository
 {
     Task<List<HomePageBlockDto>> GetHomePageBlocksAsync(string? locale, CancellationToken cancellationToken = default);
     Task<List<BlogPost>> GetBlogPostsAsync(string? search, string? tag, string? locale, int? take, CancellationToken cancellationToken = default);
-    Task<BlogPost?> FindBlogPostBySlugAsync(string slug, CancellationToken cancellationToken = default);
-    Task<BlogPost?> FindBlogPostByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<BlogPost?> FindBlogPostBySlugAsync(string slug, string? locale = null, CancellationToken cancellationToken = default);
+    Task<BlogPost?> FindBlogPostByIdAsync(int id, string? locale = null, CancellationToken cancellationToken = default);
     Task<List<SearchSuggestionDto>> GetSearchSuggestionsAsync(string term, CancellationToken cancellationToken = default);
     Task<List<SystemSettingDto>> GetSettingsAsync(string? group, string? keys, CancellationToken cancellationToken = default);
     Task<PublicStatsDto> GetPublicStatsAsync(CancellationToken cancellationToken = default);
@@ -87,18 +87,24 @@ public sealed class PublicContentRepository : IPublicContentRepository
         return await ordered.ToListAsync(cancellationToken);
     }
 
-    public Task<BlogPost?> FindBlogPostBySlugAsync(string slug, CancellationToken cancellationToken = default)
+    public Task<BlogPost?> FindBlogPostBySlugAsync(string slug, string? locale = null, CancellationToken cancellationToken = default)
     {
-        return _db.BlogPosts
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Slug == slug, cancellationToken);
+        var query = _db.BlogPosts.AsNoTracking().Where(p => p.Slug == slug);
+        if (!string.IsNullOrWhiteSpace(locale))
+        {
+            query = query.Where(p => p.Locale == BlogLocaleHelper.NormalizeLocale(locale));
+        }
+        return query.FirstOrDefaultAsync(cancellationToken);
     }
 
-    public Task<BlogPost?> FindBlogPostByIdAsync(int id, CancellationToken cancellationToken = default)
+    public Task<BlogPost?> FindBlogPostByIdAsync(int id, string? locale = null, CancellationToken cancellationToken = default)
     {
-        return _db.BlogPosts
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+        var query = _db.BlogPosts.AsNoTracking().Where(p => p.Id == id);
+        if (!string.IsNullOrWhiteSpace(locale))
+        {
+            query = query.Where(p => p.Locale == BlogLocaleHelper.NormalizeLocale(locale));
+        }
+        return query.FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<List<SearchSuggestionDto>> GetSearchSuggestionsAsync(string term, CancellationToken cancellationToken = default)

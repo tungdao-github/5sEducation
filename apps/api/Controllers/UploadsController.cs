@@ -53,7 +53,7 @@ public class UploadsController : ControllerBase
     [HttpPost("video/local")]
     [RequestFormLimits(MultipartBodyLengthLimit = 1_073_741_824)]
     [RequestSizeLimit(1_073_741_824)]
-    public async Task<ActionResult<LocalVideoUploadResponseDto>> UploadVideoLocal([FromForm] int courseId, [FromForm] IFormFile? file)
+    public async Task<ActionResult<LocalVideoUploadResponseDto>> UploadVideoLocal([FromForm] int? courseId, [FromForm] IFormFile? file)
     {
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (userId is null)

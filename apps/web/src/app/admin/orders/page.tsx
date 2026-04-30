@@ -1,5 +1,6 @@
-import AdminDashboard from "@/figma/pages/AdminDashboard";
+import AdminDashboard from "@/views/AdminDashboard";
 
 export default function Page() {
   return <AdminDashboard initialTab="orders" />;
 }
+

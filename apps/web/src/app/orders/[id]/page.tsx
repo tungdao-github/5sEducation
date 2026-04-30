@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { API_URL } from "@/lib/api";
+import { fetchOrders } from "@/services/api";
 import { useI18n } from "@/app/providers";
 
 type OrderItem = {
@@ -69,21 +69,7 @@ export default function OrderDetailPage() {
       }
 
       try {
-        const res = await fetch(`${API_URL}/api/orders/my`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.status === 401 || res.status === 403) {
-          setNeedsAuth(true);
-          return;
-        }
-
-        if (!res.ok) {
-          setError(tx("Unable to load your order.", "Khong the tai don hang."));
-          return;
-        }
-
-        const orders = (await res.json()) as Order[];
+        const orders = (await fetchOrders()) as Order[];
         const found = orders.find((item) => item.id === orderId) ?? null;
         if (!found) {
           setError(tx("Order not found.", "Khong tim thay don hang."));
@@ -232,3 +218,4 @@ export default function OrderDetailPage() {
     </div>
   );
 }
+

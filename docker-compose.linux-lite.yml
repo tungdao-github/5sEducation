@@ -1,0 +1,96 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: udemyclone-api
+    restart: unless-stopped
+    init: true
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      DbProvider: Sqlite
+      ConnectionStrings__DefaultConnection: Data Source=/data/udemyclone-api.db
+      ConnectionStrings__Sqlite: Data Source=/data/udemyclone-api.db
+      Jwt__Issuer: ${JWT_ISSUER}
+      Jwt__Audience: ${JWT_AUDIENCE}
+      Jwt__Key: ${JWT_KEY}
+      Frontend__BaseUrl: ${SITE_URL}
+      FRONTEND_BASE_URL: ${SITE_URL}
+      Cors__Origins__0: ${SITE_URL}
+      ForwardedHeaders__Enabled: "true"
+      Seed__DefaultPassword: ${SEED_DEFAULT_PASSWORD}
+      Seed__AutoConfirmEmails: "false"
+      Seed__AdminEmail: ${SEED_ADMIN_EMAIL}
+      Seed__InstructorEmail: ${SEED_INSTRUCTOR_EMAIL}
+      Seed__UserEmail: ${SEED_USER_EMAIL}
+      Logging__LogLevel__Default: Warning
+      Logging__LogLevel__Microsoft.AspNetCore: Warning
+      CloudflareStream__AccountId: ${CLOUDFLARE_STREAM_ACCOUNT_ID:-}
+      CloudflareStream__ApiToken: ${CLOUDFLARE_STREAM_API_TOKEN:-}
+      CloudflareStream__CustomerCode: ${CLOUDFLARE_STREAM_CUSTOMER_CODE:-}
+      GoogleAuth__ClientId: ${GOOGLE_AUTH_CLIENT_ID:-}
+      FacebookAuth__AppId: ${FACEBOOK_AUTH_APP_ID:-}
+      FacebookAuth__AppSecret: ${FACEBOOK_AUTH_APP_SECRET:-}
+    volumes:
+      - api_data:/data
+      - api_uploads:/app/wwwroot/uploads
+      - api_dpkeys:/root/.aspnet/DataProtection-Keys
+    networks:
+      - app
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${API_URL}
+        NEXT_PUBLIC_SITE_URL: ${SITE_URL}
+    container_name: udemyclone-web
+    restart: unless-stopped
+    init: true
+    depends_on:
+      api:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      INTERNAL_API_URL: http://api:8080
+      NODE_OPTIONS: --max-old-space-size=384
+      NEXT_PUBLIC_API_URL: ${API_URL}
+      NEXT_PUBLIC_SITE_URL: ${SITE_URL}
+      NEXT_PUBLIC_FACEBOOK_GRAPH_VERSION: ${NEXT_PUBLIC_FACEBOOK_GRAPH_VERSION:-v20.0}
+    networks:
+      - app
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: udemyclone-caddy
+    restart: unless-stopped
+    init: true
+    depends_on:
+      api:
+        condition: service_started
+      web:
+        condition: service_started
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - app
+
+networks:
+  app:
+
+volumes:
+  api_data:
+  api_uploads:
+  api_dpkeys:
+  caddy_data:
+  caddy_config:

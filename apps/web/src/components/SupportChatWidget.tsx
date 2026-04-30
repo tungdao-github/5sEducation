@@ -1,14 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { API_URL } from "@/lib/api";
+import { createSupportMessage, fetchCurrentUser } from "@/services/api";
 import { useI18n } from "@/app/providers";
-
-type Profile = {
-  firstName: string;
-  lastName: string;
-  email: string;
-};
+import SupportChatPanel from "@/components/support/SupportChatPanel";
+import SupportChatToggle from "@/components/support/SupportChatToggle";
 
 export function SupportChatWidget() {
   const { tx } = useI18n();
@@ -25,11 +21,7 @@ export function SupportChatWidget() {
 
     const loadProfile = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) return;
-        const data = (await res.json()) as Profile;
+        const data = await fetchCurrentUser();
         const fullName = `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim();
         setName(fullName);
         setEmail(data.email ?? "");
@@ -38,37 +30,23 @@ export function SupportChatWidget() {
       }
     };
 
-    loadProfile();
+    void loadProfile();
   }, []);
 
   const handleSubmit = async () => {
     if (!message.trim()) {
-      setStatus(tx("Please enter a message.", "Vui long nhap noi dung."));
+      setStatus(tx("Please enter a message.", "Vui lòng nhập nội dung."));
       return;
     }
 
     setSending(true);
     setStatus("");
     try {
-      const res = await fetch(`${API_URL}/api/support/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          message: message.trim(),
-        }),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText || tx("Unable to send message.", "Khong gui duoc tin nhan."));
-      }
-
+      await createSupportMessage(message.trim(), name.trim(), email.trim());
       setMessage("");
-      setStatus(tx("Sent. Our team will reply soon.", "Da gui. Doi ngu se phan hoi som."));
+      setStatus(tx("Sent. Our team will reply soon.", "Đã gửi. Đội ngũ sẽ phản hồi sớm."));
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : tx("Something went wrong.", "Co loi xay ra."));
+      setStatus(error instanceof Error ? error.message : tx("Something went wrong.", "Có lỗi xảy ra."));
     } finally {
       setSending(false);
     }
@@ -76,71 +54,22 @@ export function SupportChatWidget() {
 
   return (
     <div className="fixed bottom-6 right-6 z-[60]">
-      {open && (
-        <div className="mb-3 w-80 surface-card rounded-3xl p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-semibold text-emerald-950">
-                {tx("Need help?", "Can ho tro?")}
-              </p>
-              <p className="text-xs text-emerald-700/70">
-                {tx("We reply within 24 hours.", "Phan hoi trong vong 24 gio.")}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="rounded-full border border-[color:var(--stroke)] px-2 py-1 text-[10px] font-semibold text-emerald-800"
-            >
-              {tx("Close", "Dong")}
-            </button>
-          </div>
-
-          <div className="mt-4 space-y-2">
-            <input
-              value={name}
-              onChange={(e) => setName(e.currentTarget.value)}
-              placeholder={tx("Your name", "Ten cua ban")}
-              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-3 py-2 text-xs"
-            />
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.currentTarget.value)}
-              placeholder={tx("Email", "Email")}
-              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-3 py-2 text-xs"
-            />
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.currentTarget.value)}
-              placeholder={tx("How can we help?", "Ban can ho tro gi?")}
-              rows={4}
-              className="w-full rounded-2xl border border-[color:var(--stroke)] bg-white px-3 py-2 text-xs"
-            />
-          </div>
-
-          {status && (
-            <p className="mt-2 text-xs text-emerald-700">{status}</p>
-          )}
-
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={sending}
-            className="mt-4 w-full rounded-full bg-emerald-700 px-4 py-2 text-xs font-semibold text-white"
-          >
-            {sending ? tx("Sending...", "Dang gui...") : tx("Send message", "Gui tin nhan")}
-          </button>
-        </div>
-      )}
-
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="rounded-full bg-emerald-700 px-5 py-3 text-xs font-semibold text-white shadow-lg"
-      >
-        {open ? tx("Support", "Ho tro") : tx("Chat with us", "Chat ho tro")}
-      </button>
+      {open ? (
+        <SupportChatPanel
+          tx={tx}
+          name={name}
+          setName={setName}
+          email={email}
+          setEmail={setEmail}
+          message={message}
+          setMessage={setMessage}
+          status={status}
+          sending={sending}
+          onClose={() => setOpen(false)}
+          onSubmit={handleSubmit}
+        />
+      ) : null}
+      <SupportChatToggle open={open} tx={tx} onToggle={() => setOpen((prev) => !prev)} />
     </div>
   );
 }
-

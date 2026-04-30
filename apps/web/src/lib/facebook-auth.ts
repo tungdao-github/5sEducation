@@ -1,5 +1,6 @@
 import { API_URL, setStoredToken } from "@/lib/api";
 import type { AuthPayload } from "@/lib/google-auth";
+import { getStringField, isRecord } from "@/lib/json";
 
 type FacebookLoginResponse = {
   authResponse?: {
@@ -50,22 +51,15 @@ function getErrorMessage(payload: unknown, fallback: string) {
     }
   }
 
-  if (payload && typeof payload === "object") {
-    const record = payload as Record<string, unknown>;
-    const title = typeof record.title === "string" ? record.title.trim() : "";
-    if (title) {
-      return title;
-    }
+  if (isRecord(payload)) {
+    const title = getStringField(payload, "title");
+    if (title) return title;
 
-    const detail = typeof record.detail === "string" ? record.detail.trim() : "";
-    if (detail) {
-      return detail;
-    }
+    const detail = getStringField(payload, "detail");
+    if (detail) return detail;
 
-    const message = typeof record.message === "string" ? record.message.trim() : "";
-    if (message) {
-      return message;
-    }
+    const message = getStringField(payload, "message");
+    if (message) return message;
   }
 
   return fallback;

@@ -1,10 +1,13 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { API_URL } from "@/lib/api";
 import { LearningPathCard, LearningPathSummary } from "@/components/LearningPathCard";
+import { PageIntro } from "@/components/shared/PageIntro";
+import { SurfaceCard } from "@/components/shared/SurfaceCard";
 import { getServerLocale } from "@/lib/server-locale";
 import { pickLocaleText } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/seo";
+import { fetchLearningPaths } from "@/services/api";
+import type { LearningPathListDto } from "@/services/api";
 
 export const metadata: Metadata = buildMetadata({
   title: "Lo trinh hoc tap",
@@ -16,9 +19,17 @@ export const metadata: Metadata = buildMetadata({
 
 async function getLearningPaths(): Promise<LearningPathSummary[]> {
   try {
-    const res = await fetch(`${API_URL}/api/learning-paths`, { cache: "no-store" });
-    if (!res.ok) return [];
-    return res.json();
+    const paths = await fetchLearningPaths();
+    return paths.map((path: LearningPathListDto): LearningPathSummary => ({
+      id: path.id,
+      title: path.title,
+      slug: path.slug,
+      description: path.description,
+      level: path.level,
+      thumbnailUrl: path.thumbnailUrl ?? "",
+      estimatedHours: path.estimatedHours ?? 0,
+      courseCount: path.courseCount,
+    }));
   } catch {
     return [];
   }
@@ -31,26 +42,20 @@ export default async function PathsPage() {
 
   return (
     <div className="section-shell space-y-8 py-12 fade-in">
-      <div className="space-y-2">
-        <Link href="/" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-          {t("Home", "Trang chu")}
-        </Link>
-        <h1 className="section-title text-4xl font-semibold text-emerald-950">
-          {t("Learning paths", "Lo trinh hoc tap")}
-        </h1>
-        <p className="text-sm text-emerald-800/70">
-          {t(
-            "Follow a structured roadmap to master a role or skill.",
-            "Theo lo trinh co cau truc de chinh phuc ky nang."
-          )}
-        </p>
-      </div>
+      <PageIntro
+        backLink={{ href: "/", label: t("Home", "Trang chu") }}
+        title={t("Learning paths", "Lo trinh hoc tap")}
+        description={t(
+          "Follow a structured roadmap to master a role or skill.",
+          "Theo lo trinh co cau truc de chinh phuc ky nang."
+        )}
+      />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {paths.length === 0 && (
-          <div className="surface-card p-6 text-sm text-emerald-800/70">
+          <SurfaceCard className="p-6 text-sm text-emerald-800/70">
             {t("No learning paths yet.", "Chua co lo trinh hoc tap.")}
-          </div>
+          </SurfaceCard>
         )}
         {paths.map((path) => (
           <LearningPathCard key={path.id} path={path} locale={locale} />
@@ -59,3 +64,4 @@ export default async function PathsPage() {
     </div>
   );
 }
+

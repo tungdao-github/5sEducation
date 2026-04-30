@@ -27,17 +27,17 @@ public class BlogPostsController : ControllerBase
     }
 
     [HttpGet("{slug}")]
-    public async Task<ActionResult<BlogPostDetailDto>> GetBySlug(string slug)
+    public async Task<ActionResult<BlogPostDetailDto>> GetBySlug(string slug, [FromQuery] string? locale)
     {
         var isAdmin = User.IsInRole("Admin");
-        var post = await _content.GetBlogPostBySlugAsync(slug, isAdmin);
+        var post = await _content.GetBlogPostBySlugAsync(slug, isAdmin, locale);
         return post is null ? NotFound() : Ok(post);
     }
 
     [HttpGet("by-id/{id:int}")]
-    public async Task<ActionResult<BlogPostDetailDto>> GetById(int id)
+    public async Task<ActionResult<BlogPostDetailDto>> GetById(int id, [FromQuery] string? locale)
     {
-        var post = await _content.GetBlogPostByIdAsync(id);
+        var post = await _content.GetBlogPostByIdAsync(id, locale);
         return post is null ? NotFound() : Ok(post);
     }
 }

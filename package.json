@@ -4,7 +4,15 @@
   "scripts": {
     "dev": "npm --prefix apps/web run dev",
     "build": "npm --prefix apps/web run build",
+    "build:web": "npm --prefix apps/web run build",
+    "build:api": "dotnet publish apps/api/UdemyClone.Api.csproj -c Release",
     "start": "npm --prefix apps/web run start",
-    "lint": "npm --prefix apps/web run lint"
+    "lint": "npm --prefix apps/web run lint",
+    "test:api": "dotnet test apps/api/tests/UdemyClone.Api.Tests/UdemyClone.Api.Tests.csproj",
+    "test:system": "powershell -ExecutionPolicy Bypass -File scripts/test-system.ps1",
+    "docker:build:api": "docker build -f apps/api/Dockerfile -t udemyclone-api:local .",
+    "docker:build:web": "docker build -f apps/web/Dockerfile -t udemyclone-web:local .",
+    "docker:up:lite": "docker compose --env-file .env.prod -f docker-compose.linux-lite.yml up -d --build",
+    "docker:up:server": "docker compose --env-file .env.server -f docker-compose.server.yml up -d"
   }
 }

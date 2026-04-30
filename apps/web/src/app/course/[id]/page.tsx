@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import CourseDetail from "@/figma/pages/CourseDetail";
-import { API_URL } from "@/lib/api";
+import CourseDetail from "@/views/CourseDetail";
 import { buildMetadata } from "@/lib/seo";
+import { fetchCourseById, fetchCourseBySlug } from "@/services/api";
 
 type CourseSeoDto = {
   id: number;
@@ -18,10 +18,7 @@ type CourseSeoDto = {
 
 async function getCourse(id: string): Promise<CourseSeoDto | null> {
   try {
-    const bySlug = await fetch(`${API_URL}/api/courses/${id}`, { cache: "no-store" });
-    if (bySlug.ok) {
-      return bySlug.json();
-    }
+    return await fetchCourseBySlug(id);
   } catch {
     // ignore and try by id
   }
@@ -30,9 +27,7 @@ async function getCourse(id: string): Promise<CourseSeoDto | null> {
   if (!Number.isFinite(numericId) || numericId <= 0) return null;
 
   try {
-    const byId = await fetch(`${API_URL}/api/courses/by-id/${numericId}`, { cache: "no-store" });
-    if (!byId.ok) return null;
-    return byId.json();
+    return await fetchCourseById(numericId);
   } catch {
     return null;
   }
@@ -76,3 +71,4 @@ export async function generateMetadata({
 export default function Page() {
   return <CourseDetail />;
 }
+

@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { PageIntro } from "@/components/shared/PageIntro";
+import { SurfaceCard } from "@/components/shared/SurfaceCard";
 import { API_URL } from "@/lib/api";
+import { createSupportMessage, createSupportReply, fetchSupportMessages, fetchSupportReplies } from "@/services/api";
 import { notify } from "@/lib/notify";
 import { useI18n } from "@/app/providers";
 
@@ -53,21 +56,15 @@ export default function SupportPage() {
       return;
     }
 
-    const res = await fetch(`${API_URL}/api/support/messages`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (res.status === 401 || res.status === 403) {
-      setNeedsAuth(true);
-      return;
-    }
-
-    if (res.ok) {
-      const data = (await res.json()) as SupportMessageDto[];
+    try {
+      const data = await fetchSupportMessages();
       setMessages(data);
       if (!selectedId && data.length > 0) {
         setSelectedId(data[0].id);
       }
+    } catch {
+      setNeedsAuth(true);
+      return;
     }
   };
 
@@ -78,13 +75,11 @@ export default function SupportPage() {
       return;
     }
 
-    const res = await fetch(`${API_URL}/api/support/messages/${messageId}/replies`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (res.ok) {
-      const data = (await res.json()) as SupportReplyDto[];
+    try {
+      const data = await fetchSupportReplies(messageId);
       setReplies(data);
+    } catch {
+      setNeedsAuth(true);
     }
   };
 
@@ -156,29 +151,18 @@ export default function SupportPage() {
       return;
     }
 
-    const res = await fetch(`${API_URL}/api/support/messages`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ message: newMessage.trim() }),
-    });
-
-    if (res.ok) {
-      const created = (await res.json().catch(() => null)) as { id?: number } | null;
+    try {
+      const created = await createSupportMessage(newMessage.trim());
       setNewMessage("");
       await loadMessages();
       if (!selectedId) {
-        if (created?.id) {
-          setSelectedId(Number(created.id));
-        }
+        setSelectedId(created.id);
       }
       notify({
         title: tx("Message sent", "Da gui tin nhan"),
         message: tx("We will reply soon.", "Doi ngu se phan hoi som."),
       });
-    } else {
+    } catch {
       notify({
         title: tx("Send failed", "Gui that bai"),
         message: tx("Please try again.", "Vui long thu lai."),
@@ -197,20 +181,12 @@ export default function SupportPage() {
       return;
     }
 
-    const res = await fetch(`${API_URL}/api/support/messages/${selectedId}/replies`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ message: replyDraft.trim() }),
-    });
-
-    if (res.ok) {
+    try {
+      await createSupportReply(selectedId, replyDraft.trim());
       setReplyDraft("");
       await loadReplies(selectedId);
       await loadMessages();
-    } else {
+    } catch {
       notify({
         title: tx("Send failed", "Gui that bai"),
         message: tx("Please try again.", "Vui long thu lai."),
@@ -221,7 +197,7 @@ export default function SupportPage() {
   if (needsAuth) {
     return (
       <div className="section-shell py-16 fade-in">
-        <div className="surface-card p-10 text-center">
+        <SurfaceCard className="p-10 text-center">
           <p className="text-sm text-emerald-800/70">
             {tx("Please sign in to see your support messages.", "Vui long dang nhap de xem ho tro.")}
           </p>
@@ -231,27 +207,21 @@ export default function SupportPage() {
           >
             {tx("Sign in", "Dang nhap")}
           </Link>
-        </div>
+        </SurfaceCard>
       </div>
     );
   }
 
   return (
     <div className="section-shell space-y-10 py-12 fade-in">
-      <div className="space-y-2">
-        <Link href="/" className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-          {tx("Home", "Trang chu")}
-        </Link>
-        <h1 className="section-title text-4xl font-semibold text-emerald-950">
-          {tx("Support center", "Ho tro khach hang")}
-        </h1>
-        <p className="text-sm text-emerald-800/70">
-          {tx("Chat with our team and track your requests.", "Theo doi va trao doi ho tro.")}
-        </p>
-      </div>
+      <PageIntro
+        backLink={{ href: "/", label: tx("Home", "Trang chu") }}
+        title={tx("Support center", "Ho tro khach hang")}
+        description={tx("Chat with our team and track your requests.", "Theo doi va trao doi ho tro.")}
+      />
 
       <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-        <div className="surface-card space-y-4 p-6">
+        <SurfaceCard className="space-y-4 p-6">
           <h2 className="text-sm font-semibold text-emerald-900">{tx("Your requests", "Yeu cau cua ban")}</h2>
           {sortedMessages.length === 0 && (
             <p className="text-xs text-emerald-700/70">{tx("No messages yet.", "Chua co tin nhan.")}</p>
@@ -275,10 +245,10 @@ export default function SupportPage() {
               </button>
             ))}
           </div>
-        </div>
+        </SurfaceCard>
 
         <div className="space-y-6">
-          <div className="surface-card space-y-4 p-6">
+          <SurfaceCard className="space-y-4 p-6">
             <h2 className="text-sm font-semibold text-emerald-900">{tx("Start a new request", "Gui yeu cau moi")}</h2>
             <textarea
               value={newMessage}
@@ -294,9 +264,9 @@ export default function SupportPage() {
             >
               {tx("Send request", "Gui yeu cau")}
             </button>
-          </div>
+          </SurfaceCard>
 
-          <div className="surface-card space-y-4 p-6">
+          <SurfaceCard className="space-y-4 p-6">
             <h2 className="text-sm font-semibold text-emerald-900">{tx("Conversation", "Hoi thoai")}</h2>
             {selectedId ? (
               <>
@@ -341,11 +311,12 @@ export default function SupportPage() {
             ) : (
               <p className="text-xs text-emerald-700/70">{tx("Select a request to view replies.", "Chon yeu cau.")}</p>
             )}
-          </div>
+          </SurfaceCard>
         </div>
       </div>
     </div>
   );
 }
+
 
 

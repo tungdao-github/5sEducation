@@ -2,10 +2,9 @@
 
 import { usePathname } from "next/navigation";
 import { SiteHeader } from "@/components/SiteHeader";
-import Footer from "@/figma/components/Footer";
-import FigmaAuthModal from "@/figma/components/AuthModal";
-import RouteAuthModal from "@/components/AuthModal";
-import ChatWidget from "@/figma/components/ChatWidget";
+import { SiteFooter } from "@/components/SiteFooter";
+import AuthModal from "@/components/AuthModal";
+import { SupportChatWidget } from "@/components/SupportChatWidget";
 
 function isFullscreenRoute(pathname: string) {
   return pathname.startsWith("/learn/");
@@ -19,8 +18,7 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
     return (
       <>
         <main className="flex-1">{children}</main>
-        <FigmaAuthModal />
-        <RouteAuthModal />
+        <AuthModal />
       </>
     );
   }
@@ -29,10 +27,9 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
     <>
       <SiteHeader />
       <main className="flex-1">{children}</main>
-      <Footer />
-      <FigmaAuthModal />
-      <RouteAuthModal />
-      <ChatWidget />
+      <SiteFooter />
+      <AuthModal />
+      <SupportChatWidget />
     </>
   );
 }

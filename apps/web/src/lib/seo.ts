@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { resolveApiAsset } from "@/lib/api";
+import { SUPPORTED_LOCALES } from "@/lib/i18n";
 
 export const SITE_NAME = "EduCourse";
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/+$/, "");
@@ -40,6 +41,9 @@ export function buildMetadata(input: {
     keywords: input.keywords,
     alternates: {
       canonical,
+      languages: Object.fromEntries(
+        SUPPORTED_LOCALES.map((locale) => [locale, `${SITE_URL}/${locale}${input.path.startsWith("/") ? input.path : `/${input.path}`}`])
+      ),
     },
     openGraph: {
       title,

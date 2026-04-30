@@ -2,18 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { API_URL } from "@/lib/api";
+import { fetchCourseReviews, upsertCourseReview } from "@/services/api";
 import { notify } from "@/lib/notify";
 import { useI18n } from "@/app/providers";
-
-interface ReviewDto {
-  id: number;
-  courseId: number;
-  rating: number;
-  comment: string;
-  userName: string;
-  createdAt: string;
-}
+import type { ReviewDto } from "@/services/api";
 
 export function CourseReviews({ courseId, courseSlug }: { courseId: number; courseSlug: string }) {
   const { tx } = useI18n();
@@ -23,10 +15,7 @@ export function CourseReviews({ courseId, courseSlug }: { courseId: number; cour
   const [needsAuth, setNeedsAuth] = useState(false);
 
   const loadReviews = async () => {
-    const res = await fetch(`${API_URL}/api/reviews?courseId=${courseId}`);
-    if (res.ok) {
-      setReviews(await res.json());
-    }
+    setReviews(await fetchCourseReviews(courseId));
   };
 
   useEffect(() => {
@@ -41,23 +30,15 @@ export function CourseReviews({ courseId, courseSlug }: { courseId: number; cour
       return;
     }
 
-    const res = await fetch(`${API_URL}/api/reviews`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ courseId, rating, comment }),
-    });
-
-    if (res.ok) {
+    try {
+      await upsertCourseReview(courseId, rating, comment);
       notify({
         title: tx("Review saved", "Da luu danh gia"),
         message: tx("Thanks for your feedback!", "Cam on ban da gui nhan xet!"),
       });
       setComment("");
       loadReviews();
-    } else {
+    } catch {
       notify({
         title: tx("Review failed", "Danh gia that bai"),
         message: tx("Please enroll in the course before reviewing.", "Hay dang ky khoa hoc truoc khi danh gia."),

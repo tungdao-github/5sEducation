@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import CourseCreator from "@/figma/pages/CourseCreator";
+import CourseCreator from "@/views/CourseCreator";
 import { buildNoIndexMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildNoIndexMetadata({
@@ -10,3 +10,5 @@ export const metadata: Metadata = buildNoIndexMetadata({
 export default function Page() {
   return <CourseCreator />;
 }
+
+

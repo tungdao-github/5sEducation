@@ -1,5 +1,6 @@
-﻿import type { MetadataRoute } from "next";
-import { API_URL } from "@/lib/api";
+import type { MetadataRoute } from "next";
+import { docsPages } from "@/data/docs";
+import { fetchBlogPosts, fetchCourses, fetchLearningPaths } from "@/services/api";
 
 interface CourseSlug {
   slug: string;
@@ -20,28 +21,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let paths: PathSlug[] = [];
 
   try {
-    const res = await fetch(`${API_URL}/api/courses`, { cache: "no-store" });
-    if (res.ok) {
-      courses = await res.json();
-    }
+    courses = await fetchCourses();
   } catch {
     courses = [];
   }
 
   try {
-    const res = await fetch(`${API_URL}/api/blog/posts?take=200`, { cache: "no-store" });
-    if (res.ok) {
-      posts = await res.json();
-    }
+    posts = await fetchBlogPosts({ take: 200 });
   } catch {
     posts = [];
   }
 
   try {
-    const res = await fetch(`${API_URL}/api/learning-paths`, { cache: "no-store" });
-    if (res.ok) {
-      paths = await res.json();
-    }
+    paths = await fetchLearningPaths();
   } catch {
     paths = [];
   }
@@ -49,38 +41,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
   return [
-    {
-      url: baseUrl,
+    { url: baseUrl, lastModified: now },
+    { url: `${baseUrl}/courses`, lastModified: now },
+    { url: `${baseUrl}/blog`, lastModified: now },
+    { url: `${baseUrl}/paths`, lastModified: now },
+    { url: `${baseUrl}/compare`, lastModified: now },
+    { url: `${baseUrl}/faq`, lastModified: now },
+    { url: `${baseUrl}/policy/privacy`, lastModified: now },
+    { url: `${baseUrl}/policy/terms`, lastModified: now },
+    { url: `${baseUrl}/docs`, lastModified: now },
+    ...docsPages.map((page) => ({
+      url: `${baseUrl}/docs/${page.slug}`,
       lastModified: now,
-    },
-    {
-      url: `${baseUrl}/courses`,
-      lastModified: now,
-    },
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: now,
-    },
-    {
-      url: `${baseUrl}/paths`,
-      lastModified: now,
-    },
-    {
-      url: `${baseUrl}/compare`,
-      lastModified: now,
-    },
-    {
-      url: `${baseUrl}/faq`,
-      lastModified: now,
-    },
-    {
-      url: `${baseUrl}/policy/privacy`,
-      lastModified: now,
-    },
-    {
-      url: `${baseUrl}/policy/terms`,
-      lastModified: now,
-    },
+    })),
     ...courses.map((course) => ({
       url: `${baseUrl}/courses/${course.slug}`,
       lastModified: now,
@@ -95,3 +68,4 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 }
+

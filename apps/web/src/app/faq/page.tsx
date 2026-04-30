@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageIntro } from "@/components/shared/PageIntro";
+import { SurfaceCard } from "@/components/shared/SurfaceCard";
 import { buildMetadata } from "@/lib/seo";
 import { getServerLocale } from "@/lib/server-locale";
 import { pickLocaleText } from "@/lib/i18n";
@@ -97,13 +99,14 @@ export default async function FaqPage() {
 
   return (
     <div className="section-shell space-y-10 py-12 fade-in">
-      <div className="space-y-2 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{t("Help center", "Trung tam tro giup")}</p>
-        <h1 className="section-title text-4xl font-semibold text-emerald-950">{t("Frequently asked questions", "Cau hoi thuong gap")}</h1>
-      </div>
+      <PageIntro
+        align="center"
+        eyebrow={t("Help center", "Trung tam tro giup")}
+        title={t("Frequently asked questions", "Cau hoi thuong gap")}
+      />
       <div className="space-y-8">
         {faqGroups.map((group) => (
-          <section key={group.title.en} className="surface-card space-y-5 rounded-3xl p-6">
+          <SurfaceCard key={group.title.en} className="space-y-5 p-6">
             <h2 className="text-xl font-semibold text-emerald-950">{pickLocaleText(locale, group.title.en, group.title.vi)}</h2>
             <div className="space-y-4">
               {group.items.map((item) => {
@@ -116,7 +119,7 @@ export default async function FaqPage() {
                 );
               })}
             </div>
-          </section>
+          </SurfaceCard>
         ))}
       </div>
       <div className="text-center text-sm text-emerald-800/70">

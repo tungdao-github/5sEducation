@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { PageIntro } from "@/components/shared/PageIntro";
+import { SurfaceCard } from "@/components/shared/SurfaceCard";
 import { buildMetadata } from "@/lib/seo";
 import { getServerLocale } from "@/lib/server-locale";
 import { pickLocaleText } from "@/lib/i18n";
@@ -17,19 +19,13 @@ export default async function PrivacyPage() {
 
   return (
     <div className="section-shell space-y-8 py-12 fade-in">
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-          {t("Policy", "Chinh sach")}
-        </p>
-        <h1 className="section-title text-4xl font-semibold text-emerald-950">
-          {t("Privacy policy", "Chinh sach bao mat")}
-        </h1>
-        <p className="text-sm text-emerald-800/70">
-          {t("Last updated: April 3, 2026", "Cap nhat: 03/04/2026")}
-        </p>
-      </div>
+      <PageIntro
+        eyebrow={t("Policy", "Chinh sach")}
+        title={t("Privacy policy", "Chinh sach bao mat")}
+        description={t("Last updated: April 3, 2026", "Cap nhat: 03/04/2026")}
+      />
 
-      <div className="surface-card space-y-6 p-6 text-sm text-emerald-800/80">
+      <SurfaceCard className="space-y-6 p-6 text-sm text-emerald-800/80">
         <section className="space-y-2">
           <h2 className="text-lg font-semibold text-emerald-950">
             {t("1. Data we collect", "1. Du lieu thu thap")}
@@ -74,7 +70,7 @@ export default async function PrivacyPage() {
             )}
           </p>
         </section>
-      </div>
+      </SurfaceCard>
     </div>
   );
 }

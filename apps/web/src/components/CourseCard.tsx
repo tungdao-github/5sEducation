@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { MouseEvent } from "react";
-import { useCart, type Course } from "@/figma/contexts/CartContext";
-import { useWishlist } from "@/figma/contexts/WishlistContext";
-import { toast } from "@/figma/compat/sonner";
+import { useCart, type Course } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
+import { toast } from "@/lib/notify";
 import { Clock, BarChart3, Star, ShoppingCart, Check, Heart } from "lucide-react";
 
 interface CourseCardProps {
@@ -42,7 +42,7 @@ export default function CourseCard({ course }: CourseCardProps) {
   return (
     <Link
       href={`/courses/${course.slug ?? course.id}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md transition-all duration-300 hover:shadow-xl"
+      className="group flex w-full min-w-0 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md transition-all duration-300 hover:shadow-xl"
     >
       <div className="relative aspect-video shrink-0 overflow-hidden">
         <img
@@ -68,12 +68,12 @@ export default function CourseCard({ course }: CourseCardProps) {
         </button>
       </div>
 
-      <div className="flex flex-1 flex-col p-4">
+      <div className="flex min-w-0 flex-1 flex-col p-4">
         <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-600">
           {course.category}
         </div>
 
-        <h3 className="mb-2 line-clamp-2 flex-1 text-sm font-semibold text-gray-900 transition-colors group-hover:text-blue-600">
+        <h3 className="mb-2 line-clamp-2 flex-1 min-w-0 text-sm font-semibold text-gray-900 transition-colors group-hover:text-blue-600">
           {course.title}
         </h3>
 

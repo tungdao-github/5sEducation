@@ -143,7 +143,7 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddCors(options =>
 {
     var origins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>()
-        ?? ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173", "http://localhost:5174"];
+        ?? ["http://localhost:3000", "http://localhost:5173", "http://localhost:5174"];
 
     options.AddPolicy("web", policy =>
         policy.WithOrigins(origins)
@@ -185,6 +185,7 @@ builder.Services.AddScoped<AuthAccountFlowService>();
 builder.Services.AddScoped<AuthProfileService>();
 builder.Services.AddScoped<AuthPasswordRecoveryService>();
 builder.Services.AddScoped<AuthEmailConfirmationService>();
+builder.Services.AddScoped<ExternalAuthUserService>();
 builder.Services.AddScoped<GoogleAuthService>();
 builder.Services.AddScoped<FacebookAuthService>();
 builder.Services.AddScoped<AuthWorkflowService>();
@@ -199,6 +200,8 @@ builder.Services.AddScoped<AdminHomePageBlocksService>();
 builder.Services.AddScoped<AdminLearningPathCrudService>();
 builder.Services.AddScoped<AdminLearningPathsService>();
 builder.Services.AddScoped<AdminLearningPathsStructureService>();
+builder.Services.AddScoped<AdminLearningPathSectionsService>();
+builder.Services.AddScoped<AdminLearningPathCoursesService>();
 builder.Services.AddScoped<CouponValidationService>();
 builder.Services.AddScoped<CourseCatalogService>();
 builder.Services.AddScoped<CourseThumbnailStorageService>();

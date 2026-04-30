@@ -1,5 +1,4 @@
 using UdemyClone.Api.Dtos;
-using UdemyClone.Api.Models;
 using UdemyClone.Api.Repositories;
 
 namespace UdemyClone.Api.Services;
@@ -16,19 +15,20 @@ public class UserAddressesMutationService
     public async Task<AdminCrudResult<UserAddressDto>> CreateAsync(string userId, UserAddressCreateRequest request, CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
-        var address = new UserAddress
+        var draft = UserAddressMutationHelper.BuildDraft(userId, request);
+        var address = new Models.UserAddress
         {
-            UserId = userId,
-            Label = request.Label?.Trim() ?? string.Empty,
-            RecipientName = request.RecipientName.Trim(),
-            Phone = request.Phone.Trim(),
-            Line1 = request.Line1.Trim(),
-            Line2 = request.Line2?.Trim(),
-            City = request.City.Trim(),
-            State = request.State?.Trim() ?? string.Empty,
-            PostalCode = request.PostalCode?.Trim() ?? string.Empty,
-            Country = request.Country?.Trim() ?? "Vietnam",
-            IsDefault = request.IsDefault,
+            UserId = draft.UserId,
+            Label = draft.Label,
+            RecipientName = draft.RecipientName,
+            Phone = draft.Phone,
+            Line1 = draft.Line1,
+            Line2 = draft.Line2,
+            City = draft.City,
+            State = draft.State,
+            PostalCode = draft.PostalCode,
+            Country = draft.Country,
+            IsDefault = draft.IsDefault,
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -46,7 +46,7 @@ public class UserAddressesMutationService
             await ClearOtherDefaultsAsync(userId, address.Id, cancellationToken);
         }
 
-        return AdminCrudResult<UserAddressDto>.Success(Map(address));
+        return AdminCrudResult<UserAddressDto>.Success(UserAddressMutationHelper.Map(address));
     }
 
     public async Task<AdminCrudResult<object?>> UpdateAsync(int id, string userId, UserAddressUpdateRequest request, CancellationToken cancellationToken = default)
@@ -57,17 +57,8 @@ public class UserAddressesMutationService
             return AdminCrudResult<object?>.NotFound();
         }
 
-        address.Label = request.Label?.Trim() ?? string.Empty;
-        address.RecipientName = request.RecipientName.Trim();
-        address.Phone = request.Phone.Trim();
-        address.Line1 = request.Line1.Trim();
-        address.Line2 = request.Line2?.Trim();
-        address.City = request.City.Trim();
-        address.State = request.State?.Trim() ?? string.Empty;
-        address.PostalCode = request.PostalCode?.Trim() ?? string.Empty;
-        address.Country = request.Country?.Trim() ?? "Vietnam";
-        address.IsDefault = request.IsDefault;
-        address.UpdatedAt = DateTime.UtcNow;
+        var draft = UserAddressMutationHelper.BuildDraft(address, request);
+        UserAddressMutationHelper.ApplyDraft(address, draft);
 
         await _repository.SaveChangesAsync(cancellationToken);
 
@@ -138,21 +129,4 @@ public class UserAddressesMutationService
         await _repository.SaveChangesAsync(cancellationToken);
     }
 
-    private static UserAddressDto Map(UserAddress address) =>
-        new UserAddressDto
-        {
-            Id = address.Id,
-            Label = address.Label,
-            RecipientName = address.RecipientName,
-            Phone = address.Phone,
-            Line1 = address.Line1,
-            Line2 = address.Line2,
-            City = address.City,
-            State = address.State,
-            PostalCode = address.PostalCode,
-            Country = address.Country,
-            IsDefault = address.IsDefault,
-            CreatedAt = address.CreatedAt,
-            UpdatedAt = address.UpdatedAt
-        };
 }

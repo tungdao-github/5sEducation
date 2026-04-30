@@ -1,4 +1,4 @@
-import Search from "@/figma/pages/Search";
+import Search from "@/views/Search";
 import type { Metadata } from "next";
 import { buildNoIndexMetadata } from "@/lib/seo";
 
@@ -10,3 +10,5 @@ export const metadata: Metadata = buildNoIndexMetadata({
 export default function Page() {
   return <Search />;
 }
+
+

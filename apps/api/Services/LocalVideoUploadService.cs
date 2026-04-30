@@ -29,7 +29,7 @@ public class LocalVideoUploadService
     public async Task<AdminCrudResult<LocalVideoUploadResponseDto>> UploadVideoLocalAsync(
         string userId,
         bool isAdmin,
-        int courseId,
+        int? courseId,
         IFormFile? file,
         CancellationToken cancellationToken = default)
     {
@@ -38,15 +38,18 @@ public class LocalVideoUploadService
             return AdminCrudResult<LocalVideoUploadResponseDto>.BadRequest("Please choose a video file.");
         }
 
-        var course = await _lessons.FindCourseAsync(courseId, cancellationToken);
-        if (course is null)
+        if (courseId.HasValue && courseId.Value > 0)
         {
-            return AdminCrudResult<LocalVideoUploadResponseDto>.NotFound();
-        }
+            var course = await _lessons.FindCourseAsync(courseId.Value, cancellationToken);
+            if (course is null)
+            {
+                return AdminCrudResult<LocalVideoUploadResponseDto>.NotFound();
+            }
 
-        if (!isAdmin && course.InstructorId != userId)
-        {
-            return AdminCrudResult<LocalVideoUploadResponseDto>.Forbidden();
+            if (!isAdmin && course.InstructorId != userId)
+            {
+                return AdminCrudResult<LocalVideoUploadResponseDto>.Forbidden();
+            }
         }
 
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();

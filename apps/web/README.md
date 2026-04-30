@@ -17,11 +17,14 @@ http://localhost:3000
 ## Cau truc quan trong
 
 - `src/app`: route App Router
-- `src/figma`: giao dien va page component da duoc migrate tu frontend cu
+- `src/components`: UI va feature component dang duoc su dung
+- `src/contexts`: state/context dung cho app
+- `src/services`: API/service layer
 - `src/lib`: API client, i18n, auth helper
 
 ## Ghi chu
 
-- Frontend Vite duplicate cu da duoc xoa khoi repo; `apps/web` la luong chay duy nhat.
+- `apps/web` la frontend Next.js duy nhat cua du an.
+- Cac thu muc duplicate/legacy nhu `src (1)`, `codefigma`, `src/figma` khong thuoc luong production.
 - Frontend can backend `apps/api` de lay du lieu that.
 

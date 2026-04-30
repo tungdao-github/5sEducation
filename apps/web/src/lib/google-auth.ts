@@ -1,4 +1,5 @@
 import { API_URL, setStoredToken } from "@/lib/api";
+import { getRecord, getStringField, isRecord } from "@/lib/json";
 
 type GoogleCredentialResponse = {
   credential?: string;
@@ -90,27 +91,20 @@ function getErrorMessage(payload: unknown, fallback: string) {
     return payload;
   }
 
-  if (payload && typeof payload === "object") {
-    const record = payload as Record<string, unknown>;
-    const title = typeof record.title === "string" ? record.title.trim() : "";
-    if (title) {
-      return title;
-    }
+  if (isRecord(payload)) {
+    const title = getStringField(payload, "title");
+    if (title) return title;
 
-    const detail = typeof record.detail === "string" ? record.detail.trim() : "";
-    if (detail) {
-      return detail;
-    }
+    const detail = getStringField(payload, "detail");
+    if (detail) return detail;
 
-    const errors = record.errors;
-    if (errors && typeof errors === "object") {
-      const messages = Object.values(errors as Record<string, unknown>)
+    const errors = getRecord(payload, "errors");
+    if (errors) {
+      const messages = Object.values(errors)
         .flatMap((value) => (Array.isArray(value) ? value : [value]))
         .map((value) => String(value).trim())
         .filter(Boolean);
-      if (messages.length > 0) {
-        return messages.join("\n");
-      }
+      if (messages.length > 0) return messages.join("\n");
     }
   }
 

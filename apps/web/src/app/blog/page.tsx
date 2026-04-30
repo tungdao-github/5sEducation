@@ -1,4 +1,4 @@
-import Blog from "@/figma/pages/Blog";
+import Blog from "@/views/Blog";
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 
@@ -13,3 +13,5 @@ export const metadata: Metadata = buildMetadata({
 export default function Page() {
   return <Blog />;
 }
+
+

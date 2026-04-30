@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Compare from "@/figma/pages/Compare";
+import Compare from "@/views/Compare";
 import { buildNoIndexMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildNoIndexMetadata({
@@ -10,3 +10,5 @@ export const metadata: Metadata = buildNoIndexMetadata({
 export default function Page() {
   return <Compare />;
 }
+
+

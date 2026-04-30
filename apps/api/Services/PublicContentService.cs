@@ -20,24 +20,24 @@ public class PublicContentService
     public async Task<List<BlogPostListDto>> GetBlogPostsAsync(string? search, string? tag, string? locale, int? take, CancellationToken cancellationToken = default)
     {
         var posts = await _repository.GetBlogPostsAsync(search, tag, locale, take, cancellationToken);
-        return posts.Select(BlogPostHelper.MapList).ToList();
+        return posts.Select(BlogPostMappingHelper.MapList).ToList();
     }
 
-    public async Task<BlogPostDetailDto?> GetBlogPostBySlugAsync(string slug, bool isAdmin, CancellationToken cancellationToken = default)
+    public async Task<BlogPostDetailDto?> GetBlogPostBySlugAsync(string slug, bool isAdmin, string? locale = null, CancellationToken cancellationToken = default)
     {
-        var post = await _repository.FindBlogPostBySlugAsync(slug, cancellationToken);
+        var post = await _repository.FindBlogPostBySlugAsync(slug, locale, cancellationToken);
         if (post is null || (!post.IsPublished && !isAdmin))
         {
             return null;
         }
 
-        return BlogPostHelper.MapDetail(post);
+        return BlogPostMappingHelper.MapDetail(post);
     }
 
-    public async Task<BlogPostDetailDto?> GetBlogPostByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<BlogPostDetailDto?> GetBlogPostByIdAsync(int id, string? locale = null, CancellationToken cancellationToken = default)
     {
-        var post = await _repository.FindBlogPostByIdAsync(id, cancellationToken);
-        return post is null || !post.IsPublished ? null : BlogPostHelper.MapDetail(post);
+        var post = await _repository.FindBlogPostByIdAsync(id, locale, cancellationToken);
+        return post is null || !post.IsPublished ? null : BlogPostMappingHelper.MapDetail(post);
     }
 
     public async Task<List<SearchSuggestionDto>> GetSearchSuggestionsAsync(string? query, CancellationToken cancellationToken = default)

@@ -38,12 +38,12 @@ public class AdminBlogPostsService
     public async Task<List<BlogPostListDto>> GetAllAsync(string? search, string? locale, string? status, CancellationToken cancellationToken = default)
     {
         var posts = await _repository.GetAllAsync(search, locale, status, cancellationToken);
-        return posts.Select(BlogPostHelper.MapList).ToList();
+        return posts.Select(BlogPostMappingHelper.MapList).ToList();
     }
 
     public async Task<AdminCrudResult<BlogPostDetailDto>> CreateAsync(BlogPostCreateRequest request, CancellationToken cancellationToken = default)
     {
-        var draft = BlogPostHelper.BuildDraft(request);
+        var draft = BlogPostDraftHelper.BuildDraft(request);
         if (draft is null)
         {
             return AdminCrudResult<BlogPostDetailDto>.BadRequest("Title, summary, and content are required.");
@@ -75,7 +75,7 @@ public class AdminBlogPostsService
 
         await _repository.AddAsync(post, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);
-        return AdminCrudResult<BlogPostDetailDto>.Success(BlogPostHelper.MapDetail(post));
+        return AdminCrudResult<BlogPostDetailDto>.Success(BlogPostMappingHelper.MapDetail(post));
     }
 
     public async Task<AdminCrudResult<BlogPostDetailDto>> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -83,7 +83,7 @@ public class AdminBlogPostsService
         var post = await _repository.FindByIdAsync(id, cancellationToken);
         return post is null
             ? AdminCrudResult<BlogPostDetailDto>.NotFound()
-            : AdminCrudResult<BlogPostDetailDto>.Success(BlogPostHelper.MapDetail(post));
+            : AdminCrudResult<BlogPostDetailDto>.Success(BlogPostMappingHelper.MapDetail(post));
     }
 
     public async Task<AdminCrudResult<object?>> UpdateAsync(int id, BlogPostUpdateRequest request, CancellationToken cancellationToken = default)
@@ -94,7 +94,7 @@ public class AdminBlogPostsService
             return AdminCrudResult<object?>.NotFound();
         }
 
-        var draft = BlogPostHelper.BuildDraft(request);
+        var draft = BlogPostDraftHelper.BuildDraft(request);
         if (draft is null)
         {
             return AdminCrudResult<object?>.BadRequest("Title, summary, and content are required.");

@@ -1,9 +1,16 @@
-const rawApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
-const fallbackApiUrl = "http://localhost:5158";
+import { getRecord, getStringField, isRecord } from "@/lib/json";
 
-export const API_URL = (
-  rawApiUrl && rawApiUrl.length > 0 ? rawApiUrl : fallbackApiUrl
-).replace(/\/+$/, "");
+const rawPublicApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+const rawInternalApiUrl = process.env.INTERNAL_API_URL?.trim();
+const fallbackServerApiUrl = "http://localhost:5158";
+const fallbackBrowserApiUrl = "";
+
+const resolvedApiUrl =
+  typeof window === "undefined"
+    ? rawInternalApiUrl || rawPublicApiUrl || fallbackServerApiUrl
+    : rawPublicApiUrl || fallbackBrowserApiUrl;
+
+export const API_URL = resolvedApiUrl.replace(/\/+$/, "");
 
 export const AUTH_TOKEN_KEY = "token";
 export const LEGACY_AUTH_TOKEN_KEY = "auth_token";
@@ -82,27 +89,23 @@ function extractErrorMessage(payload: unknown, fallback: string) {
     if (joined) return joined;
   }
 
-  if (payload && typeof payload === "object") {
-    const data = payload as Record<string, unknown>;
+  if (isRecord(payload)) {
+    const title = getStringField(payload, "title");
+    if (title) return title;
 
-    if (typeof data.title === "string" && data.title.trim()) {
-      return data.title.trim();
-    }
-    if (typeof data.detail === "string" && data.detail.trim()) {
-      return data.detail.trim();
-    }
-    if (typeof data.message === "string" && data.message.trim()) {
-      return data.message.trim();
-    }
+    const detail = getStringField(payload, "detail");
+    if (detail) return detail;
 
-    if (data.errors && typeof data.errors === "object") {
-      const messages = Object.values(data.errors as Record<string, unknown>)
+    const message = getStringField(payload, "message");
+    if (message) return message;
+
+    const errors = getRecord(payload, "errors");
+    if (errors) {
+      const messages = Object.values(errors)
         .flatMap((value) => (Array.isArray(value) ? value : [value]))
         .map((value) => String(value).trim())
         .filter(Boolean);
-      if (messages.length > 0) {
-        return messages.join("\n");
-      }
+      if (messages.length > 0) return messages.join("\n");
     }
   }
 

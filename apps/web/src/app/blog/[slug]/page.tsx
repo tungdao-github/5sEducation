@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import BlogDetail from "@/figma/pages/BlogDetail";
-import { API_URL } from "@/lib/api";
+import BlogDetail from "@/views/BlogDetail";
 import { buildMetadata } from "@/lib/seo";
+import { fetchBlogPostDetail } from "@/services/api";
 
 type BlogSeoDto = {
   title: string;
@@ -15,9 +15,7 @@ type BlogSeoDto = {
 
 async function getPost(slug: string): Promise<BlogSeoDto | null> {
   try {
-    const res = await fetch(`${API_URL}/api/blog/posts/${slug}`, { cache: "no-store" });
-    if (!res.ok) return null;
-    return res.json();
+    return await fetchBlogPostDetail(slug);
   } catch {
     return null;
   }
@@ -56,3 +54,4 @@ export async function generateMetadata({
 export default function Page() {
   return <BlogDetail />;
 }
+

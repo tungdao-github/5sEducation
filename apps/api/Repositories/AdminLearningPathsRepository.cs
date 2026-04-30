@@ -16,6 +16,7 @@ public interface IAdminLearningPathsRepository
     Task AddAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class;
     Task RemoveAsync<T>(T entity, CancellationToken cancellationToken = default) where T : class;
     Task RemoveRangeAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class;
+    Task TouchAsync(int learningPathId, CancellationToken cancellationToken = default);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
@@ -106,6 +107,17 @@ public sealed class AdminLearningPathsRepository : IAdminLearningPathsRepository
     {
         _db.Set<T>().RemoveRange(entities);
         return Task.CompletedTask;
+    }
+
+    public async Task TouchAsync(int learningPathId, CancellationToken cancellationToken = default)
+    {
+        var path = await _db.LearningPaths.FirstOrDefaultAsync(p => p.Id == learningPathId, cancellationToken);
+        if (path is null)
+        {
+            return;
+        }
+
+        path.UpdatedAt = DateTime.UtcNow;
     }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken = default)

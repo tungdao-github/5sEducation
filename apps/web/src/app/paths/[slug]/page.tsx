@@ -1,9 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { API_URL, resolveApiAsset } from "@/lib/api";
+import { resolveApiAsset } from "@/lib/api";
 import { getServerLocale } from "@/lib/server-locale";
 import { pickLocaleText } from "@/lib/i18n";
 import { buildMetadata } from "@/lib/seo";
+import { fetchLearningPathBySlug } from "@/services/api";
 
 type PathSection = {
   id: number;
@@ -42,9 +43,7 @@ type PathDetail = {
 
 async function getPath(slug: string): Promise<PathDetail | null> {
   try {
-    const res = await fetch(`${API_URL}/api/learning-paths/${slug}`, { cache: "no-store" });
-    if (!res.ok) return null;
-    return res.json();
+    return await fetchLearningPathBySlug(slug);
   } catch {
     return null;
   }
@@ -203,4 +202,5 @@ export default async function PathDetailPage({ params }: { params: Promise<{ slu
     </div>
   );
 }
+
 

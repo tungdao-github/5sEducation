@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AdminDashboard from "@/figma/pages/AdminDashboard";
+import AdminDashboard from "@/views/AdminDashboard";
 import { buildNoIndexMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildNoIndexMetadata({
@@ -10,3 +10,4 @@ export const metadata: Metadata = buildNoIndexMetadata({
 export default function Page() {
   return <AdminDashboard initialTab="instructors" />;
 }
+
