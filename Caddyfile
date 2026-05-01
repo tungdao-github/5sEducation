@@ -1,13 +1,13 @@
-http://{$DOMAIN} {
+:80 {
   encode gzip
 
-  # API + SignalR
   reverse_proxy /api/* api:8080
   reverse_proxy /hubs/* api:8080
   reverse_proxy /uploads/* api:8080
   reverse_proxy /health api:8080
   reverse_proxy /ready api:8080
 
-  # Web app
   reverse_proxy web:3000
 }
+
+
