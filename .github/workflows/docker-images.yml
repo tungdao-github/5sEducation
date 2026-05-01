@@ -16,6 +16,7 @@ jobs:
     env:
       PROD_SITE_URL: ${{ vars.PROD_SITE_URL }}
       PROD_API_URL: ${{ vars.PROD_API_URL }}
+      PROD_GOOGLE_CLIENT_ID: ${{ vars.PROD_GOOGLE_CLIENT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -66,5 +67,6 @@ jobs:
           build-args: |
             NEXT_PUBLIC_API_URL=${{ env.PROD_API_URL }}
             NEXT_PUBLIC_SITE_URL=${{ env.PROD_SITE_URL }}
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ env.PROD_GOOGLE_CLIENT_ID }}
           tags: ${{ steps.web_meta.outputs.tags }}
           labels: ${{ steps.web_meta.outputs.labels }}

@@ -1363,7 +1363,7 @@ export async function fetchSupportReplies(messageId: number) {
 }
 
 export async function createSupportMessage(message: string, name?: string, email?: string) {
-  return fetchJsonWithAuth<SupportMessageSummaryDto>("/api/support/messages", {
+  return fetchJson<SupportMessageSummaryDto>("/api/support/messages", {
     method: "POST",
     body: JSON.stringify({ message, name, email }),
   });
