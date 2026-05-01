@@ -1,20 +1,26 @@
 import { getRecord, getStringField, isRecord } from "@/lib/json";
-
 const rawPublicApiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
 const rawInternalApiUrl = process.env.INTERNAL_API_URL?.trim();
 const fallbackServerApiUrl = "http://localhost:5158";
 const fallbackBrowserApiUrl = "";
+
+function normalizeApiBase(url: string) {
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+  return trimmed.replace(/\/api\/?$/, "").replace(/\/+$/, "");
+}
 
 const resolvedApiUrl =
   typeof window === "undefined"
     ? rawInternalApiUrl || rawPublicApiUrl || fallbackServerApiUrl
     : rawPublicApiUrl || fallbackBrowserApiUrl;
 
-export const API_URL = resolvedApiUrl.replace(/\/+$/, "");
+export const API_URL = normalizeApiBase(resolvedApiUrl);
 
 export const AUTH_TOKEN_KEY = "token";
 export const LEGACY_AUTH_TOKEN_KEY = "auth_token";
 export const AUTH_USER_KEY = "auth_user";
+
 
 function dispatchAuthChanged() {
   if (typeof window === "undefined") return;

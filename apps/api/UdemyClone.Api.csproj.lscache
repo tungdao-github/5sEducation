@@ -243,6 +243,8 @@ Migrations/
  20260419085221_UniqueHomePageBlockKey.Designer.cs
  20260419085349_UniqueLearningPathCourseMapping.cs
  20260419085349_UniqueLearningPathCourseMapping.Designer.cs
+ 20260430165753_AddCreatedAt.cs
+ 20260430165753_AddCreatedAt.Designer.cs
  ApplicationDbContextModelSnapshot.cs
  Postgres/
   20260329113740_InitialPostgres.cs
