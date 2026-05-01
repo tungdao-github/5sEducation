@@ -11,20 +11,27 @@ import { useI18n } from "@/app/providers";
 
 export default function FlashSaleCountdown({ courses }: { courses: Course[] }) {
   const { tx } = useI18n();
-  const [endTime] = useState(() => Date.now() + 8 * 3600 * 1000 + 23 * 60 * 1000 + 45 * 1000);
   const [timeLeft, setTimeLeft] = useState({ h: 8, m: 23, s: 45 });
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const durationMs = 8 * 3600000 + 23 * 60000 + 45 * 1000;
+    const endTime = Date.now() + durationMs;
+
+    const updateTimeLeft = () => {
       const diff = Math.max(0, endTime - Date.now());
       setTimeLeft({
         h: Math.floor(diff / 3600000),
         m: Math.floor((diff % 3600000) / 60000),
         s: Math.floor((diff % 60000) / 1000),
       });
+    };
+
+    updateTimeLeft();
+    const timer = setInterval(() => {
+      updateTimeLeft();
     }, 1000);
     return () => clearInterval(timer);
-  }, [endTime]);
+  }, []);
 
   const pad = (value: number) => String(value).padStart(2, "0");
   const flashCourses = getFlashSaleCourses(courses);
